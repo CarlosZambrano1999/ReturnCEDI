@@ -18,13 +18,16 @@ public class ComparativoDocMaterialRow {
     private BigDecimal diferencia;
     private int factor;
     private String presentacion;
-
     private String estado;
+    private Long idDevolucion;
+    private java.math.BigDecimal cantidadEditable;
+    private Integer incidenciaId;
+    private String observacion;
 
     public ComparativoDocMaterialRow() {
     }
 
-    public ComparativoDocMaterialRow(String codigoSap, String descripcion, BigDecimal cantidadEsperada, BigDecimal cantidadEscaneada, BigDecimal diferencia, int factor, String presentacion, String estado) {
+    public ComparativoDocMaterialRow(String codigoSap, String descripcion, BigDecimal cantidadEsperada, BigDecimal cantidadEscaneada, BigDecimal diferencia, int factor, String presentacion, String estado, Long idDevolucion, BigDecimal cantidadEditable, Integer incidenciaId, String observacion) {
         this.codigoSap = codigoSap;
         this.descripcion = descripcion;
         this.cantidadEsperada = cantidadEsperada;
@@ -33,8 +36,13 @@ public class ComparativoDocMaterialRow {
         this.factor = factor;
         this.presentacion = presentacion;
         this.estado = estado;
+        this.idDevolucion = idDevolucion;
+        this.cantidadEditable = cantidadEditable;
+        this.incidenciaId = incidenciaId;
+        this.observacion = observacion;
     }
 
+    
     public String getCodigoSap() {
         return codigoSap;
     }
@@ -97,6 +105,38 @@ public class ComparativoDocMaterialRow {
 
     public void setPresentacion(String presentacion) {
         this.presentacion = presentacion;
+    }
+
+    public Long getIdDevolucion() {
+        return idDevolucion;
+    }
+
+    public void setIdDevolucion(Long idDevolucion) {
+        this.idDevolucion = idDevolucion;
+    }
+
+    public BigDecimal getCantidadEditable() {
+        return cantidadEditable;
+    }
+
+    public void setCantidadEditable(BigDecimal cantidadEditable) {
+        this.cantidadEditable = cantidadEditable;
+    }
+
+    public Integer getIncidenciaId() {
+        return incidenciaId;
+    }
+
+    public void setIncidenciaId(Integer incidenciaId) {
+        this.incidenciaId = incidenciaId;
+    }
+
+    public String getObservacion() {
+        return observacion;
+    }
+
+    public void setObservacion(String observacion) {
+        this.observacion = observacion;
     }
     
 }

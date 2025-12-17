@@ -151,6 +151,50 @@ public class DevolucionesDAO {
 
         return lista;
     }
+    
+    public List<ComparativoDocMaterialRow> obtenerComparativoExt(long docMaterial, int idUsuario) {
+    List<ComparativoDocMaterialRow> lista = new ArrayList<>();
+    String sql = "{CALL GUIA.SP_GUIA_COMPARATIVO_DOC_MATERIAL_EXT(?, ?)}";
+
+    try (Connection cn = conexion.getConnection();
+         CallableStatement cs = cn.prepareCall(sql)) {
+
+        cs.setLong(1, docMaterial);
+        cs.setInt(2, idUsuario);
+
+        try (ResultSet rs = cs.executeQuery()) {
+            while (rs.next()) {
+                ComparativoDocMaterialRow r = new ComparativoDocMaterialRow();
+                r.setCodigoSap(rs.getString("CODIGO_SAP"));
+                r.setDescripcion(rs.getString("DESCRIPCION"));
+                r.setCantidadEsperada(rs.getBigDecimal("CANTIDAD_ESPERADA"));
+                r.setCantidadEscaneada(rs.getBigDecimal("CANTIDAD_ESCANEADA"));
+                r.setDiferencia(rs.getBigDecimal("DIFERENCIA"));
+                r.setEstado(rs.getString("ESTADO"));
+                r.setFactor(rs.getInt("FACTOR"));
+                r.setPresentacion(rs.getString("PRESENTACION"));
+
+                long idDev = rs.getLong("ID_DEVOLUCION");
+                r.setIdDevolucion(rs.wasNull() ? null : idDev);
+
+                r.setCantidadEditable(rs.getBigDecimal("CANTIDAD_EDITABLE"));
+
+                int inc = rs.getInt("INCIDENCIA_ID");
+                r.setIncidenciaId(rs.wasNull() ? null : inc);
+
+                r.setObservacion(rs.getString("OBSERVACION"));
+
+                lista.add(r);
+            }
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return lista;
+}
+
 
     /**
      * 4) Edita un registro de GUIA.DEVOLUCIONES (cantidad, incidencia, observación)

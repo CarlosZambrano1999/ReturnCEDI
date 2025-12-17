@@ -53,7 +53,7 @@ public class DevolucionesController extends HttpServlet {
                     return;
                 }
 
-                var comparativo = dao.obtenerComparativo(docMaterial);
+                var comparativo = dao.obtenerComparativoExt(docMaterial, user.getIdUsuario());
                 request.setAttribute("docMaterial", docMaterial);
                 request.setAttribute("comparativo", comparativo);
                 request.setAttribute("idUsuario", user.getIdUsuario());

@@ -117,9 +117,42 @@
             <td class="text-end"><%= r.getCantidadEscaneada().intValue() %></td>
             <td class="text-end"><%= r.getDiferencia().intValue() %></td>
             <td class="text-center">
-              <!-- Botón: abre modal o te lo hago inline después -->
-              <span class="text-muted">Siguiente paso</span>
-            </td>
+  <form method="post" action="<%=request.getContextPath()%>/Devoluciones" class="d-flex gap-2 justify-content-center align-items-center">
+    <input type="hidden" name="accion" value="editar">
+    <input type="hidden" name="docMaterial" value="<%= doc %>">
+    <input type="hidden" name="id" value="<%= r.getIdDevolucion() == null ? "" : r.getIdDevolucion() %>">
+
+    <input type="number" step="1" name="cantidad"
+           class="form-control form-control-sm cell-input text-end"
+           value="<%= r.getCantidadEditable() == null ? "0" : r.getCantidadEditable().intValue() %>"
+           <%= (r.getIdDevolucion() == null ? "disabled" : "") %> >
+
+    <select name="incidenciaId" class="form-select form-select-sm cell-select"
+            <%= (r.getIdDevolucion() == null ? "disabled" : "") %>>
+      <option value="" <%= (r.getIncidenciaId() == null ? "selected" : "") %>>Sin incidencia</option>
+      <option value="1" <%= (r.getIncidenciaId() != null && r.getIncidenciaId()==1 ? "selected" : "") %>>Producto dañado</option>
+      <option value="2" <%= (r.getIncidenciaId() != null && r.getIncidenciaId()==2 ? "selected" : "") %>>Empaque abierto</option>
+      <option value="3" <%= (r.getIncidenciaId() != null && r.getIncidenciaId()==3 ? "selected" : "") %>>Etiqueta ilegible</option>
+    </select>
+
+    <input type="text" name="observacion"
+           class="form-control form-control-sm cell-text"
+           value="<%= r.getObservacion() == null ? "" : r.getObservacion() %>"
+           placeholder="Observación..."
+           <%= (r.getIdDevolucion() == null ? "disabled" : "") %> >
+
+    <button class="btn btn-sm btn-outline-primary"
+            type="submit"
+            <%= (r.getIdDevolucion() == null ? "disabled" : "") %>>
+      Guardar
+    </button>
+  </form>
+
+  <% if (r.getIdDevolucion() == null) { %>
+    <div class="small text-muted mt-1">Escaneá este SAP para habilitar edición</div>
+  <% } %>
+</td>
+
           </tr>
         <%
           }
@@ -145,13 +178,17 @@
     });
 
     // Mantener foco siempre en scanner si doc existe
-    function keepFocus(){
-      const scanner = document.getElementById("scanner");
-      if (scanner && !scanner.disabled){
-        scanner.focus();
-        scanner.select();
-      }
-    }
+    function keepFocus(force = false) {
+  const scanner = document.getElementById("scanner");
+  if (!scanner || scanner.disabled) return;
+
+  // 🚫 Si está editando y no es forzado, NO mover foco
+  if (editandoFila && !force) return;
+
+  scanner.focus();
+  scanner.select();
+}
+
 
     // Al cargar, foco al scanner si hay doc, sino al docMaterial
     setTimeout(function(){
@@ -162,7 +199,12 @@
     }, 50);
 
     document.addEventListener("click", function(){ setTimeout(keepFocus, 30); });
-    document.addEventListener("keydown", function(e){ if (e.key === "Escape") keepFocus(); });
+    document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    editandoFila = false;
+    keepScannerFocus(true);
+  }
+});
 
     // Enter en scanner envía el formScan
     const scanner = document.getElementById("scanner");
@@ -175,6 +217,37 @@
       });
     }
   });
+  
+  setTimeout(function(){
+  const scanner = document.getElementById("scanner");
+  if (scanner && !scanner.disabled) { scanner.focus(); scanner.select(); }
+}, 80);
+
+let editandoFila = false;
+
+document.addEventListener("focusin", (e) => {
+  if (
+    e.target.classList.contains("cell-input") ||
+    e.target.classList.contains("cell-select") ||
+    e.target.classList.contains("cell-text")
+  ) {
+    editandoFila = true;
+  }
+});
+
+document.addEventListener("focusout", (e) => {
+  if (
+    e.target.classList.contains("cell-input") ||
+    e.target.classList.contains("cell-select") ||
+    e.target.classList.contains("cell-text")
+  ) {
+    editandoFila = false;
+    setTimeout(() => keepFocus(true), 80);
+  }
+});
+
+
+
 </script>
 </body>
 </html>
