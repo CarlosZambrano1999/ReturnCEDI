@@ -7,6 +7,8 @@ modelos\Usuario.class
 modelos\DatosDocMaterial.class
 modelos\ResultadoOperacion.class
 controladores\DevolucionesController.class
+modelos\Incidencia.class
+dao\AlmacenDAO.class
 controladores\CargarDocMaterialExcelController.class
 controladores\LogoutController.class
 dao\DocMaterialDAO.class
@@ -16,8 +18,12 @@ utilidades\PasswordUtil.class
 controladores\AdministrarUsuariosController.class
 configDB\ConexionSQLServer.class
 modelos\Devoluciones.class
+controladores\AlmacenController.class
+controladores\IncidenciaController.class
 modelos\Rol.class
+modelos\Almacen.class
 modelos\Producto.class
+dao\IncidenciaDAO.class
 controladores\UsuarioController.class
 modelos\DocMaterial.class
 controladores\HomeController.class
