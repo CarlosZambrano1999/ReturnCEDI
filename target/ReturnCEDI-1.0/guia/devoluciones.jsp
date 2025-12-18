@@ -39,6 +39,7 @@
                 InfoDocMaterial infoDoc = (InfoDocMaterial) request.getAttribute("infoDoc");
             %>
 
+            <h1>Devoluciones</h1>
             <div class="card shadow-sm mb-3">
                 <div class="card-body p-4">
 
@@ -256,6 +257,12 @@
             </div>
 
         </div>
+                            
+        <div id="pageSpinner" class="spinner-overlay d-none">
+            <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
 
         <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
         <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
@@ -410,6 +417,15 @@
 
         const btnCerrar = document.getElementById("btnCerrarGuia");
         const formCerrar = document.getElementById("formCerrarGuia");
+        
+        const form = document.querySelector("form[action$='/Excesos']");
+        const spinner = document.getElementById("pageSpinner");
+
+        if (form) {
+            form.addEventListener("submit", function () {
+                spinner.classList.remove("d-none");
+            });
+        }
 
         if (!btnCerrar || !formCerrar)
             return;

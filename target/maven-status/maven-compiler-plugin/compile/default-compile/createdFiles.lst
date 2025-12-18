@@ -10,6 +10,7 @@ modelos\DatosDocMaterial.class
 modelos\ResultadoOperacion.class
 controladores\DevolucionesController.class
 modelos\Incidencia.class
+controladores\ExcesosController.class
 controladores\CargarDocMaterialExcelController.class
 controladores\LogoutController.class
 dao\DocMaterialDAO.class
@@ -27,8 +28,10 @@ dao\IncidenciaDAO.class
 controladores\UsuarioController.class
 modelos\DocMaterial.class
 controladores\HomeController.class
+dao\ExcesosDAO.class
 dao\ConsultarPoliticaDAO.class
 modelos\ResultadoCargaDocMaterial.class
+modelos\Excesos.class
 modelos\PoliticaDevolucion.class
 com\farmafacil\returncedi\JakartaRestConfiguration.class
 com\farmafacil\returncedi\resources\JakartaEE10Resource.class
