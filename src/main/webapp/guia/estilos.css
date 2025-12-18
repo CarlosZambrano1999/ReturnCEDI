@@ -1,0 +1,49 @@
+body {
+    background:#f6f7fb;
+}
+.card {
+    border:0;
+    border-radius:16px;
+}
+.state-pill{
+    padding:.25rem .6rem;
+    border-radius:999px;
+    font-weight:700;
+    font-size:.85rem
+}
+.st-ok{
+    background:rgba(25,135,84,.12);
+    color:#198754
+}
+.st-f{
+    background:rgba(220,53,69,.12);
+    color:#dc3545
+}
+.st-s{
+    background:rgba(25,135,84,.12);
+    color:#198754
+}
+.st-a{
+    background:rgba(255,193,7,.18);
+    color:#b78103
+}
+tr.row-f td{
+    background:rgba(220,53,69,.08)!important
+}
+tr.row-s td{
+    background:rgba(25,135,84,.08)!important
+}
+tr.row-a td{
+    background:rgba(255,193,7,.12)!important
+}
+#scanner{
+    border-width:2px;
+    font-weight:600
+}
+#tabla th, #tabla td {
+    white-space: nowrap;
+}
+#tabla td:nth-child(3) {
+    white-space: normal;
+    min-width: 280px;
+}

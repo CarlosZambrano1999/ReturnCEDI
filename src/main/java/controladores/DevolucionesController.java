@@ -5,6 +5,7 @@
 package controladores;
 
 import dao.DevolucionesDAO;
+import dao.IncidenciaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.URLEncoder;
+import modelos.InfoDocMaterial;
+import modelos.ResultadoOperacion;
 import modelos.Usuario;
 
 /**
@@ -23,10 +25,14 @@ import modelos.Usuario;
 public class DevolucionesController extends HttpServlet {
 
     private final DevolucionesDAO dao = new DevolucionesDAO();
+    private final IncidenciaDAO incidenciaDAO = new IncidenciaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Carga mínima para vista
+        request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
         request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
     }
 
@@ -34,139 +40,222 @@ public class DevolucionesController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String accion = request.getParameter("accion");
-
-        // Doc actual (puede venir en cargarDocumento / scan / editar)
+        String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
 
-        // ID usuario desde sesión (recomendado)
         // 0) Validar sesión
         HttpSession session = request.getSession(false);
-        Usuario user = (Usuario) session.getAttribute("usuario");
+        Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
+        if (user == null) {
+            setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
+            render(request, response, -1, null);
+            return;
+        }
+
+        int idUsuario = user.getIdUsuario();
 
         try {
-            if ("cargarDocumento".equalsIgnoreCase(accion)) {
-                if (docMaterial <= 0) {
-                    request.setAttribute("msgType", "error");
-                    request.setAttribute("msg", "Doc.Material inválido.");
-                    forwardVista(request, response, null, null, -1);
+            switch (accion.toLowerCase()) {
+
+                case "cargardocumento": {
+                    if (docMaterial <= 0) {
+                        setMsg(request, "error", "Doc.Material inválido.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
+                    InfoDocMaterial info = dao.obtenerInfoDocMaterial(docMaterial);
+
+                    if (info == null) {
+                        setMsg(request, "error", "Documento no encontrado o sin datos.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
+
+                    if (info.getEstado() == 2) {
+                        // Guía cerrada -> NO traer datos
+                        setMsg(request, "warning", "Esta guía ya fue completada y está cerrada.");
+                        // Ojo: no mandamos docMaterial, comparativo, infoDoc
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
+
+                    // Si está abierta, sí mandamos todo
+                    request.setAttribute("infoDoc", info);
+
+                    setMsg(request, "success", "Documento cargado. Ya podés escanear.");
+                    render(request, response, docMaterial, idUsuario);
                     return;
                 }
 
-                var comparativo = dao.obtenerComparativoExt(docMaterial, user.getIdUsuario());
-                request.setAttribute("docMaterial", docMaterial);
-                request.setAttribute("comparativo", comparativo);
-                request.setAttribute("idUsuario", user.getIdUsuario());
+                case "scan": {
+                    if (docMaterial <= 0) {
+                        setMsg(request, "error", "Doc.Material inválido.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
 
-                request.setAttribute("msgType", "success");
-                request.setAttribute("msg", "Documento cargado. Ya podés escanear.");
+                    String codigo = request.getParameter("codigo");
+                    if (codigo == null || codigo.trim().isEmpty()) {
+                        setMsg(request, "warning", "Código vacío.");
+                        render(request, response, docMaterial, idUsuario);
+                        return;
+                    }
 
-                request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
-                return;
-            }
-
-            if ("scan".equalsIgnoreCase(accion)) {
-                String codigo = request.getParameter("codigo");
-
-                if (docMaterial <= 0) {
-                    request.setAttribute("msgType", "error");
-                    request.setAttribute("msg", "Doc.Material inválido.");
-                    forwardVista(request, response, null, null, -1);
-                    return;
-                }
-                if (codigo == null || codigo.trim().isEmpty()) {
-                    request.setAttribute("msgType", "warning");
-                    request.setAttribute("msg", "Código vacío.");
-                } else {
-                    var r = dao.registrarEscaneo(docMaterial, codigo.trim(), user.getIdUsuario(), 1.0);
+                    ResultadoOperacion r = dao.registrarEscaneo(docMaterial, codigo.trim(), idUsuario, 1.0);
 
                     if ("success".equalsIgnoreCase(r.getStatus())) {
-                        request.setAttribute("msgType", "success");
-                        request.setAttribute("msg", r.getMessage());
+                        setMsg(request, "success", r.getMessage());
                     } else if ("not_found".equalsIgnoreCase(r.getStatus())) {
-                        request.setAttribute("msgType", "warning");
-                        request.setAttribute("msg", r.getMessage());
+                        setMsg(request, "warning", r.getMessage());
                     } else {
-                        request.setAttribute("msgType", "error");
-                        request.setAttribute("msg", r.getMessage());
+                        setMsg(request, "error", r.getMessage());
                     }
+
+                    render(request, response, docMaterial, idUsuario);
+                    return;
                 }
 
-                var comparativo = dao.obtenerComparativo(docMaterial);
-                request.setAttribute("docMaterial", docMaterial);
-                request.setAttribute("comparativo", comparativo);
-                request.setAttribute("idUsuario", user.getIdUsuario());
+                case "editar": {
+                    if (docMaterial <= 0) {
+                        setMsg(request, "error", "Doc.Material inválido.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
 
-                request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
-                return;
-            }
+                    long id = parseLong(request.getParameter("id"), -1);
+                    if (id <= 0) {
+                        setMsg(request, "error", "No se pudo editar: ID inválido (escaneá primero).");
+                        render(request, response, docMaterial, idUsuario);
+                        return;
+                    }
 
-            if ("editar".equalsIgnoreCase(accion)) {
-                long id = parseLong(request.getParameter("id"), -1);
-                String cantidad = request.getParameter("cantidad");
-                String incidenciaId = request.getParameter("incidenciaId");
-                String observacion = request.getParameter("observacion");
+                    // Si ya vas a usar enteros:
+                    Integer cantidadInt = parseIntOrNull(request.getParameter("cantidad"));
+                    if (cantidadInt == null || cantidadInt < 0) {
+                        setMsg(request, "error", "La cantidad debe ser un número entero válido.");
+                        render(request, response, docMaterial, idUsuario);
+                        return;
+                    }
 
-                if (id <= 0) {
-                    request.setAttribute("msgType", "error");
-                    request.setAttribute("msg", "No se pudo editar: ID inválido (escaneá primero).");
-                } else {
-                    Double cant = parseDouble(cantidad);
-                    Integer inc = parseIntOrNull(incidenciaId);
+                    Integer inc = parseIntOrNull(request.getParameter("incidenciaId"));
+                    String obs = request.getParameter("observacion");
 
-                    var r = dao.editarDevolucion(id, cant == null ? 0 : cant, inc, observacion);
+                    ResultadoOperacion r = dao.editarDevolucion(id, cantidadInt, inc, obs);
 
-                    request.setAttribute("msgType", "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error");
-                    request.setAttribute("msg", r.getMessage());
+                    setMsg(request,
+                            "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
+                            r.getMessage());
+
+                    render(request, response, docMaterial, idUsuario);
+                    return;
                 }
 
-                var comparativo = dao.obtenerComparativo(docMaterial);
-                request.setAttribute("docMaterial", docMaterial);
-                request.setAttribute("comparativo", comparativo);
-                request.setAttribute("idUsuario", user.getIdUsuario());
+                case "eliminar": {
+                    if (docMaterial <= 0) {
+                        setMsg(request, "error", "Doc.Material inválido.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
 
-                request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
-                return;
+                    long id = parseLong(request.getParameter("id"), -1);
+                    if (id <= 0) {
+                        setMsg(request, "error", "ID inválido para eliminar.");
+                        render(request, response, docMaterial, idUsuario);
+                        return;
+                    }
+
+                    ResultadoOperacion r = dao.eliminarDevolucionAdicional(id, docMaterial, idUsuario);
+
+                    setMsg(request,
+                            "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
+                            r.getMessage());
+
+                    render(request, response, docMaterial, idUsuario);
+                    return;
+                }
+                
+                case "cerrarguia": {
+                    if (docMaterial <= 0) {
+                        setMsg(request, "error", "Doc.Material inválido.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
+
+                    ResultadoOperacion r = dao.cerrarGuia(docMaterial, idUsuario);
+
+                    setMsg(request,
+                            "success".equalsIgnoreCase(r.getStatus()) ? "success" :
+                            "warning".equalsIgnoreCase(r.getStatus()) ? "warning" : "error",
+                            r.getMessage());
+
+                    // Si cerró, ya no mostramos datos (queda bloqueado)
+                    if ("success".equalsIgnoreCase(r.getStatus()) || "warning".equalsIgnoreCase(r.getStatus())) {
+                        render(request, response, -1, idUsuario);
+                    } else {
+                        render(request, response, docMaterial, idUsuario);
+                    }
+                    return;
+                }
+
+
+                default: {
+                    setMsg(request, "error", "Acción no soportada: " + accion);
+                    render(request, response, docMaterial, idUsuario);
+                }
             }
-
-            request.setAttribute("msgType", "error");
-            request.setAttribute("msg", "Acción no soportada: " + accion);
-            request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
 
         } catch (Exception e) {
-            request.setAttribute("msgType", "error");
-            request.setAttribute("msg", "Error servidor: " + e.getMessage());
-            request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
+            setMsg(request, "error", "Error servidor: " + e.getMessage());
+            render(request, response, docMaterial, idUsuario);
         }
     }
 
-    private void forwardVista(HttpServletRequest request, HttpServletResponse response,
-                              Object detalle, Object comparativo, long doc) throws ServletException, IOException {
-        if (doc > 0) request.setAttribute("docMaterial", doc);
-        if (comparativo != null) request.setAttribute("comparativo", comparativo);
+    /**
+     * Carga todo lo que el JSP necesita y hace forward.
+     */
+    private void render(HttpServletRequest request, HttpServletResponse response, long docMaterial, Integer idUsuario)
+            throws ServletException, IOException {
+
+        // Siempre incidencias
+        request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
+
+        // Si hay doc, cargamos info + comparativo
+        if (docMaterial > 0) {
+            request.setAttribute("docMaterial", docMaterial);
+
+            // InfoDocMaterial
+            InfoDocMaterial info = dao.obtenerInfoDocMaterial(docMaterial);
+            request.setAttribute("infoDoc", info);
+
+            if (idUsuario != null) {
+                request.setAttribute("idUsuario", idUsuario);
+                request.setAttribute("comparativo", dao.obtenerComparativoExt(docMaterial, idUsuario));
+            }
+        }
+
         request.getRequestDispatcher("/guia/devoluciones.jsp").forward(request, response);
     }
 
-    private int getIdUsuario(HttpServletRequest request) {
-        HttpSession ses = request.getSession(false);
-        if (ses != null) {
-            Object o = ses.getAttribute("idUsuario");
-            if (o instanceof Integer) return (Integer) o;
-            if (o instanceof String) {
-                try { return Integer.parseInt(((String) o).trim()); } catch (Exception ignored) {}
-            }
-        }
-        // fallback (si querés permitirlo):
-        try { return Integer.parseInt(request.getParameter("idUsuario")); } catch (Exception e) { return -1; }
+    private void setMsg(HttpServletRequest request, String type, String msg) {
+        request.setAttribute("msgType", type);
+        request.setAttribute("msg", msg);
+    }
+
+    private String nvl(String s, String def) {
+        return (s == null || s.trim().isEmpty()) ? def : s.trim();
     }
 
     private long parseLong(String s, long def) {
         try { return Long.parseLong(s.trim().replace(",", "")); } catch (Exception e) { return def; }
     }
-    private Double parseDouble(String s) {
-        try { return Double.parseDouble(s.trim().replace(",", "")); } catch (Exception e) { return null; }
-    }
+
     private Integer parseIntOrNull(String s) {
-        try { if (s == null || s.trim().isEmpty()) return null; return Integer.parseInt(s.trim()); } catch (Exception e) { return null; }
+        try {
+            if (s == null || s.trim().isEmpty()) return null;
+            return Integer.parseInt(s.trim().replace(",", ""));
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
+
