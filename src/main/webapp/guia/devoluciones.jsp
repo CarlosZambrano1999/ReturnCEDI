@@ -119,7 +119,7 @@
             </div>
             <% } %>
 
-            <div class="card shadow-sm">
+            <div class="card shadow-sm" id="cardPrincipal">
                 <div class="card-body p-4">
                     <div class="table-responsive">
                         <table id="tabla" class="table table-hover align-middle w-100">
@@ -130,8 +130,8 @@
                                     <th>Descripción</th>
                                     <th>FC</th>
                                     <th>Presentación</th>
-                                    <th class="text-end">Esperado</th>
-                                    <th class="text-end">Escaneado</th>
+                                    <th class="text-end">Enviado</th>
+                                    <th class="text-end">Recibido</th>
                                     <th class="text-end">Diferencia</th>
                                     <th class="text-center">Editar</th>
                                     <th class="text-end"></th>
@@ -358,10 +358,11 @@
 
     document.addEventListener("mousedown", function (e) {
         const tabla = document.getElementById("tabla");
+        const card = document.getElementById("cardPrincipal");
         if (!tabla)
             return;
 
-        if (tabla.contains(e.target)) {
+        if (tabla.contains(e.target) || card.contains(e.target)) {
             interactuandoTabla = true;
         } else {
             interactuandoTabla = false;
@@ -418,7 +419,7 @@
         const btnCerrar = document.getElementById("btnCerrarGuia");
         const formCerrar = document.getElementById("formCerrarGuia");
         
-        const form = document.querySelector("form[action$='/Excesos']");
+        const form = document.querySelector("form[action$='/Devoluciones']");
         const spinner = document.getElementById("pageSpinner");
 
         if (form) {
