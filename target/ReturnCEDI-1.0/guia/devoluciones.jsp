@@ -122,7 +122,7 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <div class="table-responsive">
-                        <table id="tabla" class="table table-striped table-hover align-middle w-100">
+                        <table id="tabla" class="table table-hover align-middle w-100">
                             <thead>
                                 <tr>
                                     <th>Estado</th>

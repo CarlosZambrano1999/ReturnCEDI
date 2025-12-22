@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import modelos.Usuario;
 
 /**
@@ -25,18 +27,18 @@ public class UsuarioDAO {
         conexion = new ConexionSQLServer();
     }
 
-    public java.util.List<modelos.Usuario> listarUsuarios() throws SQLException {
-        java.util.List<modelos.Usuario> lista = new java.util.ArrayList<>();
+    public List<Usuario> listarUsuarios() throws SQLException {
+        List<Usuario> lista = new ArrayList<>();
 
         String sql
-                = "SELECT id_usuario, nombre, codigo, id_rol, FARMACIA, rol_nombre, estado"
+                = "SELECT id_usuario, nombre, codigo, id_rol, rol_nombre, estado "
                 + "FROM PERSONA.VW_USUARIOS_LISTA "
                 + "ORDER BY nombre ASC";
 
         try (Connection cn = conexion.getConnection(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                modelos.Usuario u = new modelos.Usuario();
+                Usuario u = new Usuario();
                 u.setIdUsuario(rs.getInt("id_usuario"));   // <- lo traemos para editar (en JSP lo ocultas)
                 u.setNombre(rs.getString("nombre"));
                 u.setCodigo(rs.getString("codigo"));
@@ -251,7 +253,7 @@ public class UsuarioDAO {
     }
 
 
-    public modelos.Usuario validarLoginPorCodigo(String codigo, String plainPassword) {
+    public Usuario validarLoginPorCodigo(String codigo, String plainPassword) {
         if (codigo == null || plainPassword == null) {
             return null;
         }
@@ -278,7 +280,7 @@ public class UsuarioDAO {
 
                 // Si deseas solo usuarios activos, habilita este guard:
                 // if (rs.getInt("estado") != 1) return null;
-                modelos.Usuario u = new modelos.Usuario();
+                Usuario u = new Usuario();
                 u.setIdUsuario(rs.getInt("id_usuario"));
                 u.setNombre(rs.getString("nombre"));
                 u.setCodigo(rs.getString("codigo"));

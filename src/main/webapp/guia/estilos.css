@@ -27,15 +27,45 @@ body {
     background:rgba(255,193,7,.18);
     color:#b78103
 }
-tr.row-f td{
-    background:rgba(220,53,69,.08)!important
+#tabla tbody tr.row-f > * {
+  background-color: rgba(220, 53, 69, 0.18) !important;
 }
-tr.row-s td{
-    background:rgba(25,135,84,.08)!important
+
+#tabla tbody tr.row-s > * {
+  background-color: rgba(25, 135, 84, 0.18) !important;
 }
-tr.row-a td{
-    background:rgba(255,193,7,.12)!important
+
+#tabla tbody tr.row-a > * {
+   background-color: rgba(255, 193, 7, 0.22) !important;
 }
+
+/* 2) Evitar que table-striped y hover te “cambien” el color */
+#tabla.table-striped tbody tr.row-f:nth-of-type(odd) > *,
+#tabla.table-striped tbody tr.row-s:nth-of-type(odd) > *,
+#tabla.table-striped tbody tr.row-a:nth-of-type(odd) > * {
+  background-color: inherit !important;
+}
+
+#tabla.table-hover tbody tr.row-f:hover > *,
+#tabla.table-hover tbody tr.row-s:hover > *,
+#tabla.table-hover tbody tr.row-a:hover > * {
+  filter: brightness(0.97);
+}
+
+/* 3) Inputs y selects dentro de filas coloreadas: que no se vean blancos */
+#tabla tbody tr.row-f input,
+#tabla tbody tr.row-f select,
+#tabla tbody tr.row-a input,
+#tabla tbody tr.row-a select,
+#tabla tbody tr.row-s input,
+#tabla tbody tr.row-s select {
+  background-color: rgba(255,255,255,.85) !important;
+}
+
+#tabla tbody tr.row-f { border-left: 6px solid #dc3545; }
+#tabla tbody tr.row-s { border-left: 6px solid #198754; }
+#tabla tbody tr.row-a { border-left: 6px solid #ffc107; }
+
 #scanner{
     border-width:2px;
     font-weight:600
@@ -59,4 +89,5 @@ tr.row-a td{
     align-items: center;
     justify-content: center;
     z-index: 9999;
+    pointer-events: none;
 }

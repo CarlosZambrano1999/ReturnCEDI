@@ -122,14 +122,14 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <div class="table-responsive">
-                        <table id="tabla" class="table table-striped table-hover align-middle w-100">
+                        <table id="tabla" class="table table-hover align-middle w-100">
                             <thead>
                                 <tr>
                                     <th>Estado</th>
                                     <th>Código SAP</th>
                                     <th>Descripción</th>
                                     <th>FC</th>
-                                    <th>Presentación</th>
+                                    <!--th>Presentación</th-->
                                     <th class="text-end">Esperado</th>
                                     <th class="text-end">Escaneado</th>
                                     <th class="text-end">Diferencia</th>
@@ -150,7 +150,7 @@
                                     <td><%= r.getCodigoSap()%></td>
                                     <td><%= r.getDescripcion() == null ? "" : r.getDescripcion()%></td>
                                     <td><%= r.getFactor()%></td>
-                                    <td><%= r.getPresentacion()%></td>
+                                    <!--td><%= r.getPresentacion()%></td-->
                                     <td class="text-end"><%= r.getCantidadEsperada().intValue()%></td>
                                     <td class="text-end"><%= r.getCantidadEscaneada().intValue()%></td>
                                     <td class="text-end"><%= r.getDiferencia().intValue()%></td>
@@ -422,11 +422,18 @@
         const form = document.querySelector("form[action$='/Excesos']");
         const spinner = document.getElementById("pageSpinner");
 
-        if (form) {
-            form.addEventListener("submit", function () {
-                spinner.classList.remove("d-none");
-            });
-        }
+        document.querySelectorAll("form[action$='/Excesos']").forEach(f => {
+  f.addEventListener("submit", function () {
+    if (spinner) spinner.classList.remove("d-none");
+
+    // ✅ mantener el foco en el scanner lo más que se pueda antes del POST
+    const sc = document.getElementById("scanner");
+    if (sc && !sc.disabled) {
+      sc.focus();
+      sc.select();
+    }
+  });
+});
 
         if (!btnCerrar || !formCerrar)
             return;
