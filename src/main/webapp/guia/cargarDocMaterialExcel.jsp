@@ -48,9 +48,7 @@ tr.row-ok td {
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
                     <h3 class="mb-0">Carga de Doc. Material</h3>
-                    <div class="muted">Subí el Excel, revisá el preview y luego cargalo a la BD.</div>
                 </div>
-                <span class="badge badge-soft px-3 py-2">GUIA.DOC_MATERIAL / GUIA.DATOS_DOC_MATERIAL</span>
             </div>
 
             <div class="card shadow-sm">
@@ -70,7 +68,7 @@ tr.row-ok td {
                                 Previsualizar
                             </button>
                             <button class="btn btn-primary w-50" id="btnCargar" type="button" disabled>
-                                Cargar a BD
+                                Cargar
                             </button>
                         </div>
                     </div>
@@ -175,7 +173,7 @@ tr.row-ok td {
             </div>
 
             <div class="text-center muted mt-3">
-                Tip: si el preview detecta columnas faltantes, corregí los encabezados del Excel para que coincidan.
+                Tip: si el preview detecta columnas faltantes, corregir los encabezados del Excel para que coincidan.
             </div>
 
         </div>
@@ -488,14 +486,14 @@ function detectDocMaterial(rows) {
 
             renderPreview(previewRows);
 
-            setStatus("Preview listo. Ya podés cargar a BD.", "ok");
+            setStatus("Preview listo. Ya puede subir la guía.", "ok");
             btnCargar.disabled = false;
             btnPreview.disabled = false;
 
         } catch (e) {
             console.error(e);
             setStatus("Error leyendo el Excel.", "err");
-            Swal.fire("Error", "No se pudo leer el Excel. Verificá que sea .xlsx válido.", "error");
+            Swal.fire("Error", "No se pudo leer el Excel. Verificar que sea .xlsx válido.", "error");
             btnPreview.disabled = false;
         }
     });

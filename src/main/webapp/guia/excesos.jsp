@@ -471,6 +471,35 @@
         });
 
     });
+    
+        document.addEventListener("shown.bs.dropdown", function (e) {
+  // e.target = botón
+  const btn = e.target;
+  const tr = btn.closest("tr");
+  if (tr) tr.classList.add("no-hover");
+});
+
+document.addEventListener("hidden.bs.dropdown", function (e) {
+  const btn = e.target;
+  const tr = btn.closest("tr");
+  if (tr) tr.classList.remove("no-hover");
+});
+
+// Si el mouse está dentro del dropdown-menu, mantenemos no-hover
+document.addEventListener("mouseover", function (e) {
+  const menu = e.target.closest(".dropdown-menu");
+  if (!menu) return;
+  const tr = menu.closest("tr");
+  if (tr) tr.classList.add("no-hover");
+});
+
+document.addEventListener("mouseleave", function (e) {
+  const menu = e.target.closest(".dropdown-menu");
+  if (!menu) return;
+  const tr = menu.closest("tr");
+  if (tr) tr.classList.remove("no-hover");
+});
+    
         </script>
     </body>
 </html>

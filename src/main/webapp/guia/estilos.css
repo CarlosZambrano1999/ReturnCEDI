@@ -91,3 +91,23 @@ body {
     z-index: 9999;
     pointer-events: none;
 }
+
+/* El menú debe quedar por encima de la tabla */
+#tabla .dropdown-menu{
+  z-index: 2000;           /* arriba de la tabla */
+  position: absolute;
+}
+
+/* Cuando una fila está "editando", quitamos hover visual */
+#tabla tbody tr.no-hover:hover > *{
+  background-color: inherit !important;
+  filter: none !important;
+}
+
+/* Extra: resaltar el dropdown-menu como contenedor (más visible) */
+#tabla .dropdown-menu{
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.14);
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fff;
+}

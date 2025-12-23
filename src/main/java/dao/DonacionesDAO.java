@@ -29,7 +29,6 @@ public class DonacionesDAO {
         this.conexion = new ConexionSQLServer();
     }
 
-
     public ResultadoOperacion registrarEscaneo(long docMaterial, String codigoInput, int idUsuario, double cantidad) {
         ResultadoOperacion resp = new ResultadoOperacion();
 
@@ -67,7 +66,6 @@ public class DonacionesDAO {
 
         return resp;
     }
-
 
     public List<ComparativoDocMaterialRow> obtenerComparativoExt(long docMaterial, int idUsuario) {
         List<ComparativoDocMaterialRow> lista = new ArrayList<>();
@@ -199,6 +197,33 @@ public class DonacionesDAO {
             cs.setLong(1, id);
             cs.setLong(2, docMaterial);
             cs.setInt(3, idUsuario);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                if (rs.next()) {
+                    resp.setStatus(rs.getString("status"));
+                    resp.setMessage(rs.getString("message"));
+                } else {
+                    resp.setStatus("error");
+                    resp.setMessage("El SP no devolvió respuesta.");
+                }
+            }
+
+        } catch (SQLException e) {
+            resp.setStatus("error");
+            resp.setMessage("SQLException: " + e.getMessage());
+        }
+
+        return resp;
+    }
+
+    public ResultadoOperacion cerrarGuia(long docMaterial, int idUsuario) {
+        ResultadoOperacion resp = new ResultadoOperacion();
+        String sql = "{CALL DONACIONES.SP_CERRAR_GUIA(?, ?)}";
+
+        try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
+
+            cs.setLong(1, docMaterial);
+            cs.setInt(2, idUsuario);
 
             try (ResultSet rs = cs.executeQuery()) {
                 if (rs.next()) {
