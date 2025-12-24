@@ -22,7 +22,23 @@
     <title><%=titulo%></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- ✅ DataTables + Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/datatables.net-responsive-bs5@2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ✅ jQuery requerido por DataTables -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+    <!-- ✅ DataTables JS -->
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- ✅ Responsive -->
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-responsive@2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-responsive-bs5@2.5.0/js/responsive.bootstrap5.min.js"></script>
 </head>
 <body class="bg-light">
 
@@ -68,7 +84,7 @@
 
             <!-- TABLA -->
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle mb-0" id="tblRpt">
+                <table class="table table-bordered table-striped align-middle mb-0 nowrap" id="tblRpt" style="width:100%">
                     <thead class="table-dark">
                         <tr>
                             <th>DOC_MATERIAL</th>
@@ -82,11 +98,9 @@
                             <th>FECHA_SCAN</th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyRpt">
-                        <tr>
-                            <td colspan="9" class="text-center text-muted">Cargando...</td>
-                        </tr>
-                    </tbody>
+
+                    <!-- ✅ IMPORTANTE: tbody vacío (sin colspan) -->
+                    <tbody id="tbodyRpt"></tbody>
                 </table>
             </div>
 
@@ -99,9 +113,6 @@
     const endpoint = "<%=endpoint%>";
     const titulo = "<%=titulo%>";
 
-    // Guardamos la última data cargada para exportar
-    let lastData = [];
-
     function esc(v) {
         if (v === null || v === undefined) return "";
         return String(v)
@@ -112,36 +123,7 @@
             .replaceAll("'", "&#039;");
     }
 
-    function renderRows(data) {
-        const tbody = document.getElementById("tbodyRpt");
-        tbody.innerHTML = "";
-
-        if (!data || data.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="9" class="text-center text-muted">Sin registros</td></tr>';
-            return;
-        }
-
-        let html = "";
-        data.forEach(function (r) {
-            html += '<tr>'
-                + '<td>' + esc(r.doc_material) + '</td>'
-                + '<td>' + esc(r.codigo_sap) + '</td>'
-                + '<td>' + esc(r.producto) + '</td>'
-                + '<td class="text-center">' + esc(r.enviado) + '</td>'
-                + '<td class="text-center">' + esc(r.recibido) + '</td>'
-                + '<td>' + esc(r.farmacia) + '</td>'
-                + '<td>' + esc(r.incidencia) + '</td>'
-                + '<td>' + esc(r.observacion) + '</td>'
-                + '<td>' + esc(r.fecha_scan) + '</td>'
-                + '</tr>';
-        });
-
-        tbody.innerHTML = html;
-    }
-
     function nombreArchivo() {
-        // titulo: "Reporte - Devoluciones" -> "Reporte_Devoluciones_2025-12-23.xls"
         const safeTitle = titulo.replaceAll(" ", "_").replaceAll("-", "_");
         const hoy = new Date();
         const yyyy = hoy.getFullYear();
@@ -150,13 +132,52 @@
         return safeTitle + "_" + yyyy + "-" + mm + "-" + dd + ".xls";
     }
 
+    // ✅ DataTables (una sola vez)
+    const dt = $("#tblRpt").DataTable({
+        responsive: true,
+        autoWidth: false,
+        processing: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        order: [],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json",
+            processing: "Cargando..."
+        },
+        columnDefs: [
+            { targets: [3,4], className: "text-center" }
+        ]
+    });
+
+    function renderDataTable(data) {
+        const rows = (data || []).map(r => ([
+            esc(r.doc_material),
+            esc(r.codigo_sap),
+            esc(r.producto),
+            esc(r.enviado),
+            esc(r.recibido),
+            esc(r.farmacia),
+            esc(r.incidencia),
+            esc(r.observacion),
+            esc(r.fecha_scan)
+        ]));
+
+        dt.clear();
+        dt.rows.add(rows);
+        dt.draw();
+
+        document.getElementById("btnExcel").disabled = (rows.length === 0);
+    }
+
     function exportarExcel() {
-        if (!lastData || lastData.length === 0) {
-            Swal.fire("Sin datos", "No hay registros para exportar.", "info");
+        // Exporta lo filtrado en DataTables (buscador + filtros)
+        const dataFiltrada = dt.rows({ search: "applied" }).data().toArray();
+
+        if (!dataFiltrada || dataFiltrada.length === 0) {
+            Swal.fire("Sin datos", "No hay registros para exportar (según filtros/búsqueda).", "info");
             return;
         }
 
-        // Armamos una tabla HTML (Excel la abre como .xls)
         let html = '';
         html += '<table border="1">';
         html += '<thead><tr>'
@@ -172,24 +193,24 @@
             + '</tr></thead>';
         html += '<tbody>';
 
-        lastData.forEach(function (r) {
+        dataFiltrada.forEach(function (row) {
             html += '<tr>'
-                + '<td>' + esc(r.doc_material) + '</td>'
-                + '<td>' + esc(r.codigo_sap) + '</td>'
-                + '<td>' + esc(r.producto) + '</td>'
-                + '<td>' + esc(r.enviado) + '</td>'
-                + '<td>' + esc(r.recibido) + '</td>'
-                + '<td>' + esc(r.farmacia) + '</td>'
-                + '<td>' + esc(r.incidencia) + '</td>'
-                + '<td>' + esc(r.observacion) + '</td>'
-                + '<td>' + esc(r.fecha_scan) + '</td>'
+                + '<td>' + row[0] + '</td>'
+                + '<td>' + row[1] + '</td>'
+                + '<td>' + row[2] + '</td>'
+                + '<td>' + row[3] + '</td>'
+                + '<td>' + row[4] + '</td>'
+                + '<td>' + row[5] + '</td>'
+                + '<td>' + row[6] + '</td>'
+                + '<td>' + row[7] + '</td>'
+                + '<td>' + row[8] + '</td>'
                 + '</tr>';
         });
 
         html += '</tbody></table>';
 
         const blob = new Blob(
-            ['\ufeff' + html], // BOM para acentos
+            ['\ufeff' + html],
             { type: 'application/vnd.ms-excel;charset=utf-8;' }
         );
 
@@ -201,6 +222,13 @@
         document.body.removeChild(link);
     }
 
+    function setLoading(on) {
+        // “processing” de DT se controla internamente, pero esto ayuda UX
+        document.getElementById("btnFiltrar").disabled = on;
+        document.getElementById("btnLimpiar").disabled = on;
+        document.getElementById("btnExcel").disabled = on || (dt.rows().count() === 0);
+    }
+
     function cargar() {
         const desde = document.getElementById("desde").value;
         const hasta = document.getElementById("hasta").value;
@@ -210,11 +238,8 @@
             return;
         }
 
-        document.getElementById("btnExcel").disabled = true;
-        lastData = [];
-
-        document.getElementById("tbodyRpt").innerHTML =
-            '<tr><td colspan="9" class="text-center text-muted">Cargando...</td></tr>';
+        setLoading(true);
+        dt.clear().draw(); // ✅ sin filas “colspan”
 
         const body = new URLSearchParams();
         if (desde) body.append("desde", desde);
@@ -235,11 +260,10 @@
             });
         })
         .then(function (resp) {
-
             if (resp.contentType.indexOf("application/json") === -1) {
                 console.log("Respuesta NO JSON:", resp);
                 Swal.fire("Respuesta no válida (" + resp.status + ")", resp.text.substring(0, 300), "error");
-                renderRows([]);
+                renderDataTable([]);
                 return;
             }
 
@@ -249,7 +273,7 @@
             if (!json) {
                 Swal.fire("Error", "No se pudo parsear JSON.", "error");
                 console.log(resp.text);
-                renderRows([]);
+                renderDataTable([]);
                 return;
             }
 
@@ -263,7 +287,7 @@
 
             if (json.status === "error") {
                 Swal.fire("Error", json.message || "Ocurrió un error.", "error");
-                renderRows([]);
+                renderDataTable([]);
                 return;
             }
 
@@ -276,23 +300,24 @@
             }
 
             if (json.status === "empty") {
-                renderRows([]);
+                renderDataTable([]);
                 return;
             }
 
             if (json.status === "success") {
-                lastData = json.data || [];
-                renderRows(lastData);
-                document.getElementById("btnExcel").disabled = (lastData.length === 0);
+                renderDataTable(json.data || []);
                 return;
             }
 
-            renderRows([]);
+            renderDataTable([]);
         })
         .catch(function (err) {
             console.error(err);
             Swal.fire("Error", "No se pudo consultar el reporte.", "error");
-            renderRows([]);
+            renderDataTable([]);
+        })
+        .finally(function () {
+            setLoading(false);
         });
     }
 
