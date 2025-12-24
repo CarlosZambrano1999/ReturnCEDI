@@ -31,7 +31,7 @@ import modelos.reportes.RptProductividadDiaHoraUsuario;
  *
  * @author Administrador
  */
-@WebServlet(name = "ReportesServlet", urlPatterns = {"/Reportes"})
+@WebServlet(name = "ReportesServlet", urlPatterns = {"/Reportes/Devoluciones"})
 public class ReportDevolucionesController extends HttpServlet {
 
     private final ReportesDAO dao = new ReportesDAO();
@@ -44,8 +44,9 @@ public class ReportDevolucionesController extends HttpServlet {
         try {
             request.setAttribute("usuarios", usuarioDAO.listarUsuarios());
             request.setAttribute("tab", "rpt1");
-
-            request.getRequestDispatcher("/reportes/devoluciones.jsp").forward(request, response);
+            
+            setViewMeta(request);
+            request.getRequestDispatcher("/reportes/generales.jsp").forward(request, response);
 
         } catch (SQLException ex) {
             Logger.getLogger(ReportDevolucionesController.class.getName()).log(Level.SEVERE, null, ex);
@@ -169,7 +170,8 @@ try {
 
     private void forward(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/reportes/devoluciones.jsp").forward(request, response);
+        setViewMeta(request);
+        request.getRequestDispatcher("/reportes/generales.jsp").forward(request, response);
     }
 
     private void setMsg(HttpServletRequest request, String type, String msg) {
@@ -215,4 +217,12 @@ try {
             return null;
         }
     }
+    
+    private void setViewMeta(HttpServletRequest request) {
+        request.setAttribute("pageTitle", "Dashboard Reportes - Devoluciones");
+        request.setAttribute("pageSubtitle", "Devoluciones · Productividad e incidencias");
+        request.setAttribute("baseUrl", request.getContextPath() + "/Reportes/Devoluciones");
+        request.setAttribute("moduloNombre", "Devoluciones");
+    }
+
 }

@@ -59,7 +59,7 @@ tr.row-ok td {
                             <label class="form-label fw-semibold">Archivo Excel (.xlsx)</label>
                             <input class="form-control" type="file" id="archivoExcel" accept=".xlsx" />
                             <div class="form-text">
-                                Debe contener columnas como: <b>Material</b>, <b>Doc.mat.</b>, <b>Pos.</b>, <b>Hora</b>, <b>Fecha doc.</b>, <b>Fe.contab.</b>, <b>Ctd.en UM entrada</b>, <b>Importe ML</b>, etc.
+                                Debe contener columnas como: <b>Material</b>, <b>Documento material</b>, <b>Posición</b>, <b>Hora de entrada</b>, <b>Fe.contabilización</b>, <b>Fe.contabilización</b>, <b>Ctd.en UM entrada</b>, <b>Importe ML</b>, etc.
                             </div>
                         </div>
 
@@ -150,17 +150,17 @@ tr.row-ok td {
                             <tr>
                                 <th>Material</th>
                                 <th>Texto breve</th>
-                                <th>Ce.</th>
-                                <th>Alm.</th>
-                                <th>Cl.mov.</th>
-                                <th>Doc.mat.</th>
-                                <th>Pos.</th>
+                                <th>Centro</th>
+                                <th>Almacén</th>
+                                <th>Clase de movimiento</th>
+                                <th>Documento material</th>
+                                <th>Posición</th>
                                 <th>Referencia</th>
                                 <th>Texto</th>
-                                <th>Hora</th>
-                                <th>Usuario</th>
-                                <th>Fecha doc.</th>
-                                <th>Fe.contab.</th>
+                                <th>Hora de entrada</th>
+                                <th>Nombre del usuario</th>
+                                <th>Fecha Documento</th>
+                                <th>Fe.contabilización</th>
                                 <th>Cantidad</th>
                                 <th>Importe</th>
                             </tr>
@@ -206,17 +206,17 @@ tr.row-ok td {
     const REQUIRED_HEADERS = [
         "Material",
         "Texto breve de material",
-        "Ce.",
-        "Alm.",
-        "Cl.mov.",
-        "Doc.mat.",
-        "Pos.",
+        "Centro",
+        "Almacén",
+        "Clase de movimiento",
+        "Documento material",
+        "Posición",
         "Referencia",
         "Texto cab.documento",
-        "Hora",
-        "Usuario",
-        "Fecha doc.",
-        "Fe.contab.",
+        "Hora de entrada",
+        "Nombre del usuario",
+        "Fe.contabilización",
+        "Fe.contabilización",
         "Ctd.en UM entrada",
         "Importe ML"
     ];
@@ -309,18 +309,18 @@ function renderPreview(rows) {
 
   rows.forEach((r, idx) => {
     const material = (r["Material"] ?? "").toString().trim();
-    const doc = (r["Doc.mat."] ?? "").toString().trim();
-    const pos = (r["Pos."] ?? "").toString().trim();
-    const fdoc = (r["Fecha doc."] ?? "").toString().trim();
-    const fcon = (r["Fe.contab."] ?? "").toString().trim();
+    const doc = (r["Documento material"] ?? "").toString().trim();
+    const pos = (r["Posición"] ?? "").toString().trim();
+    const fdoc = (r["Fe.contabilización"] ?? "").toString().trim();
+    const fcon = (r["Fe.contabilización"] ?? "").toString().trim();
 
     // Reglas mínimas (ajustables)
     const errores = [];
     if (isEmpty(material)) errores.push("Material vacío");
-    if (isEmpty(doc)) errores.push("Doc.mat. vacío");
-    if (docMaterial && !isEmpty(doc) && doc !== docMaterial) errores.push("Doc.mat. distinto");
-    if (isEmpty(pos)) errores.push("Pos. vacío");
-    if (isEmpty(fdoc)) errores.push("Fecha doc. vacía");
+    if (isEmpty(doc)) errores.push("Documento material vacío");
+    if (docMaterial && !isEmpty(doc) && doc !== docMaterial) errores.push("Documento material distinto");
+    if (isEmpty(pos)) errores.push("Posición vacío");
+    if (isEmpty(fdoc)) errores.push("Fe.contabilización vacía");
     if (isEmpty(fcon)) errores.push("Fe.contab. vacía");
 
     const cantidad = toNumber(r["Ctd.en UM entrada"]);
@@ -335,17 +335,17 @@ function renderPreview(rows) {
     const rowNode = dt.row.add([
       r["Material"] ?? "",
       r["Texto breve de material"] ?? "",
-      r["Ce."] ?? "",
-      r["Alm."] ?? "",
-      r["Cl.mov."] ?? "",
-      r["Doc.mat."] ?? "",
-      r["Pos."] ?? "",
+      r["Centro"] ?? "",
+      r["Almacén"] ?? "",
+      r["Clase de movimiento"] ?? "",
+      r["Documento material"] ?? "",
+      r["Posición"] ?? "",
       r["Referencia"] ?? "",
       r["Texto cab.documento"] ?? "",
-      r["Hora"] ?? "",
-      r["Usuario"] ?? "",
-      r["Fecha doc."] ?? "",
-      r["Fe.contab."] ?? "",
+      r["Hora de entrada"] ?? "",
+      r["Nombre del usuario"] ?? "",
+      r["Fe.contabilización"] ?? "",
+      r["Fe.contabilización"] ?? "",
       r["Ctd.en UM entrada"] ?? "",
       r["Importe ML"] ?? ""
     ]).draw(false).node();
@@ -384,18 +384,18 @@ if (err > 0) {
 }
 
 function detectDocMaterial(rows) {
-        // toma el primer Doc.mat. no vacío y valida que todos (si vienen) sean iguales
+        // toma el primer Documento material no vacío y valida que todos (si vienen) sean iguales
         let dm = null;
         for (const r of rows) {
-            const v = (r["Doc.mat."] ?? "").toString().trim();
+            const v = (r["Documento material"] ?? "").toString().trim();
             if (v) { dm = v; break; }
         }
-        if (!dm) return { ok: false, value: null, error: "No se detectó Doc.mat. en el preview." };
+        if (!dm) return { ok: false, value: null, error: "No se detectó Documento material en el preview." };
 
         for (const r of rows) {
-            const v = (r["Doc.mat."] ?? "").toString().trim();
+            const v = (r["Documento material"] ?? "").toString().trim();
             if (v && v !== dm) {
-                return { ok: false, value: null, error: "El archivo tiene más de un Doc.mat. distinto." };
+                return { ok: false, value: null, error: "El archivo tiene más de un Documento material distinto." };
             }
         }
         return { ok: true, value: dm, error: null };
@@ -471,12 +471,12 @@ function detectDocMaterial(rows) {
             // Tomar solo primeras filas para preview
             previewRows = json.slice(0, MAX_PREVIEW_ROWS);
 
-            // Detectar Doc.mat.
+            // Detectar Documento material
             const dm = detectDocMaterial(previewRows);
             if (!dm.ok) {
                 docMaterialEl.textContent = "—";
                 setStatus(dm.error, "err");
-                Swal.fire("Doc.mat. inválido", dm.error, "error");
+                Swal.fire("Documento material inválido", dm.error, "error");
                 btnPreview.disabled = false;
                 return;
             }
@@ -504,7 +504,7 @@ function detectDocMaterial(rows) {
         Swal.fire({
             icon: "question",
             title: "¿Cargar a la base de datos?",
-            html: "Se insertará el <b>Doc.mat.</b> con estado <b>1</b> y luego el detalle.<br><br><b>Archivo:</b> " + selectedFile.name,
+            html: "Se insertará el <b>Documento material</b> con estado <b>1</b> y luego el detalle.<br><br><b>Archivo:</b> " + selectedFile.name,
             showCancelButton: true,
             confirmButtonText: "Sí, cargar",
             cancelButtonText: "Cancelar"
