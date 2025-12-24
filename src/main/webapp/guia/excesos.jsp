@@ -119,7 +119,7 @@
             </div>
             <% } %>
 
-            <div class="card shadow-sm">
+            <div class="card shadow-sm" id="cardPrincipal">
                 <div class="card-body p-4">
                     <div class="table-responsive">
                         <table id="tabla" class="table table-hover align-middle w-100">
@@ -130,8 +130,8 @@
                                     <th>Descripción</th>
                                     <th>FC</th>
                                     <!--th>Presentación</th-->
-                                    <th class="text-end">Esperado</th>
-                                    <th class="text-end">Escaneado</th>
+                                    <th class="text-end">Enviado</th>
+                                    <th class="text-end">Recibido</th>
                                     <th class="text-end">Diferencia</th>
                                     <th class="text-center">Editar</th>
                                     <th class="text-end"></th>
@@ -360,10 +360,11 @@
 
     document.addEventListener("mousedown", function (e) {
         const tabla = document.getElementById("tabla");
+        const card = document.getElementById("cardPrincipal");
         if (!tabla)
             return;
 
-        if (tabla.contains(e.target)) {
+        if (tabla.contains(e.target) || card.contains(e.target)) {
             interactuandoTabla = true;
         } else {
             interactuandoTabla = false;
@@ -470,6 +471,35 @@
         });
 
     });
+    
+        document.addEventListener("shown.bs.dropdown", function (e) {
+  // e.target = botón
+  const btn = e.target;
+  const tr = btn.closest("tr");
+  if (tr) tr.classList.add("no-hover");
+});
+
+document.addEventListener("hidden.bs.dropdown", function (e) {
+  const btn = e.target;
+  const tr = btn.closest("tr");
+  if (tr) tr.classList.remove("no-hover");
+});
+
+// Si el mouse está dentro del dropdown-menu, mantenemos no-hover
+document.addEventListener("mouseover", function (e) {
+  const menu = e.target.closest(".dropdown-menu");
+  if (!menu) return;
+  const tr = menu.closest("tr");
+  if (tr) tr.classList.add("no-hover");
+});
+
+document.addEventListener("mouseleave", function (e) {
+  const menu = e.target.closest(".dropdown-menu");
+  if (!menu) return;
+  const tr = menu.closest("tr");
+  if (tr) tr.classList.remove("no-hover");
+});
+    
         </script>
     </body>
 </html>

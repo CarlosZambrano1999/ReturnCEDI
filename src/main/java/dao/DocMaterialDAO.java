@@ -8,12 +8,14 @@ import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import configDB.ConexionSQLServer;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 import modelos.DatosDocMaterial;
+import modelos.InfoDocMaterial;
 import modelos.ResultadoCargaDocMaterial;
 
 /**
@@ -119,5 +121,31 @@ public class DocMaterialDAO {
         }
 
         return resp;
+    }
+    
+     public InfoDocMaterial obtenerInfoDocMaterial(long docMaterial) {
+        InfoDocMaterial info = null;
+
+        String sql = "{CALL GUIA.SP_GUIA_OBTENER_INFO_DOC_MATERIAL(?)}";
+
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+
+            cs.setLong(1, docMaterial);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                if (rs.next()) {
+                    info = new InfoDocMaterial();
+                    info.setAlmacen(rs.getString("ALMACEN"));
+                    info.setDepartamento(rs.getString("DEPARTAMENTO"));
+                    info.setFarmacia(rs.getString("FARMACIA"));
+                    info.setEstado(rs.getInt("ESTADO"));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return info;
     }
 }

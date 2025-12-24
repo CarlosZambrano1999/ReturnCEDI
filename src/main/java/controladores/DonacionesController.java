@@ -183,7 +183,7 @@ public class DonacionesController extends HttpServlet {
                         return;
                     }
 
-                    ResultadoOperacion r = dao.cerrarGuia(docMaterial, idUsuario);
+                    ResultadoOperacion r = donacionesDAO.cerrarGuia(docMaterial, idUsuario);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" :

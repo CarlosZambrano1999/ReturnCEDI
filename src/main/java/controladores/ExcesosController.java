@@ -183,7 +183,7 @@ public class ExcesosController extends HttpServlet {
                         return;
                     }
 
-                    ResultadoOperacion r = dao.cerrarGuia(docMaterial, idUsuario);
+                    ResultadoOperacion r = excesosDAO.cerrarGuia(docMaterial, idUsuario);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" :
