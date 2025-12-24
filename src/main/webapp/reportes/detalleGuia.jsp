@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    // ✅ Acepta tanto parámetros URL como atributos enviados por el servlet
     String doc = request.getParameter("doc");
     if (doc == null) doc = (String) request.getAttribute("doc");
 
@@ -39,22 +38,150 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
+    <!-- ✅ Tema ReturnCEDI / FarmaFácil -->
+    <style>
+        :root{
+            --rc-blue:  #00AEEF;  /* azul/cian */
+            --rc-green: #00C56A;  /* verde */
+            --rc-bg:    #F6F8FB;  /* fondo claro */
+            --rc-text:  #0f172a;
+            --rc-muted: #64748b;
+            --rc-border:#e5e7eb;
+        }
+
+        body{ background: var(--rc-bg) !important; color: var(--rc-text); }
+
+        .rc-title{
+            font-weight: 800;
+            letter-spacing: .2px;
+            margin: 0;
+            line-height: 1.1;
+        }
+        .rc-title .t1{ color: var(--rc-blue); }
+        .rc-title .t2{ color: var(--rc-green); }
+
+        .card{
+            border: 1px solid var(--rc-border) !important;
+            border-radius: 14px !important;
+        }
+
+        /* Botones con paleta */
+        .btn-rc-primary{
+            background: var(--rc-blue) !important;
+            border-color: var(--rc-blue) !important;
+            color: #fff !important;
+            font-weight: 700;
+            border-radius: 10px !important;
+        }
+        .btn-rc-primary:hover{ filter: brightness(.95); }
+
+        .btn-rc-success{
+            background: var(--rc-green) !important;
+            border-color: var(--rc-green) !important;
+            color: #fff !important;
+            font-weight: 700;
+            border-radius: 10px !important;
+        }
+        .btn-rc-success:hover{ filter: brightness(.95); }
+
+        .btn-outline-rc{
+            border-color: var(--rc-border) !important;
+            color: var(--rc-text) !important;
+            font-weight: 700;
+            background: #fff !important;
+            border-radius: 10px !important;
+        }
+        .btn-outline-rc:hover{
+            border-color: var(--rc-blue) !important;
+            color: var(--rc-blue) !important;
+        }
+
+        /* Tabla + encabezado */
+        table.dataTable{
+            border: 1px solid var(--rc-border) !important;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #tblDetalle thead{
+            background: linear-gradient(90deg, var(--rc-blue), var(--rc-green)) !important;
+            color: #fff !important;
+        }
+        #tblDetalle thead th{
+            border-color: rgba(255,255,255,.25) !important;
+            vertical-align: middle;
+            font-weight: 700;
+            font-size: .9rem;
+            white-space: nowrap;
+        }
+        #tblDetalle tbody td{
+            border-color: var(--rc-border) !important;
+            font-size: .92rem;
+        }
+
+        /* DataTables (buscador, select, paginación) */
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select{
+            border: 1px solid var(--rc-border) !important;
+            border-radius: 10px !important;
+            padding: .4rem .6rem !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: #fff !important;
+        }
+        .dataTables_wrapper .dataTables_filter input:focus,
+        .dataTables_wrapper .dataTables_length select:focus{
+            border-color: var(--rc-blue) !important;
+            box-shadow: 0 0 0 .2rem rgba(0,174,239,.15) !important;
+        }
+        .dataTables_wrapper .dataTables_info{ color: var(--rc-muted) !important; }
+
+        .page-link{
+            border-color: var(--rc-border) !important;
+            color: var(--rc-text) !important;
+            border-radius: 10px !important;
+            margin: 0 .12rem;
+        }
+        .page-item.active .page-link{
+            background: var(--rc-blue) !important;
+            border-color: var(--rc-blue) !important;
+            color: #fff !important;
+        }
+        .page-link:focus{
+            box-shadow: 0 0 0 .2rem rgba(0,174,239,.15) !important;
+        }
+
+        /* Botones DataTables */
+        .dt-buttons .btn{ border-radius: 10px !important; font-weight: 800 !important; }
+
+        /* Línea de info superior */
+        .rc-sub{
+            color: var(--rc-muted);
+            font-weight: 600;
+        }
+        .rc-sub strong{ color: var(--rc-text); }
+
+        /* Centrado numéricos */
+        .text-center-col{ text-align:center; }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
 <div class="container py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 class="mb-0">Detalle de Guía</h4>
-            <small class="text-muted">
-                Documento: <strong><%=doc%></strong> |
-                Tipo: <strong><%=tipo%></strong>
-            </small>
+            <h3 class="rc-title mb-0">
+                <span class="t1">Return</span><span class="t2">CEDI</span>
+                <span class="ms-2 text-muted fw-semibold" style="font-size:.95rem;">| Detalle de Guía</span>
+            </h3>
+            <div class="rc-sub mt-1">
+                Documento: <strong><%=doc%></strong> &nbsp;|&nbsp; Tipo: <strong><%=tipo%></strong>
+            </div>
         </div>
 
-        <a href="javascript:history.back()" class="btn btn-secondary">Regresar</a>
+        <a href="javascript:history.back()" class="btn btn-outline-rc">Regresar</a>
     </div>
 
     <div class="card shadow-sm">
@@ -62,7 +189,7 @@
 
             <div class="table-responsive">
                 <table id="tblDetalle" class="table table-bordered table-striped align-middle w-100">
-                    <thead class="table-dark">
+                    <thead>
                         <tr>
                             <th>DOC_MATERIAL</th>
                             <th>USUARIO</th>
@@ -93,8 +220,14 @@ $(function () {
     const docMaterial = "<%=doc%>";
     const tipo = "<%=tipo%>";
 
+    // ✅ SweetAlert2 con paleta
+    const Toast = Swal.mixin({
+        confirmButtonColor: '#00AEEF',
+        cancelButtonColor:  '#00C56A'
+    });
+
     if (!docMaterial || !tipo) {
-        Swal.fire("Error", "Faltan parámetros (doc / tipo).", "error");
+        Toast.fire("Error", "Faltan parámetros (doc / tipo).", "error");
         return;
     }
 
@@ -107,13 +240,13 @@ $(function () {
         language: {
             url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
         },
-        dom: 'Bfrtip',
+        dom: '<"d-flex flex-wrap gap-2 align-items-center justify-content-between mb-2"Bf>rt<"d-flex flex-wrap gap-2 align-items-center justify-content-between mt-2"lip>',
         buttons: [
             {
                 extend: 'excelHtml5',
                 title: 'Detalle Guía ' + docMaterial,
                 text: 'Exportar a Excel',
-                className: 'btn btn-success'
+                className: 'btn btn-rc-success'
             }
         ],
         columns: [
@@ -122,8 +255,8 @@ $(function () {
             { data: 'codigo_sap' },
             { data: 'codigo' },
             { data: 'producto' },
-            { data: 'enviado' },
-            { data: 'recibido' },
+            { data: 'enviado', className: 'text-center' },
+            { data: 'recibido', className: 'text-center' },
             { data: 'farmacia' },
             { data: 'incidencia' },
             { data: 'observacion' },
