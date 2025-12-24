@@ -19,25 +19,32 @@
     <title>Detalle de Guía</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet"> 
 
     <!-- DataTables -->
-    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    <link href="<%=request.getContextPath()%>/css/dataTables.css" rel="stylesheet"> 
+    <link href="<%=request.getContextPath()%>/css/buttons.css" rel="stylesheet"> 
 
     <!-- JS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
+
+    <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
 
     <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+              <script src="<%=request.getContextPath()%>/js/jqueryDataTables.js"></script>
+
+              <script src="<%=request.getContextPath()%>/js/dataTablesBootstrap.js"></script>
+
 
     <!-- Buttons Excel -->
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTableButtons.js"></script>
+
+      <script src="<%=request.getContextPath()%>/js/buttonsBootstrap.js"></script>
+
+       <script src="<%=request.getContextPath()%>/js/jszip.js"></script>
+
+        <script src="<%=request.getContextPath()%>/js/buttonshtml5.js"></script>
+
 
     <!-- ✅ Tema ReturnCEDI / FarmaFácil -->
     <style>
