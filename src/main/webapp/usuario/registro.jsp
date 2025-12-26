@@ -9,7 +9,7 @@
         <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
     </head>
     <body class="bg-light">
-        <!jsp:include page="/componentes/navbar.jsp" /-->
+        <jsp:include page="/componentes/navbar.jsp" />
 
 
         <%

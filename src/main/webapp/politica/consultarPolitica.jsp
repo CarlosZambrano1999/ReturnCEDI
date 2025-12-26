@@ -39,6 +39,20 @@
 </head>
 
 <body>
+    <jsp:include page="/componentes/navbar.jsp" />
+    
+    <!-- Spinner global -->
+<div id="spinnerBuscar"
+     class="d-none position-fixed top-0 start-0 w-100 h-100
+            d-flex align-items-center justify-content-center
+            bg-white bg-opacity-75"
+     style="z-index: 2000;">
+  <div class="text-center">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div class="mt-3 fw-semibold text-muted">Buscando información...</div>
+  </div>
+</div>
+
 <div class="container py-4">
 
   <%
@@ -79,6 +93,15 @@
           timer: 2200,
           showConfirmButton: false
         });
+        
+        const formBuscar = document.getElementById("formBuscar");
+        const spinnerBuscar = document.getElementById("spinnerBuscar");
+
+        if (formBuscar) {
+          formBuscar.addEventListener("submit", function () {
+            spinnerBuscar.classList.remove("d-none");
+          });
+        }
       });
     </script>
   <% } %>

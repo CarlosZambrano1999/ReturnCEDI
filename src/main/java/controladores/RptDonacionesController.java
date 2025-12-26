@@ -22,7 +22,7 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-@WebServlet("/RptDonaciones")
+@WebServlet("/IncidenciasDonaciones")
 public class RptDonacionesController extends HttpServlet {
 
     private final RptUsuarioDAO dao = new RptUsuarioDAO();

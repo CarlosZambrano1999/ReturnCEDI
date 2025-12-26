@@ -40,6 +40,7 @@ tr.row-ok td {
 </head>
 
 <body>
+    <jsp:include page="/componentes/navbar.jsp" />
 <div class="container py-4">
 
     <div class="row justify-content-center">

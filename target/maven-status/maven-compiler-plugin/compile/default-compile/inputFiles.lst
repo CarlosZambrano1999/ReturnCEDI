@@ -1,79 +1,27 @@
-<<<<<<< HEAD
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\LogoutController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\UsuarioDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\RolDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\EvaluacionPolitica.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\Guias.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\HomeController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\RptGuiasMayorIncidencia.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\CargarDocMaterialExcelController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\ExcesosController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\PoliticaDevolucion.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\GuiasController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\RptFarmaciasMayorIncidencia.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\IndexController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\configDB\ConexionSQLServer.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\DevolucionesController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\ExcesosDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\ResultadoCargaDocMaterial.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\RptExcesosController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\ResultadoOperacion.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\DetalleGuiaDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\RptIncidenciasMasFrecuentes.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\Incidencia.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\RptProductividadDiaHoraUsuario.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\RptUsuario.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\utilidades\PasswordUtil.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\Devoluciones.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\DevolucionesDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\DetalleGuiaController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\DonacionesController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\ConsultarPoliticaController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\ComparativoDocMaterialRow.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\RptDevolucionesController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\DonacionesDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\LoginController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\InfoDocMaterial.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\reportes\DetalleGuia.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\Rol.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\GuiasDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\ReportesDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\Usuario.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\DatosDocMaterial.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\UsuarioController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\RptUsuarioDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\com\farmafacil\returncedi\JakartaRestConfiguration.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\IncidenciaController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\DocMaterial.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\com\farmafacil\returncedi\resources\JakartaEE10Resource.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\ConsultarPoliticaDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\ProveedorPolitica.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\ReportDevolucionesController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\DocMaterialDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\ColorPolitica.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\AdministrarUsuariosController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\controladores\RptDonacionesController.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\dao\IncidenciaDAO.java
-C:\Users\arlom\OneDrive\Documents\GitHub\ReturnCEDI\src\main\java\modelos\Producto.java
-=======
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\ReportesDAO.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\reportes\Guias.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\com\farmafacil\returncedi\resources\JakartaEE10Resource.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\DonacionesDAO.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\CargarDocMaterialExcelController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\IndexController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\reportes\RptFarmaciasMayorIncidencia.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\reportes\RptGuiasMayorIncidencia.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\GuiasController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\configDB\ConexionSQLServer.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\com\farmafacil\returncedi\JakartaRestConfiguration.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\GuiasDAO.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\Usuario.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\PoliticaDevolucion.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\ResultadoOperacion.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\AdministrarUsuariosController.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\reportes\RptUsuario.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\RptUsuarioDAO.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\Rol.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\ReportExcesosController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\IncidenciaController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\ColorPolitica.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\ReportDevolucionesController.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\reportes\DetalleGuia.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\DocMaterial.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\LoginController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\UsuarioDAO.java
@@ -92,7 +40,11 @@ C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Do
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\utilidades\PasswordUtil.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\DonacionesController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\RptExcesosDAO.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\RptExcesosController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\DatosDocMaterial.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\RptDonacionesController.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\DetalleGuiaController.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\RptDevolucionesController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\LogoutController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\InfoDocMaterial.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\ExcesosController.java
@@ -100,9 +52,9 @@ C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Do
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\Incidencia.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\Producto.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\ComparativoDocMaterialRow.java
+C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\DetalleGuiaDAO.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\HomeController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\modelos\EvaluacionPolitica.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\DevolucionesDAO.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\controladores\ConsultarPoliticaController.java
 C:\Users\DANIEL.ZAMBRANO\OneDrive - CORPORACION DE SALUD VALENCIANA (COSAVAL)\Documentos\NetBeansProjects\ReturnCEDI\src\main\java\dao\ExcesosDAO.java
->>>>>>> feature/fixesRevision/cz

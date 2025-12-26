@@ -174,6 +174,7 @@
 </head>
 
 <body>
+    <jsp:include page="/componentes/navbar.jsp" />
 
 <div class="container py-4">
 
