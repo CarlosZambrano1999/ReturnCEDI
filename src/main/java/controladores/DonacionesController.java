@@ -34,6 +34,13 @@ public class DonacionesController extends HttpServlet {
             throws ServletException, IOException {
 
         // Carga mínima para vista
+        HttpSession session = request.getSession(false);
+        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (user == null || (user.getIdRol()>2 && user.getIdRol()<5) ) {
+            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
         request.getRequestDispatcher("/guia/donaciones.jsp").forward(request, response);
     }
@@ -46,11 +53,11 @@ public class DonacionesController extends HttpServlet {
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
 
         // 0) Validar sesión
-        HttpSession session = request.getSession(false);
-        Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-        if (user == null) {
-            setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-            render(request, response, -1, null);
+       HttpSession session = request.getSession(false);
+        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (user == null || (user.getIdRol()>2 && user.getIdRol()<5) ) {
+            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

@@ -24,6 +24,13 @@ public class AdministrarUsuariosController extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
         
+        HttpSession session = req.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null || usuario.getIdRol() != 1) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        
         // 1) Listar usuarios
         try {
             List<Usuario> usuarios = new UsuarioDAO().listarUsuarios();
@@ -53,6 +60,14 @@ public class AdministrarUsuariosController extends HttpServlet {
             throws ServletException, IOException {
         
         req.setCharacterEncoding("UTF-8");
+        
+        HttpSession session = req.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null || usuario.getIdRol() != 1) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        
         String accion = req.getParameter("accion");
 
         // === EDITAR USUARIO (nombre, rol, farmacia) ===

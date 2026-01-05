@@ -25,21 +25,8 @@
     boolean esHome = request.getRequestURI().endsWith("/home") ||
                      request.getRequestURI().endsWith("/home.jsp");
 %>
+        <link href="<%=request.getContextPath()%>/componentes/estilos.css" rel="stylesheet">
 
-<style>
-    :root{
-        --rc-blue:#0d6efd;
-        --rc-green:#198754;
-    }
-    .rc-title{
-        font-weight:800;
-        letter-spacing:.2px;
-        margin:0;
-        line-height:1.1;
-    }
-    .rc-title .t1{ color:var(--rc-blue); }
-    .rc-title .t2{ color:var(--rc-green); }
-</style>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container-fluid px-4">

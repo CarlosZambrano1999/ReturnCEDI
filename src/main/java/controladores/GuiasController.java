@@ -30,6 +30,12 @@ public class GuiasController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (user == null ) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         // Vista única del reporte
         request.getRequestDispatcher("/reportes/rptGuias.jsp").forward(request, response);
     }

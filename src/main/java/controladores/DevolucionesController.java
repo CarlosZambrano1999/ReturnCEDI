@@ -30,6 +30,14 @@ public class DevolucionesController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null || usuario.getIdRol()>3) {
+            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         // Carga mínima para vista
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
@@ -43,12 +51,11 @@ public class DevolucionesController extends HttpServlet {
         String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
 
-        // 0) Validar sesión
         HttpSession session = request.getSession(false);
-        Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-        if (user == null) {
-            setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-            render(request, response, -1, null);
+        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (user == null || user.getIdRol()>3) {
+            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

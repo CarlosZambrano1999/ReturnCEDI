@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import java.util.Map;
 import modelos.DatosDocMaterial;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoCargaDocMaterial;
+import modelos.Usuario;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -51,6 +53,13 @@ public class CargarDocMaterialExcelController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         // Ruta: /guia/cargarDocMaterialExcel.jsp
         request.getRequestDispatcher("/guia/cargarDocMaterialExcel.jsp").forward(request, response);
@@ -61,6 +70,13 @@ public class CargarDocMaterialExcelController extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("application/json;charset=UTF-8");
+        
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         try {
             Part filePart = request.getPart("archivoExcel");

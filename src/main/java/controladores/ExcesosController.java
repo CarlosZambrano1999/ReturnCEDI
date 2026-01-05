@@ -32,6 +32,14 @@ public class ExcesosController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession(false);
+        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (user == null || (user.getIdRol() != 1 && user.getIdRol() != 2 && user.getIdRol() != 4) ) {
+            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         // Carga mínima para vista
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
@@ -47,10 +55,10 @@ public class ExcesosController extends HttpServlet {
 
         // 0) Validar sesión
         HttpSession session = request.getSession(false);
-        Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-        if (user == null) {
-            setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-            render(request, response, -1, null);
+        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (user == null || (user.getIdRol() != 1 && user.getIdRol() != 2 && user.getIdRol() != 4) ) {
+            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

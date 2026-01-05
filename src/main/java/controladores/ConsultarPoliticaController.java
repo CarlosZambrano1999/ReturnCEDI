@@ -36,6 +36,13 @@ public class ConsultarPoliticaController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         request.getRequestDispatcher("/politica/consultarPolitica.jsp").forward(request, response);
     }
@@ -43,6 +50,7 @@ public class ConsultarPoliticaController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
 
         String accion = nvl(request.getParameter("accion"), "").toLowerCase();
 

@@ -8,9 +8,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
+import modelos.Usuario;
 
 @WebServlet("/Incidencia")
 public class IncidenciaController extends HttpServlet {
@@ -20,6 +22,13 @@ public class IncidenciaController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null || usuario.getIdRol() < 2) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         try {
             List<Incidencia> lista = dao.listarIncidencias();
@@ -36,6 +45,13 @@ public class IncidenciaController extends HttpServlet {
     @Override
 protected void doPost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
+    
+    HttpSession session = request.getSession(false);
+    Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+    if (usuario == null || usuario.getIdRol() < 2) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
 
     String accion = request.getParameter("accion");
     if (accion == null || accion.trim().isEmpty()) accion = request.getParameter("action");

@@ -1,0 +1,16 @@
+:root{
+    --rc-blue:#0d6efd;
+    --rc-green:#198754;
+}
+.rc-title{
+    font-weight:800;
+    letter-spacing:.2px;
+    margin:0;
+    line-height:1.1;
+}
+.rc-title .t1{
+    color:var(--rc-blue);
+}
+.rc-title .t2{
+    color:var(--rc-green);
+}

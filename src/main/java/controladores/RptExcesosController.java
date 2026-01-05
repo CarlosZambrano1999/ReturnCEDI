@@ -31,6 +31,12 @@ public class RptExcesosController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+        if (usuario == null || (usuario.getIdRol() != 1 && usuario.getIdRol() != 2 && usuario.getIdRol() != 4)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         request.getRequestDispatcher("/reportes/rptUsuario.jsp").forward(request, response);
     }
 
