@@ -536,7 +536,7 @@
                 Swal.fire({
                     icon: "question",
                     title: "¿Cargar a la base de datos?",
-                    html: "Se insertará el <b>Documento material</b> con estado <b>1</b> y luego el detalle.<br><br><b>Archivo:</b> " + selectedFile.name,
+                    html: "Se insertará el <b>Documento material</b> y luego el detalle.<br><br><b>Archivo:</b> " + selectedFile.name,
                     showCancelButton: true,
                     confirmButtonText: "Sí, cargar",
                     cancelButtonText: "Cancelar"

@@ -43,7 +43,7 @@ public class ReportDonacionesController extends HttpServlet {
         
         HttpSession session = request.getSession(false);
         Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null || usuario.getIdRol() < 2) {
+        if (usuario == null || usuario.getIdRol() > 2) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
