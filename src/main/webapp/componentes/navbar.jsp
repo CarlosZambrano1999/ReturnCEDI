@@ -86,7 +86,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <% if (canAccess.apply(new Integer[]{1,2}, rol)) { %>
-                            <li><a class="dropdown-item" href="<%=ctx%>/Incidiencia">Administrar Incidencias</a></li>
+                            <li><a class="dropdown-item" href="<%=ctx%>/Incidencia">Administrar Incidencias</a></li>
                         <% } %>
 
                         <% if (canAccess.apply(new Integer[]{1,2,3}, rol)) { %>
@@ -143,4 +143,6 @@
 
         </div>
     </div>
+
 </nav>
+

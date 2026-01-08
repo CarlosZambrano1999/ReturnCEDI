@@ -1,0 +1,39 @@
+body{
+    background:#f6f7fb;
+}
+.card{
+    border:0;
+    border-radius:18px;
+}
+.kpi-card{
+    transition: all .15s ease;
+}
+.kpi-card:hover{
+    transform: translateY(-2px);
+}
+.kpi-icon{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(13,110,253,.12);
+}
+.mono{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+}
+.chart-wrap{
+    position: relative;
+    min-height: 320px;
+}
+canvas{
+    max-height: 420px;
+}
+.nav-tabs .nav-link{
+    border-radius: 12px 12px 0 0;
+}
+.dt-buttons .btn{
+    border-radius: 10px;
+}
+

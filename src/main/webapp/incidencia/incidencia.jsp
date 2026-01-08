@@ -7,12 +7,9 @@
     <head>
         <title>Incidencias</title>
 
-        <!-- Bootstrap -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-        <!-- DataTables (Bootstrap 5 + Responsive) -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+        <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/dataTables.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/ResponsiveBootstrap.css">
     </head>
 
     <body>
@@ -194,14 +191,14 @@
         </div>
 
         <!-- JS: Bootstrap -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
 
         <!-- JS: jQuery + DataTables -->
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
-        <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-        <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jqueryDataTables.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTablesBootstrap.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTablesResponsive.js"></script>
+        <script src="<%=request.getContextPath()%>/js/responsiveBootstrap.js"></script>
 
         <script>
             // Cargar datos al modal de edición
@@ -225,14 +222,14 @@
                         {orderable: false, targets: [2, 3]}
                     ],
                     language: {
-                        url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+                        url: '<%=request.getContextPath()%>/js/es-ES.json'
                     }
                 });
             });
         </script>
 
         <!-- SweetAlert2 -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
 
         <%
             String swalIcon = (String) session.getAttribute("swalIcon");

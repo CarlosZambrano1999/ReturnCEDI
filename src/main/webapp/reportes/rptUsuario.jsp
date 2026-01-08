@@ -17,152 +17,23 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title><%=titulo%></title>
+    <head>
+        <meta charset="UTF-8">
+        <title><%=titulo%></title>
 
-      <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet"> 
+        <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
+        <link href="<%=request.getContextPath()%>/reportes/detalles.css" rel="stylesheet"> 
+        <link href="<%=request.getContextPath()%>/css/dataTables.css" rel="stylesheet"> 
+        <link href="<%=request.getContextPath()%>/css/ResponsiveBootstrap.css" rel="stylesheet"> 
 
-    <!-- ✅ DataTables + Bootstrap 5 -->
-      <link href="<%=request.getContextPath()%>/css/dataTables.css" rel="stylesheet"> 
-    <link href="<%=request.getContextPath()%>/css/ResponsiveBootstrap.css" rel="stylesheet"> 
+        <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jqueryDataTables.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTablesBootstrap.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTablesResponsive.js"></script>
+        <script src="<%=request.getContextPath()%>/js/responsiveBootstrap.js"></script>
 
-      <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
-
-    <!-- ✅ jQuery requerido por DataTables -->
-      <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
-
-    <!-- ✅ DataTables JS -->
-      <script src="<%=request.getContextPath()%>/js/jqueryDataTables.js"></script>
-      <script src="<%=request.getContextPath()%>/js/dataTablesBootstrap.js"></script>
-
-    <!-- ✅ Responsive -->
-    <script src="<%=request.getContextPath()%>/js/dataTablesResponsive.js"></script>
-    <script src="<%=request.getContextPath()%>/js/responsiveBootstrap.js"></script>
-
-
-    <!-- ✅ Tema ReturnCEDI / FarmaFácil -->
-    <style>
-        :root{
-            /* Paleta (inspirada en tu logo) */
-            --rc-blue:  #00AEEF;  /* azul/cian */
-            --rc-green: #00C56A;  /* verde */
-            --rc-bg:    #F6F8FB;  /* fondo claro */
-            --rc-text:  #0f172a;
-            --rc-muted: #64748b;
-            --rc-border:#e5e7eb;
-        }
-
-        body{ background: var(--rc-bg) !important; color: var(--rc-text); }
-
-        .rc-title{
-            font-weight: 800;
-            letter-spacing: .2px;
-            margin: 0;
-            line-height: 1.1;
-        }
-        .rc-title .t1{ color: var(--rc-blue); }
-        .rc-title .t2{ color: var(--rc-green); }
-
-        .card{
-            border: 1px solid var(--rc-border) !important;
-            border-radius: 14px !important;
-        }
-
-        /* Botones con paleta */
-        .btn-rc-primary{
-            background: var(--rc-blue) !important;
-            border-color: var(--rc-blue) !important;
-            color: #fff !important;
-            font-weight: 600;
-        }
-        .btn-rc-primary:hover{ filter: brightness(.95); }
-        .btn-rc-success{
-            background: var(--rc-green) !important;
-            border-color: var(--rc-green) !important;
-            color: #fff !important;
-            font-weight: 600;
-        }
-        .btn-rc-success:hover{ filter: brightness(.95); }
-
-        .btn-outline-rc{
-            border-color: var(--rc-border) !important;
-            color: var(--rc-text) !important;
-            font-weight: 600;
-            background: #fff !important;
-        }
-        .btn-outline-rc:hover{
-            border-color: var(--rc-blue) !important;
-            color: var(--rc-blue) !important;
-        }
-
-        /* Tabla */
-        table.dataTable{
-            border: 1px solid var(--rc-border) !important;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        #tblRpt thead{
-            background: linear-gradient(90deg, var(--rc-blue), var(--rc-green)) !important;
-            color: #fff !important;
-        }
-        #tblRpt thead th{
-            border-color: rgba(255,255,255,.25) !important;
-            vertical-align: middle;
-            font-weight: 700;
-            font-size: .9rem;
-            white-space: nowrap;
-        }
-        #tblRpt tbody td{
-            border-color: var(--rc-border) !important;
-            font-size: .92rem;
-        }
-
-        /* DataTables (buscador, select, paginación) */
-        .dataTables_wrapper .dataTables_filter input,
-        .dataTables_wrapper .dataTables_length select{
-            border: 1px solid var(--rc-border) !important;
-            border-radius: 10px !important;
-            padding: .4rem .6rem !important;
-            outline: none !important;
-            box-shadow: none !important;
-            background: #fff !important;
-        }
-        .dataTables_wrapper .dataTables_filter input:focus,
-        .dataTables_wrapper .dataTables_length select:focus{
-            border-color: var(--rc-blue) !important;
-            box-shadow: 0 0 0 .2rem rgba(0,174,239,.15) !important;
-        }
-
-        .dataTables_wrapper .dataTables_info{ color: var(--rc-muted) !important; }
-
-        .page-link{
-            border-color: var(--rc-border) !important;
-            color: var(--rc-text) !important;
-            border-radius: 10px !important;
-            margin: 0 .12rem;
-        }
-        .page-item.active .page-link{
-            background: var(--rc-blue) !important;
-            border-color: var(--rc-blue) !important;
-            color: #fff !important;
-        }
-        .page-link:focus{
-            box-shadow: 0 0 0 .2rem rgba(0,174,239,.15) !important;
-        }
-
-        /* Pequeños detalles */
-        .form-label{ color: var(--rc-muted); font-weight: 600; }
-        .form-control{
-            border-radius: 12px !important;
-            border-color: var(--rc-border) !important;
-        }
-        .form-control:focus{
-            border-color: var(--rc-blue) !important;
-            box-shadow: 0 0 0 .2rem rgba(0,174,239,.15) !important;
-        }
-    </style>
-</head>
+    </head>
 <body>
 <jsp:include page="/componentes/navbar.jsp" />
 <div class="container py-4">
@@ -234,6 +105,7 @@
         </div>
     </div>
 </div>
+<script src="<%=request.getContextPath()%>/js/bundle.js"></script>
 
 <script>
 (function () {
@@ -267,7 +139,7 @@
         lengthMenu: [10, 25, 50, 100],
         order: [],
         language: {
-            url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json",
+            url: '<%=request.getContextPath()%>/js/es-ES.json',
             processing: "Cargando..."
         },
         columnDefs: [

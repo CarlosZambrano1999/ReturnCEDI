@@ -21,21 +21,8 @@
 
   <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
   <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
+  <link href="<%=request.getContextPath()%>/politica/estilos.css" rel="stylesheet">
 
-  <style>
-    body { background:#f6f7fb; }
-    .card { border:0; border-radius:16px; }
-    #scanner { border-width:2px; font-weight:700; }
-    .pill {
-      display:inline-block; padding:.25rem .6rem; border-radius:999px;
-      font-weight:800; font-size:.85rem;
-    }
-    .pill-ok{ background: rgba(25,135,84,.12); color:#198754; }
-    .pill-warn{ background: rgba(255,193,7,.18); color:#b78103; }
-    .pill-bad{ background: rgba(220,53,69,.12); color:#dc3545; }
-    .pill-info{ background: rgba(13,110,253,.12); color:#0d6efd; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-  </style>
 </head>
 
 <body>

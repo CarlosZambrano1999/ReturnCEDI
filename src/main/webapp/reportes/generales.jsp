@@ -99,55 +99,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><%= pageTitle %></title>
 
+        <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
+        <link href="<%=request.getContextPath()%>/css/dataTables.css" rel="stylesheet">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/css/buttons.css">
+        <link rel="stylesheet" href="<%=request.getContextPath()%>/reportes/generales.css">
 
-        <!-- Bootstrap 5 -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-        <!-- DataTables -->
-        <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-        <!-- DataTables Buttons -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
-
-        <style>
-            body{
-                background:#f6f7fb;
-            }
-            .card{
-                border:0;
-                border-radius:18px;
-            }
-            .kpi-card{
-                transition: all .15s ease;
-            }
-            .kpi-card:hover{
-                transform: translateY(-2px);
-            }
-            .kpi-icon{
-                width:44px;
-                height:44px;
-                border-radius:12px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                background: rgba(13,110,253,.12);
-            }
-            .mono{
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-            }
-            .chart-wrap{
-                position: relative;
-                min-height: 320px;
-            }
-            canvas{
-                max-height: 420px;
-            }
-            .nav-tabs .nav-link{
-                border-radius: 12px 12px 0 0;
-            }
-            .dt-buttons .btn{
-                border-radius: 10px;
-            }
-        </style>
     </head>
     <body>
 <jsp:include page="/componentes/navbar.jsp" />
@@ -456,24 +412,23 @@
         </div><!-- container -->
 
         <!-- JS -->
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
+        <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
 
         <!-- DataTables -->
-        <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jqueryDataTables.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTablesBootstrap.js"></script>
 
         <!-- DataTables Buttons -->
-        <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+        <script src="<%=request.getContextPath()%>/js/dataTableButtons.js"></script>
+        <script src="<%=request.getContextPath()%>/js/buttonsBootstrap.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jszip.js"></script>
+        <script src="<%=request.getContextPath()%>/js/buttonshtml5.js"></script>
+        <script src="<%=request.getContextPath()%>/js/buttonsprint.js"></script>
 
         <!-- Chart.js + jsPDF -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
+        <script src="<%=request.getContextPath()%>/js/chart.js"></script>
+        <script src="<%=request.getContextPath()%>/js/jspdf.js"></script>
         <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
 
         <script>
