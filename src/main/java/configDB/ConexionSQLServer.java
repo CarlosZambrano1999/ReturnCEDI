@@ -4,6 +4,7 @@
  */
 package configDB;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,33 +15,47 @@ import java.sql.SQLException;
  */
 public class ConexionSQLServer {
  
-    private static final String HOST = getenvOrDefault("DB_SQL_HOST", "192.168.50.54");
-    private static final String PORT = getenvOrDefault("DB_SQL_PORT", "1433");
-    private static final String DB   = getenvOrDefault("DB_SQL_NAME", "ReturnCEDIDB");
-    private static final String USER = getenvOrDefault("DB_SQL_USER", "sa");
-    private static final String PASS = getenvOrDefault("DB_SQL_PASS", "sa$2000");
- 
-    private static final String URL  = String.format(
-            "jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=true;trustServerCertificate=true;",
-            HOST, PORT, DB
+    private static final Dotenv dotenv = Dotenv.configure()
+            .filename(".env")          // obligatorio leer .env
+            .ignoreIfMissing()         // <-- QUÍTALO si quieres que falle cuando no exista
+            .load();
+
+    private static final String HOST = required("DB_SQL_HOST");
+    private static final String PORT = required("DB_SQL_PORT");
+    private static final String DB   = required("DB_SQL_NAME");
+    private static final String USER = required("DB_SQL_USER");
+    private static final String PASS = required("DB_SQL_PASS");
+
+    private static final String ENCRYPT = optional("DB_SQL_ENCRYPT", "true");
+    private static final String TRUST   = optional("DB_SQL_TRUST_CERT", "true");
+
+    private static final String URL = String.format(
+            "jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=%s;trustServerCertificate=%s;",
+            HOST, PORT, DB, ENCRYPT, TRUST
     );
- 
+
     static {
         try {
-            // Cargar driver JDBC (opcional en Java moderno si está en el classpath)
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
-            // Si no está el driver en el classpath, esto te lo hará evidente.
-            throw new RuntimeException("No se encontró el driver JDBC de SQL Server. Agrega mssql-jdbc a tu proyecto.", e);
+            throw new RuntimeException("No se encontró el driver JDBC de SQL Server. Agrega mssql-jdbc al proyecto.", e);
         }
     }
- 
+
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASS);
     }
- 
-    private static String getenvOrDefault(String key, String def) {
-        String v = System.getenv(key);
-        return (v == null || v.isEmpty()) ? def : v;
+
+    private static String required(String key) {
+        String value = dotenv.get(key);
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalStateException("Falta la variable obligatoria en .env: " + key);
+        }
+        return value.trim();
+    }
+
+    private static String optional(String key, String def) {
+        String value = dotenv.get(key);
+        return (value == null || value.trim().isEmpty()) ? def : value.trim();
     }
 }

@@ -12,6 +12,7 @@ controladores\CargarDocMaterialExcelController.class
 modelos\reportes\Guias.class
 controladores\ReportExcesosController.class
 controladores\IndexController.class
+controladores\ReaperturaDocMaterial.class
 controladores\RptDonacionesController.class
 modelos\reportes\RptIncidenciasMasFrecuentes.class
 controladores\DetalleGuiaController.class

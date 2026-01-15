@@ -1,8 +1,14 @@
+<%@page import="modelos.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String titulo = "Reporte - Guías";
     String endpoint = request.getContextPath() + "/RptGuias";      // Servlet que lista guías
     String detalleBase = request.getContextPath() + "/DetalleGuia"; // Servlet detalle (para botón Ver)
+    int rolSesion = 999;
+    if (session != null && session.getAttribute("usuario") != null) {
+        Usuario u = (Usuario) session.getAttribute("usuario");
+        rolSesion = u.getIdRol();
+    }
 %>
 
 <!DOCTYPE html>
@@ -94,6 +100,8 @@ $(function () {
 
     const endpoint = "<%=endpoint%>";
     const detalleBase = "<%=detalleBase%>";
+    const endpointReaperturar = "<%=request.getContextPath()%>/reaperturarDocMaterial";
+    const rolSesion = <%=rolSesion%>;
 
     const table = $('#tblGuias').DataTable({
         paging: true,
@@ -125,10 +133,23 @@ $(function () {
                 searchable: false,
                 className: 'text-center',
                 render: function (data, type, row) {
-                    const doc = encodeURIComponent(row.doc_material || "");
-                    const tipo = encodeURIComponent(row.tipo || "");
-                    return '<a class="btn btn-sm btn-rc-primary" href="' + detalleBase + '?doc=' + doc + '&tipo=' + tipo + '">Ver</a>';
-                }
+    const docEnc = encodeURIComponent(row.doc_material || "");
+    const tipoEnc = encodeURIComponent(row.tipo || "");
+    const docRaw = (row.doc_material || "");
+
+    const btnVer =
+        '<a class="btn btn-sm btn-rc-primary me-1" href="' + detalleBase + '?doc=' + docEnc + '&tipo=' + tipoEnc + '">Ver</a>';
+
+    // Solo rol <= 2 puede ver Reaperturar
+    let btnReaperturar = '';
+    if (rolSesion <= 2) {
+        btnReaperturar =
+            '<button type="button" class="btn btn-sm btn-warning btnReaperturar" data-doc="' + docRaw + '">Reaperturar</button>';
+    }
+
+    return btnVer + btnReaperturar;
+}
+
             }
         ]
     });
@@ -186,6 +207,54 @@ $(function () {
                 Swal.fire("Error", "No se pudo consultar el reporte.", "error");
             });
     }
+    
+    $('#tblGuias tbody').on('click', '.btnReaperturar', function () {
+    const docMaterial = $(this).data('doc');
+
+    Swal.fire({
+        title: '¿Reaperturar documento?',
+        text: 'Se cambiará el estado del DOC_MATERIAL a Pendiente para modificar el cuadre',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, reaperturar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        $.post(endpointReaperturar, { doc_material: docMaterial })
+            .done(function (json) {
+
+                if (!json || !json.status) {
+                    Swal.fire("Error", "Respuesta inválida del servidor.", "error");
+                    return;
+                }
+
+                if (json.status === "logout") {
+                    Swal.fire("Sesión expirada", json.message || "Inicia sesión nuevamente.", "warning")
+                        .then(() => window.location.href = "<%=request.getContextPath()%>/login");
+                    return;
+                }
+
+                if (json.status === "success") {
+                    Swal.fire("Listo", json.message || "Documento reaperturado.", "success");
+                    cargar(); // recarga con los filtros actuales
+                    return;
+                }
+
+                if (json.status === "duplicate") {
+                    Swal.fire("Atención", json.message || "Ya estaba reaperturado.", "info");
+                    cargar();
+                    return;
+                }
+
+                Swal.fire("Error", json.message || "No se pudo reaperturar.", "error");
+            })
+            .fail(function () {
+                Swal.fire("Error", "No se pudo contactar el servidor.", "error");
+            });
+    });
+});
+
 
     $('#btnFiltrar').on('click', cargar);
 

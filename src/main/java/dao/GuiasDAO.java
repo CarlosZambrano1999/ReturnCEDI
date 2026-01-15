@@ -10,21 +10,12 @@ import java.sql.SQLException;
 import java.sql.Date;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GuiasDAO {
 
-    /**
-     * Lista guías según rol:
-     * - Rol 1 o 2: retorna todas
-     * - Otros roles: retorna solo las del usuario (idUsuario)
-     *
-     * @param idUsuario id del usuario en sesión
-     * @param rol rol del usuario en sesión
-     * @param desde filtro opcional (puede ser null)
-     * @param hasta filtro opcional (puede ser null)
-     * @return lista de guías
-     */
     public List<Guias> listarGuias(int idUsuario, int rol, Date desde, Date hasta) {
 
         List<Guias> lista = new ArrayList<>();
@@ -33,9 +24,7 @@ public class GuiasDAO {
         ConexionSQLServer conexion = new ConexionSQLServer();
 
         try (
-            Connection cn = conexion.getConnection();
-            CallableStatement cs = cn.prepareCall(sql)
-        ) {
+                Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
             cs.setInt(1, idUsuario);
             cs.setInt(2, rol);
@@ -81,4 +70,43 @@ public class GuiasDAO {
     public List<Guias> listarGuias(int idUsuario, int rol) {
         return listarGuias(idUsuario, rol, null, null);
     }
+
+    public Map<String, String> reaperturarDocMaterial(String docMaterial, int idUsuario) {
+
+        Map<String, String> resultado = new HashMap<>();
+        String sql = "{CALL GUIA.SP_GUIA_REAPERTURAR_DOC_MATERIAL(?, ?)}";
+
+        ConexionSQLServer conexion = new ConexionSQLServer();
+
+        try (
+                Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
+
+            cs.setString(1, docMaterial);
+            cs.setInt(2, idUsuario);
+
+            boolean hasResult = cs.execute();
+
+            if (hasResult) {
+                try (ResultSet rs = cs.getResultSet()) {
+                    if (rs.next()) {
+                        resultado.put("status", rs.getString("status"));
+                        resultado.put("message", rs.getString("message"));
+                        return resultado;
+                    }
+                }
+            }
+
+            // Si por alguna razón no vino resultado
+            resultado.put("status", "error");
+            resultado.put("message", "No se recibió respuesta del procedimiento.");
+            return resultado;
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error en GuiasDAO.reaperturarDocMaterial: " + e.getMessage());
+            resultado.put("status", "error");
+            resultado.put("message", e.getMessage());
+            return resultado;
+        }
+    }
+
 }
