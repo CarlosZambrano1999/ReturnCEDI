@@ -10,8 +10,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import modelos.Rol;
+
 
 @WebServlet("/registro")
 public class UsuarioController extends HttpServlet {
@@ -23,12 +22,22 @@ public class UsuarioController extends HttpServlet {
         // Cargar roles activos
         try {
             dao.RolDAO rolDAO = new dao.RolDAO();
-            List<Rol> roles = rolDAO.listarActivos();
+            java.util.List<modelos.Rol> roles = rolDAO.listarActivos();
             request.setAttribute("roles", roles);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "No se pudieron cargar los roles.");
             request.setAttribute("roles", java.util.Collections.emptyList());
+        }
+
+        // Cargar farmacias (stores)
+        try {
+            dao.FarmaciaDAO farmaciaDAO = new dao.FarmaciaDAO();
+            java.util.List<modelos.Farmacia> farmacias = farmaciaDAO.listarFarmacias();
+            request.setAttribute("farmacias", farmacias);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("farmacias", java.util.Collections.emptyList());
         }
 
         // Enruta al JSP
@@ -48,8 +57,12 @@ public class UsuarioController extends HttpServlet {
         String password   = request.getParameter("password"); // no trim a contraseñas
         String idRolStr   = request.getParameter("idRol");
         String estadoStr  = request.getParameter("estado");   // opcional (default 1)
+        String storeIdStr = request.getParameter("storeId");  // ahora es String
 
-        
+        // Normalizar storeId
+        storeIdStr = (storeIdStr == null) ? null : storeIdStr.trim();
+        if (storeIdStr != null && storeIdStr.isEmpty()) storeIdStr = null;
+
         // 2) Validaciones mínimas
         if (nombre == null || codigo == null || password == null || password.isEmpty() || idRolStr == null) {
             request.setAttribute("error", "Completa los campos obligatorios: nombre, código, contraseña y rol.");
@@ -58,6 +71,7 @@ public class UsuarioController extends HttpServlet {
             request.setAttribute("val_codigo", codigo);
             request.setAttribute("val_idRol", idRolStr);
             request.setAttribute("val_estado", estadoStr);
+            request.setAttribute("val_storeId", storeIdStr);
             // Recargar combos
             cargarCombos(request);
             request.getRequestDispatcher("/usuario/registro.jsp").forward(request, response);
@@ -73,6 +87,7 @@ public class UsuarioController extends HttpServlet {
             request.setAttribute("val_codigo", codigo);
             request.setAttribute("val_idRol", idRolStr);
             request.setAttribute("val_estado", estadoStr);
+            request.setAttribute("val_storeId", storeIdStr);
             cargarCombos(request);
             request.getRequestDispatcher("/usuario/registro.jsp").forward(request, response);
             return;
@@ -84,6 +99,7 @@ public class UsuarioController extends HttpServlet {
         u.setCodigo(codigo);
         u.setIdRol(idRol);
         u.setEstado(estado);
+        u.setStoreId(storeIdStr); // String
 
         // 4) Llamar al DAO (SP)
         dao.UsuarioDAO usuarioDAO = new dao.UsuarioDAO();
@@ -108,6 +124,7 @@ public class UsuarioController extends HttpServlet {
         request.setAttribute("val_codigo", codigo);
         request.setAttribute("val_idRol", idRolStr);
         request.setAttribute("val_estado", estadoStr);
+        request.setAttribute("val_storeId", storeIdStr);
 
         // Recargar roles y farmacias para el JSP
         cargarCombos(request);
@@ -139,5 +156,11 @@ public class UsuarioController extends HttpServlet {
             request.setAttribute("roles", java.util.Collections.emptyList());
         }
 
+        try {
+            dao.FarmaciaDAO farmaciaDAO = new dao.FarmaciaDAO();
+            request.setAttribute("farmacias", farmaciaDAO.listarFarmacias());
+        } catch (Exception e) {
+            request.setAttribute("farmacias", java.util.Collections.emptyList());
+        }
     }
 }

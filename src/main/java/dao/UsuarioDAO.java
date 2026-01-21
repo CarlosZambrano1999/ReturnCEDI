@@ -31,7 +31,7 @@ public class UsuarioDAO {
         List<Usuario> lista = new ArrayList<>();
 
         String sql
-                = "SELECT id_usuario, nombre, codigo, id_rol, rol_nombre, estado "
+                = "SELECT id_usuario, nombre, codigo, id_rol, store_id, FARMACIA, rol_nombre, estado "
                 + "FROM PERSONA.VW_USUARIOS_LISTA "
                 + "ORDER BY nombre ASC";
 
@@ -42,7 +42,9 @@ public class UsuarioDAO {
                 u.setIdUsuario(rs.getInt("id_usuario"));   // <- lo traemos para editar (en JSP lo ocultas)
                 u.setNombre(rs.getString("nombre"));
                 u.setCodigo(rs.getString("codigo"));
-                u.setIdRol(rs.getInt("id_rol"));           // <- lo traemos para editar (en JSP lo ocultas si quieres)
+                u.setIdRol(rs.getInt("id_rol")); 
+                u.setStoreId(rs.getString("store_id"));
+                u.setFarmacia(rs.getString("FARMACIA"));
                 u.setRolNombre(rs.getString("rol_nombre"));
                 u.setEstado(rs.getInt("estado"));// nombre del rol (para mostrar)
 
@@ -62,10 +64,11 @@ public class UsuarioDAO {
         }
 
         try {
+            // Generar salt + hash de contraseña
             utilidades.PasswordUtil.Result sec = utilidades.PasswordUtil.hashForStorage(plainPwd);
 
             cn = conexion.getConnection();
-            String sql = "{CALL PERSONA.SP_INSERTAR_USUARIO(?, ?, ?, ?, ?, ?, ?)}";
+            String sql = "{CALL PERSONA.SP_INSERTAR_USUARIO(?, ?, ?, ?, ?, ?, ?, ?)}";
             cs = cn.prepareCall(sql);
 
             // Parámetros IN
@@ -75,12 +78,14 @@ public class UsuarioDAO {
             cs.setString(4, sec.hashB64);     // Hash generado
             cs.setInt(5, u.getIdRol());
             cs.setInt(6, u.getEstado());
+            cs.setString(7, u.getStoreId());
 
             // Parámetro OUT
-            cs.registerOutParameter(7, java.sql.Types.INTEGER);
+            cs.registerOutParameter(8, java.sql.Types.INTEGER);
 
             boolean tieneRs = cs.execute();
             String status = "error";
+            String message = "Error desconocido.";
             int idGenerado = 0;
 
             if (tieneRs) {
@@ -94,7 +99,7 @@ public class UsuarioDAO {
             }
 
             // Verificar valor OUT (por seguridad)
-            int idOut = cs.getInt(7);
+            int idOut = cs.getInt(8);
             if (idGenerado == 0 && idOut > 0) {
                 idGenerado = idOut;
             }
@@ -151,26 +156,28 @@ public class UsuarioDAO {
                 utilidades.PasswordUtil.Result sec = utilidades.PasswordUtil.hashForStorage(nuevaPassword);
 
                 String sql = "UPDATE PERSONA.USUARIO "
-                        + "SET nombre = ?, id_rol = ?, salt = ?, hash_password = ? "
+                        + "SET nombre = ?, id_rol = ?, store_id = ?, salt = ?, hash_password = ? "
                         + "WHERE id_usuario = ?";
 
                 ps = cn.prepareStatement(sql);
                 ps.setString(1, u.getNombre());
                 ps.setInt(2, u.getIdRol());
-                ps.setString(3, sec.saltB64);
-                ps.setString(4, sec.hashB64);
-                ps.setInt(5, u.getIdUsuario());
+                ps.setString(3, u.getStoreId());
+                ps.setString(4, sec.saltB64);
+                ps.setString(5, sec.hashB64);
+                ps.setInt(6, u.getIdUsuario());
 
             } else {
                 // Sin cambiar contraseña
                 String sql = "UPDATE PERSONA.USUARIO "
-                        + "SET nombre = ?, id_rol = ?"
+                        + "SET nombre = ?, id_rol = ?, store_id = ? "
                         + "WHERE id_usuario = ?";
 
                 ps = cn.prepareStatement(sql);
                 ps.setString(1, u.getNombre());
                 ps.setInt(2, u.getIdRol());
-                ps.setInt(3, u.getIdUsuario());
+                ps.setString(3, u.getStoreId());
+                ps.setInt(4, u.getIdUsuario());
             }
 
             int filas = ps.executeUpdate();

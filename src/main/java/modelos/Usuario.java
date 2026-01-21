@@ -17,12 +17,13 @@ public class Usuario {
     private String hashPassword;    // [hash_password]
     private int idRol;              // [id_rol] (INT/FK)
     private int estado;             // [estado] (0 = inactivo, 1 = activo)
+    private String storeId;
+    private String farmacia;
 
     public Usuario() {
     }
 
-    public Usuario(int idUsuario, String nombre, String codigo, String salt,
-            String hashPassword, int idRol, int estado, String rolNombre) {
+    public Usuario(int idUsuario, String nombre, String codigo, String salt, String hashPassword, int idRol, int estado, String storeId, String farmacia, String rolNombre) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.codigo = codigo;
@@ -30,6 +31,8 @@ public class Usuario {
         this.hashPassword = hashPassword;
         this.idRol = idRol;
         this.estado = estado;
+        this.storeId = storeId;
+        this.farmacia = farmacia;
         this.rolNombre = rolNombre;
     }
 
@@ -98,5 +101,23 @@ public class Usuario {
     public void setRolNombre(String rolNombre) {
         this.rolNombre = rolNombre;
     }
+
+    public String getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getFarmacia() {
+        return farmacia;
+    }
+
+    public void setFarmacia(String farmacia) {
+        this.farmacia = farmacia;
+    }
+    
+    
 
 }

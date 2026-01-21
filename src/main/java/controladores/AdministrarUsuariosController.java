@@ -1,5 +1,6 @@
 package controladores;
 
+import dao.FarmaciaDAO;
 import dao.UsuarioDAO;
 import dao.RolDAO;
 import modelos.Usuario;
@@ -14,7 +15,7 @@ import java.util.List;
 import modelos.Rol;
 
 @WebServlet("/admin")
-public class AdministrarUsuariosController extends HttpServlet {
+public class AdministrarUsuariosController extends BaseSeguridadController {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -23,13 +24,10 @@ public class AdministrarUsuariosController extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
         
-        HttpSession session = req.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null || usuario.getIdRol() != 1) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+        if (!requireRol1(req, resp)) {
             return;
         }
-        
+
         // 1) Listar usuarios
         try {
             List<Usuario> usuarios = new UsuarioDAO().listarUsuarios();
@@ -50,6 +48,16 @@ public class AdministrarUsuariosController extends HttpServlet {
             req.setAttribute("roles", java.util.Collections.emptyList());
         }
 
+        // 3) Cargar FARMACIAS para el combo
+        try {
+            FarmaciaDAO farmaciaDAO = new FarmaciaDAO();
+            List<modelos.Farmacia> farmacias = farmaciaDAO.listarFarmacias();
+            req.setAttribute("farmacias", farmacias);
+        } catch (Exception e) {
+            e.printStackTrace();
+            req.setAttribute("farmacias", java.util.Collections.emptyList());
+        }
+
         // 4) Ir al JSP
         req.getRequestDispatcher("/usuario/usuarios.jsp").forward(req, resp);
     }
@@ -58,15 +66,11 @@ public class AdministrarUsuariosController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         
-        req.setCharacterEncoding("UTF-8");
-        
-        HttpSession session = req.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null || usuario.getIdRol() != 1) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+        if (!requireRol1(req, resp)) {
             return;
         }
-        
+
+        req.setCharacterEncoding("UTF-8");
         String accion = req.getParameter("accion");
 
         // === EDITAR USUARIO (nombre, rol, farmacia) ===
@@ -74,6 +78,8 @@ public class AdministrarUsuariosController extends HttpServlet {
             String idUsuarioStr = req.getParameter("id_usuario");
             String nombre = req.getParameter("nombre");
             String idRolStr = req.getParameter("idRol");
+            String storeId = req.getParameter("storeId");
+            // OJO: ya NO usamos password aquí
             String nuevaPwd = ""; // fuerza NO cambio de contraseña
 
             try {
@@ -84,6 +90,7 @@ public class AdministrarUsuariosController extends HttpServlet {
                 u.setIdUsuario(idUsuario);
                 u.setNombre(nombre);
                 u.setIdRol(idRol);
+                u.setStoreId(storeId);
 
                 UsuarioDAO usuarioDAO = new UsuarioDAO();
                 String resultado = usuarioDAO.actualizarUsuario(u, nuevaPwd);

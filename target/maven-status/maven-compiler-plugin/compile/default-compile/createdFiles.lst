@@ -17,11 +17,13 @@ controladores\RptDonacionesController.class
 modelos\reportes\RptIncidenciasMasFrecuentes.class
 controladores\DetalleGuiaController.class
 controladores\AdministrarUsuariosController.class
+modelos\Farmacia.class
 configDB\ConexionSQLServer.class
 controladores\RptExcesosController.class
 modelos\Devoluciones.class
 controladores\IncidenciaController.class
 modelos\Rol.class
+controladores\BaseSeguridadController.class
 controladores\GuiasController.class
 modelos\InfoDocMaterial.class
 controladores\CargarDocMaterialExcelController$FilaError.class
@@ -48,6 +50,7 @@ dao\DocMaterialDAO.class
 dao\UsuarioDAO.class
 modelos\reportes\RptGuiasMayorIncidencia.class
 utilidades\PasswordUtil.class
+dao\FarmaciaDAO.class
 controladores\RptDevolucionesController.class
 dao\ReportesDAO.class
 modelos\DocMaterial.class

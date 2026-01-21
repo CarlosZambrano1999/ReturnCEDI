@@ -20,6 +20,7 @@
             String val_codigo = (String) request.getAttribute("val_codigo");
             String val_idRol = (String) request.getAttribute("val_idRol");
             String val_estado = (String) request.getAttribute("val_estado");
+            String val_storeId = (String) request.getAttribute("val_storeId");
         %>
 
         <div class="container mt-5">
@@ -67,10 +68,10 @@
                                     <select class="form-select" id="idRol" name="idRol" required>
                                         <option value="">-- Selecciona un rol --</option>
                                         <%
-                                            List<Rol> roles
-                                                    = (List<Rol>) request.getAttribute("roles");
+                                            java.util.List<modelos.Rol> roles
+                                                    = (java.util.List<modelos.Rol>) request.getAttribute("roles");
                                             if (roles != null && !roles.isEmpty()) {
-                                                for (Rol r : roles) {
+                                                for (modelos.Rol r : roles) {
                                                     String selected = (val_idRol != null
                                                             && val_idRol.equals(String.valueOf(r.getId_rol()))) ? "selected" : "";
                                         %>
@@ -88,6 +89,27 @@
                                     </select>
                                 </div>
 
+                                <!-- Farmacia (con búsqueda mediante datalist) -->
+                                <div class="mb-3">
+                                    <label for="storeId" class="form-label">Farmacia</label>
+                                    <input list="farmaciaList" class="form-control" id="storeId" name="storeId"
+                                           value="<%= (val_storeId != null ? val_storeId : "")%>"
+                                           required placeholder="Busca o selecciona una farmacia">
+
+                                    <datalist id="farmaciaList">
+                                        <%
+                                            java.util.List<modelos.Farmacia> farmacias
+                                                    = (java.util.List<modelos.Farmacia>) request.getAttribute("farmacias");
+                                            if (farmacias != null && !farmacias.isEmpty()) {
+                                                for (modelos.Farmacia f : farmacias) {
+                                        %>
+                                        <option value="<%= f.getStoreId()%>"><%= f.getCentro() + " " + f.getFarmacia()%> </option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+                                    </datalist>
+                                </div>
 
                                 <!-- Estado -->
                                 <div class="mb-3">
@@ -108,9 +130,7 @@
 
                         </div>
 
-                        <div class="card-footer text-center text-muted small">
-                            © 2025 — Sistema de Registro | Desarrollado por <b>arlom</b>
-                        </div>
+                      
                     </div>
                 </div>
             </div>

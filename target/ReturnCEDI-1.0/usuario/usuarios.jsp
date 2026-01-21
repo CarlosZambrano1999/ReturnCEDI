@@ -1,3 +1,4 @@
+<%@page import="modelos.Farmacia"%>
 <%@page import="modelos.Rol"%>
 <%@page import="modelos.Usuario"%>
 <%@page import="java.util.List"%>
@@ -88,6 +89,7 @@
                                 <th>Nombre</th>
                                 <th>Código</th>
                                 <th>Rol</th>
+                                <th>Farmacia</th>
                                 <th>Estado</th>
                                 <th>Editar</th>
                                 <th>Contraseña</th> <!-- 👈 nueva -->
@@ -105,6 +107,7 @@
                                 <td><%= u.getNombre()%></td>
                                 <td><%= u.getCodigo()%></td>
                                 <td><%= u.getRolNombre()%></td>
+                                <td><%= u.getFarmacia()%></td>
                                 <td><%= (u.getEstado() == 1 ? "Activo" : "Inactivo")%></td>
 
                                 <!-- EDITAR -->
@@ -114,7 +117,8 @@
                                             data-id="<%= u.getIdUsuario()%>"
                                             data-nombre="<%= u.getNombre()%>"
                                             data-codigo="<%= u.getCodigo()%>"
-                                            data-idrol="<%= u.getIdRol()%>">
+                                            data-idrol="<%= u.getIdRol()%>"
+                                            data-storeid="<%= u.getStoreId()%>">
                                         Editar
                                     </button>
                                 </td>
@@ -181,7 +185,7 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Código (solo lectura)</label>
+                                    <label class="form-label">Código</label>
                                     <input type="text" id="edit_codigo" class="form-control" readonly>
                                 </div>
 
@@ -195,6 +199,23 @@
                                                 for (Rol r : roles) {
                                         %>
                                         <option value="<%= r.getId_rol()%>"><%= r.getRol()%></option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Farmacia</label>
+                                    <select name="storeId" id="edit_storeId" class="form-select" required>
+                                        <option value="" disabled>Seleccione farmacia...</option>
+                                        <%
+                                            List<Farmacia> farmacias = (List<Farmacia>) request.getAttribute("farmacias");
+                                            if (farmacias != null) {
+                                                for (Farmacia f : farmacias) {
+                                        %>
+                                        <option value="<%= f.getStoreId()%>"><%= f.getFarmacia()%></option>
                                         <%
                                                 }
                                             }
@@ -311,11 +332,13 @@
                             const nombre = this.getAttribute('data-nombre');
                             const codigo = this.getAttribute('data-codigo');
                             const idRol = this.getAttribute('data-idrol');
+                            const storeId = this.getAttribute('data-storeid');
 
                             document.getElementById('edit_id_usuario').value = id;
                             document.getElementById('edit_nombre').value = nombre;
                             document.getElementById('edit_codigo').value = codigo;
                             document.getElementById('edit_idRol').value = idRol;
+                            document.getElementById('edit_storeId').value = storeId;
                             
 
                             const modal = new bootstrap.Modal(document.getElementById('modalEditarUsuario'));
