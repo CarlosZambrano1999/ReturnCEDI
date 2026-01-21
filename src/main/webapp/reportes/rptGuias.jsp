@@ -144,7 +144,7 @@ $(function () {
     let btnReaperturar = '';
     if (rolSesion <= 2) {
         btnReaperturar =
-            '<button type="button" class="btn btn-sm btn-warning btnReaperturar" data-doc="' + docRaw + '">Reaperturar</button>';
+            '<button type="button" class="btn btn-sm btn-warning btnReaperturar mt-2" data-doc="' + docRaw + '">Reaperturar</button>';
     }
 
     return btnVer + btnReaperturar;

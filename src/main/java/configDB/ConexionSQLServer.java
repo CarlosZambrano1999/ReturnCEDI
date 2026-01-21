@@ -16,8 +16,8 @@ import java.sql.SQLException;
 public class ConexionSQLServer {
  
     private static final Dotenv dotenv = Dotenv.configure()
-            .filename(".env")          // obligatorio leer .env
-            .ignoreIfMissing()         // <-- QUÍTALO si quieres que falle cuando no exista
+            .filename(".env")         
+            .ignoreIfMissing()         
             .load();
 
     private static final String HOST = required("DB_SQL_HOST");
