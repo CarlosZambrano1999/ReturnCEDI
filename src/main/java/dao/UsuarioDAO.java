@@ -265,8 +265,7 @@ public class UsuarioDAO {
             return null;
         }
 
-        String sql = "SELECT id_usuario, nombre, codigo, salt, hash_password, id_rol, estado "
-                + "FROM PERSONA.USUARIO WHERE codigo = ?";
+        String sql = "SELECT * FROM [PERSONA].[VW_USUARIOS_LISTA] WHERE codigo = ?";
 
         try (Connection cn = conexion.getConnection(); PreparedStatement ps = cn.prepareStatement(sql)) {
 
@@ -291,7 +290,10 @@ public class UsuarioDAO {
                 u.setIdUsuario(rs.getInt("id_usuario"));
                 u.setNombre(rs.getString("nombre"));
                 u.setCodigo(rs.getString("codigo"));
+                u.setCentro(rs.getString("CENTRO"));
+                u.setFarmacia(rs.getString("FARMACIA"));
                 u.setIdRol(rs.getInt("id_rol"));
+                u.setStoreId(rs.getString("store_id"));
                 u.setEstado(rs.getInt("estado"));
                 return u;
             }

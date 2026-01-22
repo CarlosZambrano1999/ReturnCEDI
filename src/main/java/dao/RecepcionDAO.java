@@ -14,73 +14,26 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import modelos.ComparativoDocMaterialRow;
-import modelos.DatosDocMaterial;
 import modelos.Devoluciones;
-import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
 
 /**
  *
  * @author Administrador
  */
-public class DevolucionesDAO {
+public class RecepcionDAO {
 
     private final ConexionSQLServer conexion;
 
-    public DevolucionesDAO() {
+    public RecepcionDAO() {
         this.conexion = new ConexionSQLServer();
     }
 
-    public List<DatosDocMaterial> obtenerDetalleDocMaterial(long docMaterial) {
-        List<DatosDocMaterial> lista = new ArrayList<>();
 
-        String sql = "{CALL GUIA.SP_GUIA_OBTENER_DOC_MATERIAL_DETALLE(?)}";
-
-        try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
-
-            cs.setLong(1, docMaterial);
-
-            try (ResultSet rs = cs.executeQuery()) {
-                while (rs.next()) {
-                    DatosDocMaterial d = new DatosDocMaterial();
-                    d.setDocMaterial(rs.getLong("DOC_MATERIAL"));
-                    d.setCodigoSap(rs.getString("CODIGO_SAP"));
-                    d.setDescripcion(rs.getString("DESCRIPCION"));
-                    d.setCentro(rs.getString("CENTRO"));
-                    d.setAlmacen(rs.getString("ALMACEN"));
-                    d.setTransito(getIntegerOrNull(rs, "TRANSITO"));
-                    d.setPosicion(getIntegerOrNull(rs, "POSICION"));
-                    d.setReferencia(rs.getString("REFERENCIA"));
-                    d.setTexto(rs.getString("TEXTO"));
-                    d.setHora(rs.getTime("HORA"));
-                    d.setUsuario(rs.getString("USUARIO"));
-                    d.setFechaDocumento(rs.getDate("FECHA_DOCUMENTO"));
-                    d.setFechaContable(rs.getDate("FECHA_CONTABLE"));
-                    d.setCantidad(rs.getBigDecimal("CANTIDAD"));
-                    d.setImporte(rs.getBigDecimal("IMPORTE"));
-
-                    lista.add(d);
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Error al listar Materiales:" + e.getMessage());
-        }
-
-        return lista;
-    }
-
-    /**
-     * 2) Registra un escaneo: resuelve el producto (SP_BUSCAR_PRODUCTO interno)
-     * y lo guarda/acumula en GUIA.DEVOLUCIONES.
-     *
-     * IMPORTANTE: este método asume que tu SP ya está adaptado a ID_USUARIO.
-     */
     public ResultadoOperacion registrarEscaneo(long docMaterial, String codigoInput, int idUsuario, double cantidad) {
         ResultadoOperacion resp = new ResultadoOperacion();
 
-        String sql = "{CALL GUIA.SP_GUIA_REGISTRAR_ESCANEO(?, ?, ?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_REGISTRAR_ESCANEO(?, ?, ?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
@@ -115,43 +68,10 @@ public class DevolucionesDAO {
         return resp;
     }
 
-    /**
-     * 3) Trae el comparativo: esperado vs escaneado
-     */
-    public List<ComparativoDocMaterialRow> obtenerComparativo(long docMaterial) {
-        List<ComparativoDocMaterialRow> lista = new ArrayList<>();
-
-        String sql = "{CALL GUIA.SP_GUIA_COMPARATIVO_DOC_MATERIAL(?)}";
-
-        try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
-
-            cs.setLong(1, docMaterial);
-
-            try (ResultSet rs = cs.executeQuery()) {
-                while (rs.next()) {
-                    ComparativoDocMaterialRow r = new ComparativoDocMaterialRow();
-                    r.setCodigoSap(rs.getString("CODIGO_SAP"));
-                    r.setDescripcion(rs.getString("DESCRIPCION"));
-                    r.setCantidadEsperada(rs.getBigDecimal("CANTIDAD_ESPERADA"));
-                    r.setCantidadEscaneada(rs.getBigDecimal("CANTIDAD_ESCANEADA"));
-                    r.setDiferencia(rs.getBigDecimal("DIFERENCIA"));
-                    r.setEstado(rs.getString("ESTADO"));
-                    r.setFactor(rs.getInt("FACTOR"));
-                    r.setPresentacion(rs.getString("PRESENTACION"));
-                    lista.add(r);
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return lista;
-    }
 
     public List<ComparativoDocMaterialRow> obtenerComparativoExt(long docMaterial, int idUsuario) {
         List<ComparativoDocMaterialRow> lista = new ArrayList<>();
-        String sql = "{CALL GUIA.SP_GUIA_COMPARATIVO_DOC_MATERIAL_EXT(?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_COMPARATIVO_DOC_MATERIAL_EXT(?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
@@ -195,10 +115,10 @@ public class DevolucionesDAO {
      * 4) Edita un registro de GUIA.DEVOLUCIONES (cantidad, incidencia,
      * observación)
      */
-    public ResultadoOperacion editarDevolucion(long id, double cantidad, Integer incidenciaId, String observacion) {
+    public ResultadoOperacion editarRecepcion(long id, double cantidad, Integer incidenciaId, String observacion) {
         ResultadoOperacion resp = new ResultadoOperacion();
 
-        String sql = "{CALL GUIA.SP_GUIA_EDITAR_ESCANEO(?, ?, ?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_EDITAR_ESCANEO(?, ?, ?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
@@ -235,9 +155,9 @@ public class DevolucionesDAO {
         return resp;
     }
 
-    public Devoluciones obtenerDevolucionPorSap(long docMaterial, String codigoSap, int idUsuario) {
+    public Devoluciones obtenerRecepcionPorSap(long docMaterial, String codigoSap, int idUsuario) {
         String sql = "SELECT TOP 1 ID, DOC_MATERIAL, CODIGO_SAP, CANTIDAD, INCIDENCIA_ID, OBSERVACION "
-                + "FROM GUIA.DEVOLUCIONES "
+                + "FROM FARMACIAS.TBL_FARMACIAS "
                 + "WHERE DOC_MATERIAL = ? AND CODIGO_SAP = ? AND ID_USUARIO = ? "
                 + "ORDER BY FECHA_SCAN DESC";
 
@@ -266,19 +186,13 @@ public class DevolucionesDAO {
         return null;
     }
 
-    // ----------------- helpers -----------------
-    private Integer getIntegerOrNull(ResultSet rs, String col) throws SQLException {
-        int v = rs.getInt(col);
-        return rs.wasNull() ? null : v;
-    }
-
     private String safe(String s) {
         return s == null ? "" : s;
     }
 
-    public ResultadoOperacion eliminarDevolucionAdicional(long id, long docMaterial, int idUsuario) {
+    public ResultadoOperacion eliminarExcesoAdicional(long id, long docMaterial, int idUsuario) {
         ResultadoOperacion resp = new ResultadoOperacion();
-        String sql = "{CALL GUIA.SP_GUIA_ELIMINAR_DEVOLUCION_ADICIONAL(?, ?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_ELIMINAR_DEVOLUCION_ADICIONAL(?, ?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
@@ -303,37 +217,10 @@ public class DevolucionesDAO {
 
         return resp;
     }
-
-    public InfoDocMaterial obtenerInfoDocMaterial(long docMaterial) {
-        InfoDocMaterial info = null;
-
-        String sql = "{CALL GUIA.SP_GUIA_OBTENER_INFO_DOC_MATERIAL(?)}";
-
-        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
-
-            cs.setLong(1, docMaterial);
-
-            try (ResultSet rs = cs.executeQuery()) {
-                if (rs.next()) {
-                    info = new InfoDocMaterial();
-                    info.setAlmacen(rs.getString("ALMACEN"));
-                    info.setDepartamento(rs.getString("DEPARTAMENTO"));
-                    info.setFarmacia(rs.getString("FARMACIA"));
-                    info.setCentro(rs.getString("CENTRO"));
-                    info.setEstado(rs.getInt("ESTADO"));
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return info;
-    }
-
+    
     public ResultadoOperacion cerrarGuia(long docMaterial, int idUsuario) {
         ResultadoOperacion resp = new ResultadoOperacion();
-        String sql = "{CALL GUIA.SP_GUIA_CERRAR_GUIA(?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_CERRAR_GUIA(?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 

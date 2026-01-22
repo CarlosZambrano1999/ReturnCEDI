@@ -1,5 +1,6 @@
 modelos\ComparativoDocMaterialRow.class
 controladores\LoginController.class
+dao\RecepcionDAO.class
 dao\DevolucionesDAO.class
 modelos\reportes\RptUsuario.class
 dao\DonacionesDAO.class
@@ -32,6 +33,7 @@ dao\IncidenciaDAO.class
 controladores\UsuarioController.class
 dao\ConsultarPoliticaDAO.class
 modelos\ResultadoCargaDocMaterial.class
+controladores\RecepcionController.class
 com\farmafacil\returncedi\JakartaRestConfiguration.class
 controladores\ReportDonacionesController.class
 dao\UsuarioDAO$ResultadoRegistro.class
