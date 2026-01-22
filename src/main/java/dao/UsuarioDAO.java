@@ -352,5 +352,72 @@ public class UsuarioDAO {
             }
         }
     }
+public ResultadoRegistro importarUsuarioExcel(String nombre, String codigo, String plainPwd,
+                                             int idRol, String storeId) {
+
+    if (nombre == null || nombre.trim().isEmpty()) {
+        return new ResultadoRegistro("error", "Nombre obligatorio.");
+    }
+    if (codigo == null || codigo.trim().isEmpty()) {
+        return new ResultadoRegistro("error", "Código obligatorio.");
+    }
+    if (plainPwd == null || plainPwd.isEmpty()) {
+        return new ResultadoRegistro("error", "Contraseña obligatoria.");
+    }
+    if (idRol <= 0) {
+        return new ResultadoRegistro("error", "Rol inválido.");
+    }
+    if (storeId == null || storeId.trim().isEmpty()) {
+        return new ResultadoRegistro("error", "Store ID obligatorio.");
+    }
+
+    Connection cn = null;
+    CallableStatement cs = null;
+    ResultSet rs = null;
+
+    try {
+        utilidades.PasswordUtil.Result sec = utilidades.PasswordUtil.hashForStorage(plainPwd);
+
+        cn = conexion.getConnection();
+        String sql = "{CALL PERSONA.SP_IMPORTAR_USUARIO_EXCEL(?, ?, ?, ?, ?, ?)}";
+        cs = cn.prepareCall(sql);
+
+        cs.setString(1, nombre.trim());
+        cs.setString(2, codigo.trim());
+        cs.setString(3, sec.saltB64);
+        cs.setString(4, sec.hashB64);
+        cs.setInt(5, idRol);
+        cs.setString(6, storeId.trim());
+
+        boolean tieneRs = cs.execute();
+
+        String status = "error";
+        String message = "Respuesta no válida del SP.";
+
+        if (tieneRs) {
+            rs = cs.getResultSet();
+            if (rs != null && rs.next()) {
+                status = rs.getString("status");
+                message = rs.getString("message");
+            }
+        }
+
+        return new ResultadoRegistro(
+                status != null ? status : "error",
+                message != null ? message : "Error desconocido.",
+                0
+        );
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return new ResultadoRegistro("error", "Error SQL: " + e.getMessage());
+    } finally {
+        try { if (rs != null) rs.close(); } catch (Exception ignored) {}
+        try { if (cs != null) cs.close(); } catch (Exception ignored) {}
+        try { if (cn != null) cn.close(); } catch (Exception ignored) {}
+    }
+}
+
+
 
 }
