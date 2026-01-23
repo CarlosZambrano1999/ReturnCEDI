@@ -33,11 +33,14 @@ public class AuthModuloFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        String path = request.getServletPath(); // "/Devoluciones"
+        String path = request.getServletPath();
 
         // 1) Permitir recursos públicos o estáticos
-        if (path.startsWith("/css") || path.startsWith("/js") || path.startsWith("/img")
-                || path.equals("/login") || path.endsWith(".jsp")) {
+        if (path.startsWith("/css") || path.startsWith("/js") || path.startsWith("/image") || path.startsWith("/fonts")
+                || path.equals("/login") || path.equals("/logout") || path.equals("/componentes") || path.endsWith(".jsp")
+                || path.equals("/RolesServlet") || path.equals("/AccesosServlet") || path.equals("/ModulosServlet")
+                || path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".json")
+                ) {
             chain.doFilter(req, res);
             return;
         }
@@ -53,13 +56,15 @@ public class AuthModuloFilter implements Filter {
         try {
             boolean permitido = accesoDAO.tieneAcceso(usuario.getIdRol(), path);
             if (!permitido) {
-                response.sendRedirect(request.getContextPath() + "/inicio");
+                response.sendRedirect(request.getContextPath() + "/home");
                 return;
             }
         } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/inicio");
+            response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
+        
+        request.setAttribute("usuario_auth", usuario);
 
         chain.doFilter(req, res);
     }

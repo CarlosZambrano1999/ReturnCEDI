@@ -11,7 +11,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -21,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import modelos.Usuario;
 import modelos.reportes.RptFarmaciasMayorIncidencia;
 import modelos.reportes.RptGuiasMayorIncidencia;
 import modelos.reportes.RptIncidenciasMasFrecuentes;
@@ -41,13 +39,6 @@ public class ReportDevolucionesController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null || usuario.getIdRol() > 2) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         try {
             request.setAttribute("usuarios", usuarioDAO.listarUsuarios());
             request.setAttribute("tab", "rpt1");
@@ -67,15 +58,6 @@ public class ReportDevolucionesController extends HttpServlet {
         try {
             
             String accion = nvl(request.getParameter("accion"), "").toLowerCase();
-            
-            // 0) Validar sesión
-            HttpSession session = request.getSession(false);
-            Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-            if (user == null) {
-                setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-                forward(request, response);
-                return;
-            }
             
             // 1) Filtros comunes
             Date desde = parseSqlDate(request.getParameter("desde"));

@@ -68,16 +68,6 @@ public class ReportDonacionesController extends HttpServlet {
             
             String accion = nvl(request.getParameter("accion"), "").toLowerCase();
             
-            // 0) Validar sesión
-            HttpSession session = request.getSession(false);
-            Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-            if (user == null) {
-                setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-                setViewMeta(request);
-                forward(request, response);
-                return;
-            }
-            
             // 1) Filtros comunes
             Date desde = parseSqlDate(request.getParameter("desde"));
             Date hasta = parseSqlDate(request.getParameter("hasta"));

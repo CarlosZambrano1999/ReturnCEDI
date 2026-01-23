@@ -41,13 +41,6 @@ public class ReportExcesosController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null || usuario.getIdRol() > 2) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
 
         try {
             request.setAttribute("usuarios", usuarioDAO.listarUsuarios());
@@ -68,15 +61,6 @@ public class ReportExcesosController extends HttpServlet {
         try {
             
             String accion = nvl(request.getParameter("accion"), "").toLowerCase();
-            
-            // 0) Validar sesión
-            HttpSession session = request.getSession(false);
-            Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-            if (user == null) {
-                setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-                forward(request, response);
-                return;
-            }
             
             // 1) Filtros comunes
             Date desde = parseSqlDate(request.getParameter("desde"));

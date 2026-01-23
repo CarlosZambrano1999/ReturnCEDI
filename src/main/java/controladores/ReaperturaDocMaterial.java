@@ -35,17 +35,8 @@ public class ReaperturaDocMaterial extends HttpServlet {
         Map<String, Object> res = new HashMap<>();
 
         try {
-            HttpSession sesion = request.getSession(false);
-
-            if (sesion == null || sesion.getAttribute("usuario") == null) {
-                res.put("status", "logout");
-                res.put("message", "Sesión expirada. Inicia sesión nuevamente.");
-                response.getWriter().write(gson.toJson(res));
-                return;
-            }
-
-            Usuario usuario = (Usuario) sesion.getAttribute("usuario");
-            int idUsuario = usuario.getIdUsuario();
+            Usuario user = (Usuario) request.getAttribute("usuario_auth");
+            int idUsuario = user.getIdUsuario();
 
             String docMaterial = request.getParameter("doc_material");
 

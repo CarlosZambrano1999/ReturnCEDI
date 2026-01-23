@@ -1,6 +1,7 @@
 modelos\ComparativoDocMaterialRow.class
 controladores\LoginController.class
 controladores\AccesosController.class
+dao\RecepcionDAO.class
 dao\DevolucionesDAO.class
 modelos\reportes\RptUsuario.class
 dao\DonacionesDAO.class
@@ -30,17 +31,16 @@ modelos\Devoluciones.class
 controladores\IncidenciaController.class
 modelos\Rol.class
 controladores\RolesController.class
-controladores\BaseSeguridadController.class
 controladores\GuiasController.class
 modelos\InfoDocMaterial.class
 controladores\CargarDocMaterialExcelController$FilaError.class
 modelos\Producto.class
 dao\IncidenciaDAO.class
 controladores\UsuarioController.class
-controladores\AuthFilter.class
 dao\ConsultarPoliticaDAO.class
 modelos\ResultadoCargaDocMaterial.class
 controladores\ImportarUsuariosExcelController.class
+controladores\RecepcionController.class
 com\farmafacil\returncedi\JakartaRestConfiguration.class
 controladores\ReportDonacionesController.class
 dao\UsuarioDAO$ResultadoRegistro.class
@@ -55,6 +55,7 @@ controladores\DevolucionesController.class
 modelos\ModuloAsignacion.class
 controladores\ExcesosController.class
 modelos\reportes\DetalleGuia.class
+controladores\AuthModuloFilter.class
 controladores\LogoutController.class
 dao\DocMaterialDAO.class
 dao\UsuarioDAO.class

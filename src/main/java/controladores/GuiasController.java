@@ -30,12 +30,6 @@ public class GuiasController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (user == null ) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
         // Vista única del reporte
         request.getRequestDispatcher("/reportes/rptGuias.jsp").forward(request, response);
     }
@@ -47,31 +41,13 @@ public class GuiasController extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         Map<String, Object> res = new HashMap<>();
 
-        // 🔐 Validar sesión
-        HttpSession sesion = request.getSession(false);
-        if (sesion == null || sesion.getAttribute("usuario") == null) {
-            res.put("status", "logout");
-            res.put("message", "Sesión expirada. Inicia sesión nuevamente.");
-            escribirJson(response, res);
-            return;
-        }
-
-        // 👤 Obtener usuario desde sesión
-        Usuario usuario = (Usuario) sesion.getAttribute("usuario");
-        int idUsuario = usuario.getIdUsuario();
+        
+        Usuario user = (Usuario) request.getAttribute("usuario_auth");
+        int idUsuario = user.getIdUsuario();
 
         // 🧩 Obtener rol desde sesión (en tu login se guarda como "rol")
-        int rol = 0;
-        Object rolObj = sesion.getAttribute("rol");
-        if (rolObj instanceof Integer) {
-            rol = (Integer) rolObj;
-        } else if (rolObj != null) {
-            try {
-                rol = Integer.parseInt(rolObj.toString());
-            } catch (NumberFormatException e) {
-                rol = 0;
-            }
-        }
+        int rol = user.getIdRol();
+
 
         // 📅 Leer fechas opcionales (yyyy-mm-dd)
         Date desde = null;

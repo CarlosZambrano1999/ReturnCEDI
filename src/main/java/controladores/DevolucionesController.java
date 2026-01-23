@@ -51,14 +51,7 @@ public class DevolucionesController extends HttpServlet {
         String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
 
-        HttpSession session = request.getSession(false);
-        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (user == null || user.getIdRol()>3) {
-            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
+        Usuario user = (Usuario) request.getAttribute("usuario_auth");
         int idUsuario = user.getIdUsuario();
 
         try {

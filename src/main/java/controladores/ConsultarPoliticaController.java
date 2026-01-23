@@ -10,7 +10,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +21,6 @@ import modelos.EvaluacionPolitica;
 import modelos.PoliticaDevolucion;
 import modelos.Producto;
 import modelos.ProveedorPolitica;
-import modelos.Usuario;
 
 /**
  *
@@ -37,13 +35,6 @@ public class ConsultarPoliticaController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         request.getRequestDispatcher("/politica/consultarPolitica.jsp").forward(request, response);
     }
 
@@ -59,15 +50,6 @@ public class ConsultarPoliticaController extends HttpServlet {
         String idProveedor = nvl(request.getParameter("idProveedor"), "");
         String idColorStr = nvl(request.getParameter("idColor"), "");
         String fechaVencStr = nvl(request.getParameter("fechaVencimiento"), "");
-
-        // 0) Validar sesión (igual que tu patrón)
-        HttpSession session = request.getSession(false);
-        Usuario user = (session == null) ? null : (Usuario) session.getAttribute("usuario");
-        if (user == null) {
-            setMsg(request, "error", "Sesión expirada. Volvé a iniciar sesión.");
-            forward(request, response);
-            return;
-        }
 
         try {
             switch (accion) {

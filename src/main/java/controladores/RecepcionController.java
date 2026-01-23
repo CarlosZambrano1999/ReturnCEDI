@@ -33,14 +33,6 @@ public class RecepcionController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (user == null || (user.getIdRol() != 1 && user.getIdRol() != 2 && user.getIdRol() != 4) ) {
-            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         // Carga mínima para vista
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
         request.getRequestDispatcher("/guia/recepcion.jsp").forward(request, response);
@@ -52,16 +44,8 @@ public class RecepcionController extends HttpServlet {
 
         String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
-
-        // 0) Validar sesión
-        HttpSession session = request.getSession(false);
-        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (user == null || (user.getIdRol() != 1 && user.getIdRol() != 2 && user.getIdRol() != 4) ) {
-            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
+        
+        Usuario user = (Usuario) request.getAttribute("usuario_auth");
         int idUsuario = user.getIdUsuario();
 
         try {

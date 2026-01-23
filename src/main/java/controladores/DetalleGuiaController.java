@@ -28,13 +28,6 @@ public class DetalleGuiaController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 🔐 Validar sesión
-        HttpSession sesion = request.getSession(false);
-        if (sesion == null || sesion.getAttribute("usuario") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         // 📌 Params que vienen por URL desde el botón
         String doc = request.getParameter("doc");
         String tipo = request.getParameter("tipo");
@@ -53,16 +46,6 @@ public class DetalleGuiaController extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         Map<String, Object> res = new HashMap<>();
 
-        // 🔐 Validar sesión
-        HttpSession sesion = request.getSession(false);
-        if (sesion == null || sesion.getAttribute("usuario") == null) {
-            res.put("status", "logout");
-            res.put("message", "Sesión expirada. Inicia sesión nuevamente.");
-            escribirJson(response, res);
-            return;
-        }
-
-        // 📌 Leer parámetros (pueden venir del JS)
         String doc = request.getParameter("doc");
         String tipo = request.getParameter("tipo");
 

@@ -12,7 +12,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
@@ -33,14 +32,6 @@ public class DonacionesController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Carga mínima para vista
-        HttpSession session = request.getSession(false);
-        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (user == null || (user.getIdRol()>2 && user.getIdRol()<5) ) {
-            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
         request.getRequestDispatcher("/guia/donaciones.jsp").forward(request, response);
     }
@@ -52,15 +43,7 @@ public class DonacionesController extends HttpServlet {
         String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
 
-        // 0) Validar sesión
-       HttpSession session = request.getSession(false);
-        Usuario user = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (user == null || (user.getIdRol()>2 && user.getIdRol()<5) ) {
-            setMsg(request, "error", "Sesión expirada. Inicia sesión.");
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
+        Usuario user = (Usuario) request.getAttribute("usuario_auth");
         int idUsuario = user.getIdUsuario();
 
         try {

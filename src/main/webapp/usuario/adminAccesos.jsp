@@ -19,6 +19,9 @@
 
     <!-- (Opcional) tu css -->
     <link href="<%=request.getContextPath()%>/guia/estilos.css" rel="stylesheet">
+    
+    <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
+
 </head>
 <body>
 <jsp:include page="/componentes/navbar.jsp" />

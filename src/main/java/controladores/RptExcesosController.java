@@ -31,12 +31,7 @@ public class RptExcesosController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null || (usuario.getIdRol() != 1 && usuario.getIdRol() != 2 && usuario.getIdRol() != 4)) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+
         request.getRequestDispatcher("/reportes/rptUsuario.jsp").forward(request, response);
     }
 
@@ -47,17 +42,8 @@ public class RptExcesosController extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         Map<String, Object> res = new HashMap<>();
 
-        HttpSession sesion = request.getSession(false);
-        if (sesion == null || sesion.getAttribute("usuario") == null) {
-            res.put("status", "logout");
-            res.put("message", "Sesión expirada. Inicia sesión nuevamente.");
-            escribirJson(response, res);
-            return;
-        }
-
-        Usuario usuario = (Usuario) sesion.getAttribute("usuario");
-        int idUsuario = usuario.getIdUsuario();
-
+        Usuario user = (Usuario) request.getAttribute("usuario_auth");
+        int idUsuario = user.getIdUsuario();
         Date desde = null;
         Date hasta = null;
 
