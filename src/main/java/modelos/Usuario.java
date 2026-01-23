@@ -19,11 +19,12 @@ public class Usuario {
     private int estado;             // [estado] (0 = inactivo, 1 = activo)
     private String storeId;
     private String farmacia;
+    private String centro;
 
     public Usuario() {
     }
 
-    public Usuario(int idUsuario, String nombre, String codigo, String salt, String hashPassword, int idRol, int estado, String storeId, String farmacia, String rolNombre) {
+    public Usuario(int idUsuario, String nombre, String codigo, String salt, String hashPassword, int idRol, int estado, String storeId, String farmacia, String centro, String rolNombre) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.codigo = codigo;
@@ -33,6 +34,7 @@ public class Usuario {
         this.estado = estado;
         this.storeId = storeId;
         this.farmacia = farmacia;
+        this.centro = centro;
         this.rolNombre = rolNombre;
     }
 
@@ -117,7 +119,13 @@ public class Usuario {
     public void setFarmacia(String farmacia) {
         this.farmacia = farmacia;
     }
-    
-    
 
+    public String getCentro() {
+        return centro;
+    }
+
+    public void setCentro(String centro) {
+        this.centro = centro;
+    }
+    
 }

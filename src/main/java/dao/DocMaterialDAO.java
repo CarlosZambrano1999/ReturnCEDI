@@ -139,6 +139,7 @@ public class DocMaterialDAO {
                     info.setDepartamento(rs.getString("DEPARTAMENTO"));
                     info.setFarmacia(rs.getString("FARMACIA"));
                     info.setEstado(rs.getInt("ESTADO"));
+                    info.setCentro(rs.getString("CENTRO"));
                 }
             }
 

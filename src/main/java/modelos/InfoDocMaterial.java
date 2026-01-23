@@ -12,6 +12,7 @@ package modelos;
 public class InfoDocMaterial {
     private String almacen;
     private String departamento;
+    private String centro;
     private String farmacia;
     private int estado;
 
@@ -33,6 +34,16 @@ public class InfoDocMaterial {
     public void setEstado(int estado) {
         this.estado = estado;
     }
+
+    public String getCentro() {
+        return centro;
+    }
+
+    public void setCentro(String centro) {
+        this.centro = centro;
+    }
+    
+    
     
 }
 
