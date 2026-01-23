@@ -121,11 +121,13 @@ public class RecepcionController extends HttpServlet {
 
                     if ("success".equalsIgnoreCase(r.getStatus())) {
                         setMsg(request, "success", r.getMessage());
-                    } else if ("not_found".equalsIgnoreCase(r.getStatus())) {
+                    } else if ("not_found".equalsIgnoreCase(r.getStatus())
+                            || "not_in_doc".equalsIgnoreCase(r.getStatus())) {
                         setMsg(request, "warning", r.getMessage());
                     } else {
                         setMsg(request, "error", r.getMessage());
                     }
+
 
                     render(request, response, docMaterial, idUsuario);
                     return;
@@ -145,18 +147,17 @@ public class RecepcionController extends HttpServlet {
                         return;
                     }
 
-                    // Si ya vas a usar enteros:
-                    Integer cantidadInt = parseIntOrNull(request.getParameter("cantidad"));
+                    
+                    /* Integer cantidadInt = parseIntOrNull(request.getParameter("cantidad"));
                     if (cantidadInt == null || cantidadInt < 0) {
                         setMsg(request, "error", "La cantidad debe ser un número entero válido.");
                         render(request, response, docMaterial, idUsuario);
                         return;
-                    }
+                    } */
 
-                    Integer inc = parseIntOrNull(request.getParameter("incidenciaId"));
                     String obs = request.getParameter("observacion");
 
-                    ResultadoOperacion r = recepcionDAO.editarRecepcion(id, cantidadInt, inc, obs);
+                    ResultadoOperacion r = recepcionDAO.editarRecepcion(id, obs);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
@@ -212,6 +213,31 @@ public class RecepcionController extends HttpServlet {
                     }
                     return;
                 }
+                
+                case "limpiar": {
+                    if (docMaterial <= 0) {
+                        setMsg(request, "error", "Doc.Material inválido.");
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
+
+                    long id = parseLong(request.getParameter("id"), -1);
+                    if (id <= 0) {
+                        setMsg(request, "error", "ID inválido para limpiar.");
+                        render(request, response, docMaterial, idUsuario);
+                        return;
+                    }
+
+                    ResultadoOperacion r = recepcionDAO.limpiarCantidadEscaneada(id, docMaterial, idUsuario);
+
+                    setMsg(request,
+                        "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
+                        r.getMessage());
+
+                    render(request, response, docMaterial, idUsuario);
+                    return;
+                }
+
 
 
                 default: {
@@ -226,9 +252,7 @@ public class RecepcionController extends HttpServlet {
         }
     }
 
-    /**
-     * Carga todo lo que el JSP necesita y hace forward.
-     */
+
     private void render(HttpServletRequest request, HttpServletResponse response, long docMaterial, Integer idUsuario)
             throws ServletException, IOException {
 

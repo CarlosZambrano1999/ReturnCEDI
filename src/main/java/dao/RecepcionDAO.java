@@ -115,26 +115,20 @@ public class RecepcionDAO {
      * 4) Edita un registro de GUIA.DEVOLUCIONES (cantidad, incidencia,
      * observación)
      */
-    public ResultadoOperacion editarRecepcion(long id, double cantidad, Integer incidenciaId, String observacion) {
+    public ResultadoOperacion editarRecepcion(long id, String observacion) {
         ResultadoOperacion resp = new ResultadoOperacion();
 
-        String sql = "{CALL FARMACIAS.SP_EDITAR_ESCANEO(?, ?, ?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_EDITAR_ESCANEO(?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
             cs.setLong(1, id);
-            cs.setBigDecimal(2, new java.math.BigDecimal(String.valueOf(cantidad)));
 
-            if (incidenciaId == null) {
-                cs.setNull(3, Types.INTEGER);
-            } else {
-                cs.setInt(3, incidenciaId);
-            }
 
             if (observacion == null || observacion.trim().isEmpty()) {
-                cs.setNull(4, Types.NVARCHAR);
+                cs.setNull(2, Types.NVARCHAR);
             } else {
-                cs.setString(4, observacion.trim());
+                cs.setString(2, observacion.trim());
             }
 
             try (ResultSet rs = cs.executeQuery()) {
@@ -244,5 +238,34 @@ public class RecepcionDAO {
 
         return resp;
     }
+    
+    public ResultadoOperacion limpiarCantidadEscaneada(long id, long docMaterial, int idUsuario) {
+        ResultadoOperacion resp = new ResultadoOperacion();
+        String sql = "{CALL FARMACIAS.SP_LIMPIAR_ESCANEO(?, ?, ?)}";
+
+        try (Connection cn = conexion.getConnection();
+             CallableStatement cs = cn.prepareCall(sql)) {
+
+            cs.setLong(1, id);
+            cs.setLong(2, docMaterial);
+            cs.setInt(3, idUsuario);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                if (rs.next()) {
+                    resp.setStatus(rs.getString("status"));
+                    resp.setMessage(rs.getString("message"));
+                } else {
+                    resp.setStatus("error");
+                    resp.setMessage("El SP no devolvió respuesta.");
+                }
+            }
+        } catch (SQLException e) {
+            resp.setStatus("error");
+            resp.setMessage("SQLException: " + e.getMessage());
+        }
+        return resp;
+    }
+    
+
 
 }

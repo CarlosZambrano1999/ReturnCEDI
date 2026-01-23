@@ -40,7 +40,7 @@
                 InfoDocMaterial infoDoc = (InfoDocMaterial) request.getAttribute("infoDoc");
             %>
 
-            <h1>Recepcion</h1>
+            <h1>Recepción</h1>
             <div class="card shadow-sm mb-3">
                 <div class="card-body p-4">
 
@@ -50,7 +50,6 @@
                     </div>
                     <% }%>
 
-                    <!-- FORM: cargar documento -->
                     <form method="post" action="<%=request.getContextPath()%>/Recepcion" class="row g-3 align-items-end">
                         <input type="hidden" name="accion" value="cargarDocumento"/>
 
@@ -72,7 +71,6 @@
                         </div>
                     </form>
 
-                    <!-- Form separado solo para scan, para que Enter haga POST scan -->
                     <form id="formScan" method="post" action="<%=request.getContextPath()%>/Recepcion">
                         <input type="hidden" name="accion" value="scan"/>
                         <input type="hidden" name="docMaterial" value="<%= doc == null ? "" : doc%>"/>
@@ -223,6 +221,18 @@
                                                     </div>        
 
                                                 </form>
+                                                                
+                                                                <form method="post" action="<%=request.getContextPath()%>/Recepcion"
+      onsubmit="return confirmarLimpiar(this);">
+    <input type="hidden" name="accion" value="limpiar">
+    <input type="hidden" name="docMaterial" value="<%= doc%>">
+    <input type="hidden" name="id" value="<%= r.getIdDevolucion()%>">
+
+    <button type="submit" class="btn btn-sm btn-outline-warning w-100">
+        Limpiar escaneo (0)
+    </button>
+</form>
+
                                             </div>
                                         </div>
 
@@ -416,16 +426,17 @@
         const spinner = document.getElementById("pageSpinner");
 
         document.querySelectorAll("form[action$='/Recepcion']").forEach(f => {
-  f.addEventListener("submit", function () {
-    if (spinner) spinner.classList.remove("d-none");
+            f.addEventListener("submit", function () {
+              const accion = (f.querySelector("input[name='accion']")?.value || "").toLowerCase();
 
-    const sc = document.getElementById("scanner");
-    if (sc && !sc.disabled) {
-      sc.focus();
-      sc.select();
-    }
-  });
-});
+              // ✅ Solo mostrar overlay en acciones pesadas
+              const accionesConOverlay = ["cargardocumento", "cerrarguia"];
+
+              if (accionesConOverlay.includes(accion)) {
+                spinner.classList.remove("d-none");
+              }
+            });
+          });
 
         if (!btnCerrar || !formCerrar)
             return;
@@ -488,6 +499,18 @@ document.addEventListener("mouseleave", function (e) {
   const tr = menu.closest("tr");
   if (tr) tr.classList.remove("no-hover");
 });
+
+function confirmarLimpiar(form){
+  Swal.fire({
+    title: '¿Limpiar a 0?',
+    text: 'Esto dejará la cantidad escaneada en cero para este producto.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, limpiar',
+    cancelButtonText: 'Cancelar'
+  }).then(r => { if(r.isConfirmed) form.submit(); });
+  return false;
+}
     
         </script>
     </body>
