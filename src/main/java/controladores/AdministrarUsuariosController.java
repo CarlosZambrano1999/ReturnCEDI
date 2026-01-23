@@ -15,7 +15,7 @@ import java.util.List;
 import modelos.Rol;
 
 @WebServlet("/admin")
-public class AdministrarUsuariosController extends BaseSeguridadController {
+public class AdministrarUsuariosController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -24,10 +24,6 @@ public class AdministrarUsuariosController extends BaseSeguridadController {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
         
-        if (!requireRol1(req, resp)) {
-            return;
-        }
-
         // 1) Listar usuarios
         try {
             List<Usuario> usuarios = new UsuarioDAO().listarUsuarios();
@@ -65,10 +61,6 @@ public class AdministrarUsuariosController extends BaseSeguridadController {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
-        if (!requireRol1(req, resp)) {
-            return;
-        }
 
         req.setCharacterEncoding("UTF-8");
         String accion = req.getParameter("accion");

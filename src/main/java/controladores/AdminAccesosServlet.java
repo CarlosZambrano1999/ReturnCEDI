@@ -15,13 +15,13 @@ import java.io.IOException;
  *
  * @author Administrador
  */
+@WebServlet("/admin/accesos")
+public class AdminAccesosServlet extends HttpServlet {
 
-@WebServlet("/home")
-public class HomeController extends HttpServlet {
-        @Override
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.getRequestDispatcher("/home/home.jsp").forward(request, response);
+        request.getRequestDispatcher("/usuario/adminAccesos.jsp").forward(request, response);
     }
 }
