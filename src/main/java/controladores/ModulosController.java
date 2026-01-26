@@ -31,6 +31,14 @@ public class ModulosController extends HttpServlet {
                 .replace("\t", "\\t");
     }
 
+    private static Integer parseIntOrNull(String s) {
+        if (s == null) return null;
+        s = s.trim();
+        if (s.isEmpty()) return null;
+        try { return Integer.parseInt(s); }
+        catch (Exception e) { return null; }
+    }
+
     private void writeJson(HttpServletResponse resp, String json) throws IOException {
         resp.setContentType("application/json; charset=UTF-8");
         resp.getWriter().write(json);
@@ -53,27 +61,53 @@ public class ModulosController extends HttpServlet {
 
         try {
             switch (action) {
+
                 case "listar": {
                     List<Modulo> modulos = dao.listar();
+
                     StringBuilder sb = new StringBuilder();
                     sb.append("{\"status\":\"success\",\"data\":[");
+
                     for (int i = 0; i < modulos.size(); i++) {
                         Modulo m = modulos.get(i);
                         if (i > 0) sb.append(",");
+
                         sb.append("{")
                           .append("\"idModulo\":").append(m.getIdModulo()).append(",")
-                          .append("\"modulo\":\"").append(esc(m.getModulo())).append("\",")
-                          .append("\"estado\":").append(m.getEstado())
-                          .append("}");
+                          .append("\"modulo\":\"").append(m.getRuta()).append("\",")
+                          .append("\"estado\":").append(m.getEstado()).append(",")
+                          .append("\"titulo\":\"").append(esc(m.getTitulo())).append("\",")
+                          .append("\"descripcion\":\"").append(esc(m.getDescripcion())).append("\",")
+                          .append("\"icono\":\"").append(esc(m.getIcono())).append("\",")
+                          .append("\"categoria\":\"").append(esc(m.getCategoria())).append("\",")
+                          .append("\"orden\":\"").append(m.getOrden()).append("\",");
+                        
+                        sb.append("}");
                     }
+
                     sb.append("]}");
                     writeJson(response, sb.toString());
                     break;
                 }
 
                 case "insertar": {
-                    String modulo = request.getParameter("modulo");
-                    ModuloDAO.ResultadoSP res = dao.insertar(modulo);
+                    // NUEVOS PARAMS
+                    String modulo = request.getParameter("modulo"); // ruta
+                    String titulo = request.getParameter("titulo");
+                    String descripcion = request.getParameter("descripcion");
+                    String icono = request.getParameter("icono");
+                    String categoria = request.getParameter("categoria");
+                    Integer orden = parseIntOrNull(request.getParameter("orden"));
+
+                    Modulo m = new Modulo();
+                    m.setRuta(modulo);
+                    m.setTitulo(titulo);
+                    m.setDescripcion(descripcion);
+                    m.setIcono(icono);
+                    m.setCategoria(categoria);
+                    m.setOrden(orden);
+
+                    ModuloDAO.ResultadoSP res = dao.insertar(m);
 
                     String json = "{"
                             + "\"status\":\"" + esc(res.getStatus()) + "\","
@@ -107,8 +141,6 @@ public class ModulosController extends HttpServlet {
 
                 case "actualizar": {
                     String idModuloStr = request.getParameter("idModulo");
-                    String modulo = request.getParameter("modulo");
-
                     if (idModuloStr == null || idModuloStr.trim().isEmpty()) {
                         writeJson(response, "{\"status\":\"error\",\"message\":\"Falta idModulo.\"}");
                         return;
@@ -116,7 +148,24 @@ public class ModulosController extends HttpServlet {
 
                     int idModulo = Integer.parseInt(idModuloStr);
 
-                    ModuloDAO.ResultadoSP res = dao.actualizar(idModulo, modulo);
+                    // NUEVOS PARAMS
+                    String modulo = request.getParameter("modulo"); // ruta
+                    String titulo = request.getParameter("titulo");
+                    String descripcion = request.getParameter("descripcion");
+                    String icono = request.getParameter("icono");
+                    String categoria = request.getParameter("categoria");
+                    Integer orden = parseIntOrNull(request.getParameter("orden"));
+
+                    Modulo m = new Modulo();
+                    m.setIdModulo(idModulo);
+                    m.setRuta(modulo);
+                    m.setTitulo(titulo);
+                    m.setDescripcion(descripcion);
+                    m.setIcono(icono);
+                    m.setCategoria(categoria);
+                    m.setOrden(orden);
+
+                    ModuloDAO.ResultadoSP res = dao.actualizar(m);
 
                     String json = "{"
                             + "\"status\":\"" + esc(res.getStatus()) + "\","

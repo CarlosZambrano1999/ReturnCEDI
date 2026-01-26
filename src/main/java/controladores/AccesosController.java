@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,7 +24,9 @@ import modelos.ModuloAsignacion;
 public class AccesosController extends HttpServlet {
 
     private static String esc(String s) {
-        if (s == null) return "";
+        if (s == null) {
+            return "";
+        }
         return s.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")
@@ -47,12 +50,15 @@ public class AccesosController extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
 
         AccesoDAO dao = new AccesoDAO();
 
         try {
             switch (action) {
+
                 case "obtener": {
                     String idRolStr = request.getParameter("idRol");
                     if (idRolStr == null || idRolStr.trim().isEmpty()) {
@@ -68,14 +74,22 @@ public class AccesosController extends HttpServlet {
                     sb.append("{\"status\":\"success\",\"data\":[");
                     for (int i = 0; i < lista.size(); i++) {
                         ModuloAsignacion m = lista.get(i);
-                        if (i > 0) sb.append(",");
+                        if (i > 0) {
+                            sb.append(",");
+                        }
+
                         sb.append("{")
-                          .append("\"idModulo\":").append(m.getIdModulo()).append(",")
-                          .append("\"modulo\":\"").append(esc(m.getModulo())).append("\",")
-                          .append("\"estadoModulo\":").append(m.getEstadoModulo()).append(",")
-                          .append("\"asignado\":").append(m.getAsignado()).append(",")
-                          .append("\"estadoAsignacion\":").append(m.getEstadoAsignacion())
-                          .append("}");
+                                .append("\"idModulo\":").append(m.getIdModulo()).append(",")
+                                .append("\"modulo\":\"").append(esc(m.getModulo())).append("\",")
+                                .append("\"estadoModulo\":").append(m.getEstadoModulo()).append(",")
+                                .append("\"titulo\":\"").append(esc(m.getTitulo())).append("\",")
+                                .append("\"descripcion\":\"").append(esc(m.getDescripcion())).append("\",")
+                                .append("\"icono\":\"").append(esc(m.getIcono())).append("\",")
+                                .append("\"categoria\":\"").append(esc(m.getCategoria())).append("\",")
+                                .append("\"orden\":").append(m.getOrden() == null ? "null" : m.getOrden()).append(",")
+                                .append("\"asignado\":").append(m.getAsignado()).append(",")
+                                .append("\"estadoAsignacion\":").append(m.getEstadoAsignacion())
+                                .append("}");
                     }
                     sb.append("]}");
 
@@ -103,10 +117,17 @@ public class AccesosController extends HttpServlet {
                     writeJson(response, json);
                     break;
                 }
+                
 
                 default:
                     writeJson(response, "{\"status\":\"error\",\"message\":\"Acción no válida.\"}");
             }
+            
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.removeAttribute("allowedPaths");
+            }
+
 
         } catch (NumberFormatException e) {
             writeJson(response, "{\"status\":\"error\",\"message\":\"Formato numérico inválido.\"}");

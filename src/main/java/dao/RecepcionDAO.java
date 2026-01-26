@@ -115,10 +115,10 @@ public class RecepcionDAO {
      * 4) Edita un registro de GUIA.DEVOLUCIONES (cantidad, incidencia,
      * observación)
      */
-    public ResultadoOperacion editarRecepcion(long id, String observacion) {
+    public ResultadoOperacion editarRecepcion(long id, String observacion, int cantidad) {
         ResultadoOperacion resp = new ResultadoOperacion();
 
-        String sql = "{CALL FARMACIAS.SP_EDITAR_ESCANEO(?, ?)}";
+        String sql = "{CALL FARMACIAS.SP_EDITAR_ESCANEO(?, ?, ?)}";
 
         try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
 
@@ -130,6 +130,8 @@ public class RecepcionDAO {
             } else {
                 cs.setString(2, observacion.trim());
             }
+            
+            cs.setInt(3, cantidad);
 
             try (ResultSet rs = cs.executeQuery()) {
                 if (rs.next()) {

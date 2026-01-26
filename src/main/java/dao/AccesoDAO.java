@@ -8,9 +8,11 @@ import configDB.ConexionSQLServer;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import modelos.ModuloAsignacion;
 
 /**
@@ -29,7 +31,32 @@ public class AccesoDAO {
             cs.setInt(1, idRol);
 
             try (ResultSet rs = cs.executeQuery()) {
-                // OJO: si el SP retorna 'status/message' cuando error, aquí podrías detectarlo
+
+                // Detectar si el SP devolvió un resultset de error: (status/message)
+                // Si existe la columna "status", asumimos que es respuesta de error.
+                ResultSetMetaData md = rs.getMetaData();
+                int colCount = md.getColumnCount();
+                boolean tieneColStatus = false;
+
+                for (int i = 1; i <= colCount; i++) {
+                    String col = md.getColumnLabel(i);
+                    if (col != null && col.equalsIgnoreCase("status")) {
+                        tieneColStatus = true;
+                        break;
+                    }
+                }
+
+                if (tieneColStatus) {
+                    // El SP retornó status/message (error)
+                    if (rs.next()) {
+                        String status = rs.getString("status");
+                        String message = rs.getString("message");
+                        throw new SQLException("SP_ROL_MODULOS_OBTENER -> " + status + ": " + message);
+                    }
+                    return lista; // vacío
+                }
+
+                // Resultset normal
                 while (rs.next()) {
                     ModuloAsignacion ma = new ModuloAsignacion();
                     ma.setIdModulo(rs.getInt("ID_MODULO"));
@@ -37,6 +64,16 @@ public class AccesoDAO {
                     ma.setEstadoModulo(rs.getInt("ESTADO_MODULO"));
                     ma.setAsignado(rs.getInt("ASIGNADO"));
                     ma.setEstadoAsignacion(rs.getInt("ESTADO_ASIGNACION"));
+
+                    // NUEVOS CAMPOS
+                    ma.setTitulo(rs.getString("TITULO"));
+                    ma.setDescripcion(rs.getString("DESCRIPCION"));
+                    ma.setIcono(rs.getString("ICONO"));
+                    ma.setCategoria(rs.getString("CATEGORIA"));
+
+                    Object ord = rs.getObject("ORDEN");
+                    ma.setOrden(ord == null ? null : ((Number) ord).intValue());
+
                     lista.add(ma);
                 }
             }
@@ -74,7 +111,8 @@ public class AccesoDAO {
         public String getStatus() { return status; }
         public String getMessage() { return message; }
     }
-    
+
+    // Para el Filter (si lo vas a usar)
     public boolean tieneAcceso(int idRol, String ruta) throws SQLException {
         String sql = "{CALL GUIA.SP_VALIDAR_ACCESO_MODULO(?,?)}";
 
@@ -92,5 +130,24 @@ public class AccesoDAO {
         }
         return false;
     }
-}
+    
+    public Set<String> obtenerRutasPermitidas(int idRol) throws SQLException {
+        Set<String> set = new java.util.HashSet<>();
+        String sql = "{CALL GUIA.SP_MODULOS_RUTAS_POR_ROL(?)}";
 
+        try (Connection cn = new ConexionSQLServer().getConnection();
+             CallableStatement cs = cn.prepareCall(sql)) {
+
+            cs.setInt(1, idRol);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    String ruta = rs.getString("MODULO");
+                    if (ruta != null) set.add(ruta.trim());
+                }
+            }
+        }
+        return set;
+    }
+
+}

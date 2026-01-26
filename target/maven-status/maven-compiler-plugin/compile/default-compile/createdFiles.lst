@@ -11,6 +11,7 @@ modelos\DatosDocMaterial.class
 modelos\ResultadoOperacion.class
 dao\RptUsuarioDAO.class
 controladores\ModulosController.class
+dao\ModuloHome.class
 modelos\Incidencia.class
 dao\ModuloDAO.class
 controladores\CargarDocMaterialExcelController.class
@@ -37,6 +38,7 @@ controladores\CargarDocMaterialExcelController$FilaError.class
 modelos\Producto.class
 dao\IncidenciaDAO.class
 controladores\UsuarioController.class
+dao\HomeDAO.class
 dao\ConsultarPoliticaDAO.class
 modelos\ResultadoCargaDocMaterial.class
 controladores\ImportarUsuariosExcelController.class

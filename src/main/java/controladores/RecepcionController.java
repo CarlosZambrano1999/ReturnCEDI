@@ -132,16 +132,16 @@ public class RecepcionController extends HttpServlet {
                     }
 
                     
-                    /* Integer cantidadInt = parseIntOrNull(request.getParameter("cantidad"));
+                    Integer cantidadInt = parseIntOrNull(request.getParameter("cantidad"));
                     if (cantidadInt == null || cantidadInt < 0) {
                         setMsg(request, "error", "La cantidad debe ser un número entero válido.");
                         render(request, response, docMaterial, idUsuario);
                         return;
-                    } */
+                    }
 
                     String obs = request.getParameter("observacion");
 
-                    ResultadoOperacion r = recepcionDAO.editarRecepcion(id, obs);
+                    ResultadoOperacion r = recepcionDAO.editarRecepcion(id, obs, cantidadInt);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",

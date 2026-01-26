@@ -138,16 +138,57 @@
 
 <!-- Modal: Nuevo Módulo -->
 <div class="modal fade" id="modalNuevoModulo" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Nuevo Módulo</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body">
-        <label class="form-label">Nombre del módulo</label>
-        <input type="text" class="form-control" id="txtNuevoModulo" placeholder="Ej: Recepción Donaciones">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Ruta (MODULO)</label>
+            <input type="text" class="form-control" id="txtNuevoModuloRuta" placeholder="/Devoluciones">
+            <small class="text-muted">Debe iniciar con /</small>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Título</label>
+            <input type="text" class="form-control" id="txtNuevoModuloTitulo" placeholder="Devoluciones">
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" id="txtNuevoModuloDescripcion" rows="2" placeholder="Descripción corta para el Home..."></textarea>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Icono (Bootstrap Icons)</label>
+            <input type="text" class="form-control" id="txtNuevoModuloIcono" placeholder="bi-arrow-repeat">
+            <small class="text-muted">Ej: bi-gift, bi-search, bi-bar-chart</small>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Categoría</label>
+            <select class="form-select" id="txtNuevoModuloCategoria">
+              <option value="OPERACION">OPERACION</option>
+              <option value="INCIDENCIAS">INCIDENCIAS</option>
+              <option value="REPORTES">REPORTES</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="OTROS" selected>OTROS</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Orden</label>
+            <input type="number" class="form-control" id="txtNuevoModuloOrden" placeholder="9999">
+          </div>
+
+        </div>
       </div>
+
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button class="btn btn-success" id="btnCrearModulo">Crear</button>
@@ -156,19 +197,60 @@
   </div>
 </div>
 
+
 <!-- Modal: Editar Módulo -->
 <div class="modal fade" id="modalEditarModulo" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Editar Módulo</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+
       <div class="modal-body">
         <input type="hidden" id="editIdModulo">
-        <label class="form-label">Nombre del módulo</label>
-        <input type="text" class="form-control" id="editNombreModulo" placeholder="Nombre del módulo">
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Ruta (MODULO)</label>
+            <input type="text" class="form-control" id="editRutaModulo" placeholder="/Devoluciones">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Título</label>
+            <input type="text" class="form-control" id="editTituloModulo" placeholder="Devoluciones">
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" id="editDescripcionModulo" rows="2"></textarea>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Icono</label>
+            <input type="text" class="form-control" id="editIconoModulo" placeholder="bi-arrow-repeat">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Categoría</label>
+            <select class="form-select" id="editCategoriaModulo">
+              <option value="OPERACION">OPERACION</option>
+              <option value="INCIDENCIAS">INCIDENCIAS</option>
+              <option value="REPORTES">REPORTES</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="OTROS">OTROS</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Orden</label>
+            <input type="number" class="form-control" id="editOrdenModulo" placeholder="9999">
+          </div>
+
+        </div>
       </div>
+
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button class="btn btn-primary" id="btnGuardarEditarModulo">Guardar</button>
@@ -176,6 +258,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- JS libs -->
 <script src="<%=request.getContextPath()%>/js/jquery.js"></script>

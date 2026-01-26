@@ -155,6 +155,10 @@
                                     <td class="text-end"><%= r.getDiferencia().intValue()%></td-->
                                     <% boolean esAdicional = "ADICIONAL".equalsIgnoreCase(r.getEstado());%>
                                     <td class="text-center">
+                                        <%
+                                            boolean ocultarEditar = r.getFactor() == 1;
+                                        %>
+                                        <% if (!ocultarEditar) {%>
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
                                                     type="button"
@@ -173,35 +177,35 @@
                                                     <input type="hidden" name="docMaterial" value="<%= doc%>">
                                                     <input type="hidden" name="id" value="<%= r.getIdDevolucion() == null ? "" : r.getIdDevolucion()%>">
 
-                                                    <!--div class="d-flex gap-2 justify-content-center align-items-center">
+                                                    <div class="d-flex gap-2 justify-content-center align-items-center">
                                                         <label>Cantidad: </label>
                                                         <input type="number" step="1" name="cantidad"
                                                                class="form-control form-control-sm cell-input text-end"
                                                                value="<%= r.getCantidadEditable() == null ? "0" : r.getCantidadEditable().intValue()%>"
                                                                <%= (r.getIdDevolucion() == null ? "disabled" : "")%> >
-                                                    </div-->
+                                                    </div>
 
                                                     <!--select name="incidenciaId" class="form-select form-select-sm cell-select"
-                                                            <%= (r.getIdDevolucion() == null ? "disabled" : "")%>>
+                                                    <%= (r.getIdDevolucion() == null ? "disabled" : "")%>>
 
-                                                        <option value="" <%= (r.getIncidenciaId() == null ? "selected" : "")%>>Sin incidencia</option>
+                                                <option value="" <%= (r.getIncidenciaId() == null ? "selected" : "")%>>Sin incidencia</option>
 
-                                                        <%
-                                                            for (Incidencia inc : incidencias) {
-                                                                if (inc.getEstado() != 1) {
-                                                                    continue;
-                                                                }
-
-                                                                int idInc = inc.getId_incidencia();
-                                                                boolean selected = (r.getIncidenciaId() != null && r.getIncidenciaId() == idInc);
-                                                        %>
-                                                        <option value="<%= idInc%>" <%= selected ? "selected" : ""%>>
-                                                            <%= inc.getIncidencia()%>
-                                                        </option>
-                                                        <%
+                                                    <%
+                                                        for (Incidencia inc : incidencias) {
+                                                            if (inc.getEstado() != 1) {
+                                                                continue;
                                                             }
-                                                        %>
-                                                    </select-->
+
+                                                            int idInc = inc.getId_incidencia();
+                                                            boolean selected = (r.getIncidenciaId() != null && r.getIncidenciaId() == idInc);
+                                                    %>
+                                                    <option value="<%= idInc%>" <%= selected ? "selected" : ""%>>
+                                                    <%= inc.getIncidencia()%>
+                                                </option>
+                                                    <%
+                                                        }
+                                                    %>
+                                                </select-->
 
                                                     <input type="text" name="observacion"
                                                            class="form-control form-control-sm cell-text"
@@ -221,24 +225,26 @@
                                                     </div>        
 
                                                 </form>
-                                                                
-                                                                <form method="post" action="<%=request.getContextPath()%>/Recepcion"
-      onsubmit="return confirmarLimpiar(this);">
-    <input type="hidden" name="accion" value="limpiar">
-    <input type="hidden" name="docMaterial" value="<%= doc%>">
-    <input type="hidden" name="id" value="<%= r.getIdDevolucion()%>">
 
-    <button type="submit" class="btn btn-sm btn-outline-warning w-100">
-        Limpiar escaneo (0)
-    </button>
-</form>
+                                                <form method="post" action="<%=request.getContextPath()%>/Recepcion"
+                                                      onsubmit="return confirmarLimpiar(this);">
+                                                    <input type="hidden" name="accion" value="limpiar">
+                                                    <input type="hidden" name="docMaterial" value="<%= doc%>">
+                                                    <input type="hidden" name="id" value="<%= r.getIdDevolucion()%>">
+
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning w-100">
+                                                        Limpiar escaneo (0)
+                                                    </button>
+                                                </form>
 
                                             </div>
                                         </div>
+                                        
 
                                         <% if (r.getIdDevolucion() == null) { %>
                                         <div class="small text-muted mt-1">Escanee este Producto para habilitar edición</div>
                                         <% } %>
+                                    <% } %>    
                                     </td>
                                     <td><% if (esAdicional && r.getIdDevolucion() != null) {%>
                                         <form method="post" action="<%=request.getContextPath()%>/Recepcion"
