@@ -125,7 +125,7 @@
                             <thead>
                                 <tr>
                                     <th>Estado</th>
-                                    <th>Código SAP</th>
+                                    <th>Código EAN</th>
                                     <th>Descripción</th>
                                     <th>FC</th>
                                     <th>Presentación</th>
