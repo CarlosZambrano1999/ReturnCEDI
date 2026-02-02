@@ -458,34 +458,68 @@
 
         btnCerrar.addEventListener("click", function () {
 
+    // 1) Detectar si hay estados NO OK
+    const estadosNoOK = Array.from(document.querySelectorAll("#tabla tbody .state-pill"))
+        .map(el => (el.textContent || "").trim().toUpperCase())
+        .filter(txt => txt && txt !== "OK");
+
+    const hayNoOK = estadosNoOK.length > 0;
+
+    // 2) (Opcional) Contar por tipo para mostrarlo bonito
+    const conteo = estadosNoOK.reduce((acc, s) => {
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+    }, {});
+
+    const detalle = Object.keys(conteo)
+        .sort()
+        .map(k => `${k}: ${conteo[k]}`)
+        .join(" • ");
+
+    // 3) Configurar el mensaje según el caso
+    const config = hayNoOK
+        ? {
+            title: '¿Cerrar la guía con incidencias?',
+            html:
+                '⚠️ Hay productos con estado <b>FALTANE o SOBRANTE</b>.<br>' +
+                (detalle ? `<div class="mt-2 small text-muted">${detalle}</div>` : '') +
+                '<div class="mt-2">Si cierras la guía, no podrás seguir escaneando ni editando información.</div>',
+            icon: 'warning'
+        }
+        : {
+            title: '¿Cerrar la guía?',
+            text: 'Una vez cerrada no podrás seguir escaneando ni editando información.',
+            icon: 'warning'
+        };
+
+    // 4) Mostrar la alerta (una sola, con contenido dinámico)
+    Swal.fire({
+        ...config,
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, cerrar guía',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+
             Swal.fire({
-                title: '¿Cerrar la guía?',
-                text: 'Una vez cerrada no podrás seguir escaneando ni editando información.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, cerrar guía',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    Swal.fire({
-                        title: 'Cerrando guía...',
-                        text: 'Por favor espera',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    formCerrar.submit(); // 👉 POST normal al servlet
+                title: 'Cerrando guía...',
+                text: 'Por favor espera',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
 
-        });
+            formCerrar.submit(); // POST normal al servlet
+        }
+    });
+
+});
+
 
     });
     
