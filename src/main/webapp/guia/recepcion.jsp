@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm mb-3">
+            <!--div class="card shadow-sm mb-3">
                 <div class="card-body">
                     <h6 class="mb-3">Información del Documento</h6>
 
@@ -99,7 +99,7 @@
                     </div>
 
                 </div>
-            </div>
+            </div -->
             <% if (doc != null) {%>
             <div class="d-flex justify-content-end mt-3">
                 <form id="formCerrarGuia"
@@ -299,6 +299,8 @@
 
 
         <script>
+            
+            const LAST_CODIGO = "<%= request.getAttribute("lastCodigo") == null ? "" : request.getAttribute("lastCodigo").toString() %>";
             $(function () {
                 $("#tabla").DataTable({
         ordering: true,
@@ -520,7 +522,51 @@
 
 });
 
+if (!LAST_CODIGO) return;
 
+    const tabla = document.querySelector("#tabla tbody");
+    if (!tabla) return;
+
+    // Buscar la fila cuyo "Código EAN" (2da columna) coincida con el escaneo
+    const filas = Array.from(tabla.querySelectorAll("tr"));
+
+    const fila = filas.find(tr => {
+        const tds = tr.querySelectorAll("td");
+        if (tds.length < 4) return false;
+
+        const codigoTabla = (tds[1].textContent || "").trim(); // col 2: Código EAN
+        return codigoTabla === LAST_CODIGO.trim();
+    });
+
+    if (!fila) return;
+
+    // Leer FC (col 4)
+    const tds = fila.querySelectorAll("td");
+    const fcTxt = (tds[3].textContent || "").trim(); // col 4: FC
+    const fc = Number(fcTxt);
+
+    // Scroll a la fila (opcional)
+    fila.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Si FC es distinto de 1 → abrir dropdown y enfocar cantidad
+    if (!Number.isNaN(fc) && fc !== 1) {
+
+        const btnToggle = fila.querySelector(".dropdown .dropdown-toggle");
+        if (!btnToggle || btnToggle.disabled) return;
+
+        // Abrir dropdown Bootstrap 5
+        const dd = bootstrap.Dropdown.getOrCreateInstance(btnToggle);
+        dd.show();
+
+        // Esperar a que se pinte el menú y enfocar input cantidad
+        setTimeout(() => {
+            const inputCantidad = fila.querySelector('.dropdown-menu input[name="cantidad"]');
+            if (inputCantidad && !inputCantidad.disabled) {
+                inputCantidad.focus();
+                inputCantidad.select(); // opcional: selecciona el valor para escribir rápido
+            }
+        }, 50);
+    }
     });
     
         document.addEventListener("shown.bs.dropdown", function (e) {

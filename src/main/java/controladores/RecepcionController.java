@@ -12,7 +12,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
@@ -111,7 +110,7 @@ public class RecepcionController extends HttpServlet {
                     } else {
                         setMsg(request, "error", r.getMessage());
                     }
-
+                    request.setAttribute("lastCodigo", codigo);
 
                     render(request, response, docMaterial, idUsuario);
                     return;
