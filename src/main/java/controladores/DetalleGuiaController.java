@@ -8,8 +8,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -66,7 +64,7 @@ public class DetalleGuiaController extends HttpServlet {
         doc = doc.trim();
         tipo = tipo.trim().toUpperCase();
 
-        if (!("DEVOLUCIONES".equals(tipo) || "DONACIONES".equals(tipo) || "EXCESOS".equals(tipo))) {
+        if (!("DEVOLUCIONES".equals(tipo) || "DONACIONES".equals(tipo) || "EXCESOS".equals(tipo) || "ND".equals(tipo) || "RECEPCION".equals(tipo))) {
             res.put("status", "error");
             res.put("message", "Tipo inválido. Use DEVOLUCIONES, DONACIONES o EXCESOS.");
             escribirJson(response, res);

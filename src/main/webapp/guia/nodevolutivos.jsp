@@ -15,7 +15,7 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>Recepción - Escaneo</title>
+        <title>No Devoluciones - Escaneo</title>
         <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
         <link href="<%=request.getContextPath()%>/css/dataTables.css" rel="stylesheet">
         <link href="<%=request.getContextPath()%>/guia/estilos.css" rel="stylesheet">
@@ -40,7 +40,7 @@
                 InfoDocMaterial infoDoc = (InfoDocMaterial) request.getAttribute("infoDoc");
             %>
 
-            <h1>Recepción</h1>
+            <h1>No Devolutivos</h1>
             <div class="card shadow-sm mb-3">
                 <div class="card-body p-4">
 
@@ -50,7 +50,8 @@
                     </div>
                     <% }%>
 
-                    <form method="post" action="<%=request.getContextPath()%>/Recepcion" class="row g-3 align-items-end">
+                    <!-- FORM: cargar documento -->
+                    <form method="post" action="<%=request.getContextPath()%>/NoDevolutivos" class="row g-3 align-items-end">
                         <input type="hidden" name="accion" value="cargarDocumento"/>
 
                         <div class="col-md-4">
@@ -71,7 +72,8 @@
                         </div>
                     </form>
 
-                    <form id="formScan" method="post" action="<%=request.getContextPath()%>/Recepcion">
+                    <!-- Form separado solo para scan, para que Enter haga POST scan -->
+                    <form id="formScan" method="post" action="<%=request.getContextPath()%>/NoDevolutivos">
                         <input type="hidden" name="accion" value="scan"/>
                         <input type="hidden" name="docMaterial" value="<%= doc == null ? "" : doc%>"/>
                     </form>
@@ -104,7 +106,7 @@
             <div class="d-flex justify-content-end mt-3">
                 <form id="formCerrarGuia"
                       method="post"
-                      action="<%=request.getContextPath()%>/Recepcion">
+                      action="<%=request.getContextPath()%>/NoDevolutivos">
 
                     <input type="hidden" name="accion" value="cerrarGuia">
                     <input type="hidden" name="docMaterial" value="<%= doc%>">
@@ -130,8 +132,8 @@
                                     <th>FC</th>
                                     <th>Presentación</th>
                                     <th class="text-end">Enviado</th>
-                                    <!--th class="text-end">Recibido</th>
-                                    <th class="text-end">Diferencia</th-->
+                                    <th class="text-end">Recibido</th>
+                                    <th class="text-end">Diferencia</th>
                                     <th class="text-center">Editar</th>
                                     <th class="text-end"></th>
 
@@ -151,14 +153,10 @@
                                     <td><%= r.getFactor()%></td>
                                     <td><%= r.getPresentacion()%></td>
                                     <td class="text-end"><%= r.getCantidadEsperada().intValue()%></td>
-                                    <!--td class="text-end"><%= r.getCantidadEscaneada().intValue()%></td>
-                                    <td class="text-end"><%= r.getDiferencia().intValue()%></td-->
+                                    <td class="text-end"><%= r.getCantidadEscaneada().intValue()%></td>
+                                    <td class="text-end"><%= r.getDiferencia().intValue()%></td>
                                     <% boolean esAdicional = "ADICIONAL".equalsIgnoreCase(r.getEstado());%>
                                     <td class="text-center">
-                                        <%
-                                            boolean ocultarEditar = r.getFactor() == 1;
-                                        %>
-                                        
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
                                                     type="button"
@@ -169,10 +167,8 @@
                                             </button>
 
                                             <div class="dropdown-menu p-2" style="min-width: 260px;">
-                                                
-                                                <% if (!ocultarEditar) {%>
                                                 <form method="post"
-                                                      action="<%=request.getContextPath()%>/Recepcion"
+                                                      action="<%=request.getContextPath()%>/NoDevolutivos"
                                                       class="d-flex flex-column gap-2">
 
                                                     <input type="hidden" name="accion" value="editar">
@@ -187,33 +183,28 @@
                                                                <%= (r.getIdDevolucion() == null ? "disabled" : "")%> >
                                                     </div>
 
-                                                    <input type="text" name="observacion"
-                                                           class="form-control form-control-sm cell-text"
-                                                           value="<%= r.getObservacion() == null ? "" : r.getObservacion()%>"
-                                                           placeholder="Observación..."
-                                                           <%= (r.getIdDevolucion() == null ? "disabled" : "")%> >
+                                                    <select name="incidenciaId" class="form-select form-select-sm cell-select"
+                                                            <%= (r.getIdDevolucion() == null ? "disabled" : "")%>>
 
-                                                    <div class="d-flex justify-content-end">
-                                                        <button type="submit"
-                                                                class="btn btn-sm btn-outline-primary btn-guardar"
-                                                                <%= (r.getIdDevolucion() == null ? "disabled" : "")%>>
+                                                        <option value="" <%= (r.getIncidenciaId() == null ? "selected" : "")%>>Sin incidencia</option>
 
-                                                            <span class="btn-text">Guardar</span>
-                                                            <span class="spinner-border spinner-border-sm d-none ms-1"
-                                                                  role="status" aria-hidden="true"></span>
-                                                        </button>
-                                                    </div>        
+                                                        <%
+                                                            for (Incidencia inc : incidencias) {
+                                                                if (inc.getEstado() != 1) {
+                                                                    continue;
+                                                                }
 
-                                                </form>
-                                                 <% } %>
-                                            <% if (ocultarEditar) {%>
-                                                <form method="post"
-                                                      action="<%=request.getContextPath()%>/Recepcion"
-                                                      class="d-flex flex-column gap-2">
+                                                                int idInc = inc.getId_incidencia();
+                                                                boolean selected = (r.getIncidenciaId() != null && r.getIncidenciaId() == idInc);
+                                                        %>
+                                                        <option value="<%= idInc%>" <%= selected ? "selected" : ""%>>
+                                                            <%= inc.getIncidencia()%>
+                                                        </option>
+                                                        <%
+                                                            }
+                                                        %>
+                                                    </select>
 
-                                                    <input type="hidden" name="accion" value="editar2">
-                                                    <input type="hidden" name="docMaterial" value="<%= doc%>">
-                                                    <input type="hidden" name="id" value="<%= r.getIdDevolucion() == null ? "" : r.getIdDevolucion()%>">
 
                                                     <input type="text" name="observacion"
                                                            class="form-control form-control-sm cell-text"
@@ -233,30 +224,15 @@
                                                     </div>        
 
                                                 </form>
-                                                 <% } %>            
-
-                                                <form method="post" action="<%=request.getContextPath()%>/Recepcion"
-                                                      onsubmit="return confirmarLimpiar(this);">
-                                                    <input type="hidden" name="accion" value="limpiar">
-                                                    <input type="hidden" name="docMaterial" value="<%= doc%>">
-                                                    <input type="hidden" name="id" value="<%= r.getIdDevolucion()%>">
-
-                                                    <button type="submit" class="btn btn-sm btn-outline-warning w-100">
-                                                        Limpiar escaneo (0)
-                                                    </button>
-                                                </form>
-
                                             </div>
                                         </div>
-                                        
 
                                         <% if (r.getIdDevolucion() == null) { %>
                                         <div class="small text-muted mt-1">Escanee este Producto para habilitar edición</div>
                                         <% } %>
-                                   
                                     </td>
                                     <td><% if (esAdicional && r.getIdDevolucion() != null) {%>
-                                        <form method="post" action="<%=request.getContextPath()%>/Recepcion"
+                                        <form method="post" action="<%=request.getContextPath()%>/NoDevolutivos"
                                               class="d-flex gap-2 justify-content-center align-items-center"
                                               onsubmit="return confirmarEliminar(this);">
                                             <input type="hidden" name="accion" value="eliminar">
@@ -321,6 +297,7 @@
             if (!scanner || scanner.disabled)
                 return;
 
+            // 🚫 Si está editando y no es forzado, NO mover foco
             if ((editandoFila || interactuandoTabla) && !force)
                 return;
 
@@ -328,6 +305,8 @@
             scanner.select();
         }
 
+
+        // Al cargar, foco al scanner si hay doc, sino al docMaterial
         setTimeout(function () {
             const scanner = document.getElementById("scanner");
             const doc = document.getElementById("docMaterial");
@@ -347,6 +326,7 @@
             }
         });
 
+        // Enter en scanner envía el formScan
         const scanner = document.getElementById("scanner");
         if (scanner) {
             scanner.addEventListener("keydown", function (e) {
@@ -415,6 +395,7 @@
                 bsDropdown.hide();
         }
 
+        // Solo para forms de edición (guardar)
         const btn = form.querySelector(".btn-guardar");
         if (!btn)
             return;
@@ -422,13 +403,16 @@
         const spinner = btn.querySelector(".spinner-border");
         const text = btn.querySelector(".btn-text");
 
+        // Activar spinner
         if (spinner)
             spinner.classList.remove("d-none");
         if (text)
             text.textContent = "Guardando...";
 
+        // Deshabilitar botón para evitar doble submit
         btn.disabled = true;
 
+        // Opcional: bloquear inputs de la fila
         const inputs = form.querySelectorAll("input, select");
         inputs.forEach(i => i.setAttribute("readonly", true));
     });
@@ -437,21 +421,14 @@
 
         const btnCerrar = document.getElementById("btnCerrarGuia");
         const formCerrar = document.getElementById("formCerrarGuia");
-        const form = document.querySelector("form[action$='/Recepcion']");
+        const form = document.querySelector("form[action$='/NoDevolutivos']");
         const spinner = document.getElementById("pageSpinner");
 
-        document.querySelectorAll("form[action$='/Recepcion']").forEach(f => {
-            f.addEventListener("submit", function () {
-              const accion = (f.querySelector("input[name='accion']")?.value || "").toLowerCase();
-
-              // ✅ Solo mostrar overlay en acciones pesadas
-              const accionesConOverlay = ["cargardocumento", "cerrarguia"];
-
-              if (accionesConOverlay.includes(accion)) {
+        if (form) {
+            form.addEventListener("submit", function () {
                 spinner.classList.remove("d-none");
-              }
             });
-          });
+        }
 
         if (!btnCerrar || !formCerrar)
             return;
@@ -489,7 +466,8 @@
 
     });
     
-        document.addEventListener("shown.bs.dropdown", function (e) {
+    document.addEventListener("shown.bs.dropdown", function (e) {
+  // e.target = botón
   const btn = e.target;
   const tr = btn.closest("tr");
   if (tr) tr.classList.add("no-hover");
@@ -501,6 +479,7 @@ document.addEventListener("hidden.bs.dropdown", function (e) {
   if (tr) tr.classList.remove("no-hover");
 });
 
+// Si el mouse está dentro del dropdown-menu, mantenemos no-hover
 document.addEventListener("mouseover", function (e) {
   const menu = e.target.closest(".dropdown-menu");
   if (!menu) return;
@@ -515,18 +494,6 @@ document.addEventListener("mouseleave", function (e) {
   if (tr) tr.classList.remove("no-hover");
 });
 
-function confirmarLimpiar(form){
-  Swal.fire({
-    title: '¿Limpiar a 0?',
-    text: 'Esto dejará la cantidad escaneada en cero para este producto.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, limpiar',
-    cancelButtonText: 'Cancelar'
-  }).then(r => { if(r.isConfirmed) form.submit(); });
-  return false;
-}
-    
         </script>
     </body>
 </html>

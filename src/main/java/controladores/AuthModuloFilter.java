@@ -5,6 +5,7 @@
 package controladores;
 
 import dao.AccesoDAO;
+import dao.HomeDAO;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,6 +16,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import modelos.Modulo;
 import modelos.Usuario;
 
 /**
@@ -25,6 +31,7 @@ import modelos.Usuario;
 public class AuthModuloFilter implements Filter {
 
     private final AccesoDAO accesoDAO = new AccesoDAO();
+    private final HomeDAO homeDAO = new HomeDAO();
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -37,8 +44,9 @@ public class AuthModuloFilter implements Filter {
 
         // 1) Permitir recursos públicos o estáticos
         if (path.startsWith("/css") || path.startsWith("/js") || path.startsWith("/image") || path.startsWith("/fonts")
-                || path.equals("/login") || path.equals("/logout") || path.equals("/componentes") || path.endsWith(".jsp")
-                || path.equals("/RolesServlet") || path.equals("/AccesosServlet") || path.equals("/ModulosServlet")
+                || path.equals("/login") || path.equals("/registro") || path.equals("/logout") || path.equals("/componentes") || path.endsWith(".jsp")
+                || path.equals("/RolesServlet") || path.equals("/AccesosServlet") || path.equals("/ModulosServlet")  || path.equals("/reaperturarDocMaterial")
+                || path.equals("/home") || path.equals("/DetalleGuia") || path.equals("/importarUsuariosExcel")  
                 || path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".json")
                 ) {
             chain.doFilter(req, res);
@@ -51,6 +59,16 @@ public class AuthModuloFilter implements Filter {
         if (usuario == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
+        }
+        
+        if (session.getAttribute("navModulos") == null && usuario != null) {
+            List<Modulo> modulos = null;
+            try {
+                modulos = homeDAO.obtenerModulosHome(usuario.getIdRol());
+            } catch (SQLException ex) {
+                Logger.getLogger(AuthModuloFilter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            session.setAttribute("navModulos", modulos);
         }
 
         try {

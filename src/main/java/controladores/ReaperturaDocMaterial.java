@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import modelos.Usuario;
@@ -35,8 +36,18 @@ public class ReaperturaDocMaterial extends HttpServlet {
         Map<String, Object> res = new HashMap<>();
 
         try {
-            Usuario user = (Usuario) request.getAttribute("usuario_auth");
-            int idUsuario = user.getIdUsuario();
+            
+             HttpSession sesion = request.getSession(false);
+
+            if (sesion == null || sesion.getAttribute("usuario") == null) {
+                res.put("status", "logout");
+                res.put("message", "Sesión expirada. Inicia sesión nuevamente.");
+                response.getWriter().write(gson.toJson(res));
+                return;
+            }
+
+            Usuario usuario = (Usuario) sesion.getAttribute("usuario");
+            int idUsuario = usuario.getIdUsuario();
 
             String docMaterial = request.getParameter("doc_material");
 

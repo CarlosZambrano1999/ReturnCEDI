@@ -18,7 +18,7 @@ public class RptUsuarioDAO {
      * Lista incidencias por usuario, tipo y rango de fechas (opcionales)
      *
      * @param idUsuario ID del usuario
-     * @param tipo 1=Devoluciones, 2=Donaciones, 3=Excesos
+     * @param tipo 1=Devoluciones, 2=Donaciones, 3=Excesos, 4=ND, 5= FARMACIAS
      * @param desde Fecha desde (puede ser null)
      * @param hasta Fecha hasta (puede ser null)
      * @return Lista de incidencias

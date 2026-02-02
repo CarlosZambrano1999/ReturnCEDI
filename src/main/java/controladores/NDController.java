@@ -6,13 +6,12 @@ package controladores;
 
 import dao.DevolucionesDAO;
 import dao.IncidenciaDAO;
-import dao.RecepcionDAO;
+import dao.NdDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
@@ -22,20 +21,19 @@ import modelos.Usuario;
  *
  * @author Administrador
  */
-@WebServlet(name = "RecepcionServlet", urlPatterns = {"/Recepcion"})
-public class RecepcionController extends HttpServlet {
+@WebServlet(name = "NDServlet", urlPatterns = {"/NoDevolutivos"})
+public class NDController extends HttpServlet {
 
     private final DevolucionesDAO dao = new DevolucionesDAO();
-    private final RecepcionDAO recepcionDAO = new RecepcionDAO();
+    private final NdDAO ndDAO = new NdDAO();
     private final IncidenciaDAO incidenciaDAO = new IncidenciaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        // Carga mínima para vista
+
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
-        request.getRequestDispatcher("/guia/recepcion.jsp").forward(request, response);
+        request.getRequestDispatcher("/guia/nodevolutivos.jsp").forward(request, response);
     }
 
     @Override
@@ -44,7 +42,7 @@ public class RecepcionController extends HttpServlet {
 
         String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
-        
+
         Usuario user = (Usuario) request.getAttribute("usuario_auth");
         int idUsuario = user.getIdUsuario();
 
@@ -72,12 +70,6 @@ public class RecepcionController extends HttpServlet {
                         render(request, response, -1, idUsuario);
                         return;
                     }
-                    
-                    if (info.getCentro() == null ? user.getCentro() != null : !info.getCentro().equals(user.getCentro())) {
-                        setMsg(request, "warning", "Esta guía pertenece a otra farmacia distinta a su centro." + user.getCentro() + " " + info.getCentro());
-                        render(request, response, -1, idUsuario);
-                        return;
-                    }
 
                     // Si está abierta, sí mandamos todo
                     request.setAttribute("infoDoc", info);
@@ -101,17 +93,15 @@ public class RecepcionController extends HttpServlet {
                         return;
                     }
 
-                    ResultadoOperacion r = recepcionDAO.registrarEscaneo(docMaterial, codigo.trim(), idUsuario, 1.0);
+                    ResultadoOperacion r = ndDAO.registrarEscaneo(docMaterial, codigo.trim(), idUsuario, 1.0);
 
                     if ("success".equalsIgnoreCase(r.getStatus())) {
                         setMsg(request, "success", r.getMessage());
-                    } else if ("not_found".equalsIgnoreCase(r.getStatus())
-                            || "not_in_doc".equalsIgnoreCase(r.getStatus())) {
+                    } else if ("not_found".equalsIgnoreCase(r.getStatus())) {
                         setMsg(request, "warning", r.getMessage());
                     } else {
                         setMsg(request, "error", r.getMessage());
                     }
-
 
                     render(request, response, docMaterial, idUsuario);
                     return;
@@ -131,7 +121,7 @@ public class RecepcionController extends HttpServlet {
                         return;
                     }
 
-                    
+                    // Si ya vas a usar enteros:
                     Integer cantidadInt = parseIntOrNull(request.getParameter("cantidad"));
                     if (cantidadInt == null || cantidadInt < 0) {
                         setMsg(request, "error", "La cantidad debe ser un número entero válido.");
@@ -139,36 +129,10 @@ public class RecepcionController extends HttpServlet {
                         return;
                     }
 
+                    Integer inc = parseIntOrNull(request.getParameter("incidenciaId"));
                     String obs = request.getParameter("observacion");
 
-                    ResultadoOperacion r = recepcionDAO.editarRecepcion(id, obs, cantidadInt);
-
-                    setMsg(request,
-                            "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
-                            r.getMessage());
-
-                    render(request, response, docMaterial, idUsuario);
-                    return;
-                }
-                
-                case "editar2": {
-                    if (docMaterial <= 0) {
-                        setMsg(request, "error", "Doc.Material inválido.");
-                        render(request, response, -1, idUsuario);
-                        return;
-                    }
-
-                    long id = parseLong(request.getParameter("id"), -1);
-                    if (id <= 0) {
-                        setMsg(request, "error", "No se pudo editar: ID inválido (escaneá primero).");
-                        render(request, response, docMaterial, idUsuario);
-                        return;
-                    }
-
-                   
-                    String obs = request.getParameter("observacion");
-
-                    ResultadoOperacion r = recepcionDAO.editarRecepcion(id, obs, -1);
+                    ResultadoOperacion r = ndDAO.editarND(id, cantidadInt, inc, obs);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
@@ -192,7 +156,7 @@ public class RecepcionController extends HttpServlet {
                         return;
                     }
 
-                    ResultadoOperacion r = recepcionDAO.eliminarExcesoAdicional(id, docMaterial, idUsuario);
+                    ResultadoOperacion r = ndDAO.eliminarNDAdicional(id, docMaterial, idUsuario);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
@@ -209,7 +173,7 @@ public class RecepcionController extends HttpServlet {
                         return;
                     }
 
-                    ResultadoOperacion r = recepcionDAO.cerrarGuia(docMaterial, idUsuario);
+                    ResultadoOperacion r = ndDAO.cerrarGuia(docMaterial, idUsuario);
 
                     setMsg(request,
                             "success".equalsIgnoreCase(r.getStatus()) ? "success" :
@@ -224,31 +188,6 @@ public class RecepcionController extends HttpServlet {
                     }
                     return;
                 }
-                
-                case "limpiar": {
-                    if (docMaterial <= 0) {
-                        setMsg(request, "error", "Doc.Material inválido.");
-                        render(request, response, -1, idUsuario);
-                        return;
-                    }
-
-                    long id = parseLong(request.getParameter("id"), -1);
-                    if (id <= 0) {
-                        setMsg(request, "error", "ID inválido para limpiar.");
-                        render(request, response, docMaterial, idUsuario);
-                        return;
-                    }
-
-                    ResultadoOperacion r = recepcionDAO.limpiarCantidadEscaneada(id, docMaterial, idUsuario);
-
-                    setMsg(request,
-                        "success".equalsIgnoreCase(r.getStatus()) ? "success" : "error",
-                        r.getMessage());
-
-                    render(request, response, docMaterial, idUsuario);
-                    return;
-                }
-
 
 
                 default: {
@@ -263,7 +202,9 @@ public class RecepcionController extends HttpServlet {
         }
     }
 
-
+    /**
+     * Carga todo lo que el JSP necesita y hace forward.
+     */
     private void render(HttpServletRequest request, HttpServletResponse response, long docMaterial, Integer idUsuario)
             throws ServletException, IOException {
 
@@ -280,11 +221,11 @@ public class RecepcionController extends HttpServlet {
 
             if (idUsuario != null) {
                 request.setAttribute("idUsuario", idUsuario);
-                request.setAttribute("comparativo", recepcionDAO.obtenerComparativoExt(docMaterial, idUsuario));
+                request.setAttribute("comparativo", ndDAO.obtenerComparativoExt(docMaterial, idUsuario));
             }
         }
 
-        request.getRequestDispatcher("/guia/recepcion.jsp").forward(request, response);
+        request.getRequestDispatcher("/guia/nodevolutivos.jsp").forward(request, response);
     }
 
     private void setMsg(HttpServletRequest request, String type, String msg) {

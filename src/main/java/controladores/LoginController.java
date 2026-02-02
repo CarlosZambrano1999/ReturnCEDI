@@ -4,6 +4,7 @@
  */
 package controladores;
 
+import dao.HomeDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,9 +12,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import modelos.Modulo;
 
 @WebServlet("/login")
 public class LoginController extends HttpServlet {
+    
+    private final HomeDAO homeDAO = new HomeDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -51,6 +59,13 @@ public class LoginController extends HttpServlet {
                 sesion.setAttribute("usuario", usuario);
                 sesion.setAttribute("nombre", usuario.getNombre());
                 sesion.setAttribute("rol", usuario.getIdRol());
+                List<Modulo> modulos = null;
+                try {
+                    modulos = homeDAO.obtenerModulosHome(usuario.getIdRol());
+                } catch (SQLException ex) {
+                    Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                sesion.setAttribute("navModulos", modulos);
 
                 // Redirigir al dashboard o página principal
                 response.sendRedirect(request.getContextPath() + "/home");

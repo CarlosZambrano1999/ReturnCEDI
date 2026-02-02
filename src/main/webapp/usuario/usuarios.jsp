@@ -11,6 +11,8 @@
 
         <!-- Bootstrap CSS -->
         <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
+        <link href="<%=request.getContextPath()%>/css/bootstrap-icons.css" rel="stylesheet">
+
 
         <!-- DataTables CSS (Bootstrap 5) -->
         <link rel="stylesheet" href="<%=request.getContextPath()%>/css/dataTables.css">
