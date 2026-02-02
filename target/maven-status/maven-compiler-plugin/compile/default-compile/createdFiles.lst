@@ -63,6 +63,7 @@ dao\NdDAO.class
 controladores\AuthModuloFilter.class
 controladores\LogoutController.class
 dao\DocMaterialDAO.class
+modelos\Versiculo.class
 dao\UsuarioDAO.class
 modelos\reportes\RptGuiasMayorIncidencia.class
 utilidades\PasswordUtil.class
@@ -72,6 +73,7 @@ controladores\RptDevolucionesController.class
 dao\ReportesDAO.class
 dao\ModuloDAO$ResultadoSP.class
 controladores\ReportNDController.class
+dao\VersiculoDAO.class
 modelos\DocMaterial.class
 controladores\HomeController.class
 dao\ExcesosDAO.class

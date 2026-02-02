@@ -6,6 +6,7 @@ package controladores;
 
 import dao.DevolucionesDAO;
 import dao.IncidenciaDAO;
+import dao.VersiculoDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
 import modelos.Usuario;
+import modelos.Versiculo;
 
 /**
  *
@@ -26,7 +28,10 @@ public class DevolucionesController extends HttpServlet {
 
     private final DevolucionesDAO dao = new DevolucionesDAO();
     private final IncidenciaDAO incidenciaDAO = new IncidenciaDAO();
+    private final VersiculoDAO verDAO = new VersiculoDAO();
+    
 
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -38,6 +43,9 @@ public class DevolucionesController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        Versiculo versiculo = verDAO.obtenerVersiculoAleatorio();
+        request.setAttribute("versiculoDelDia", versiculo);
+
 
         // Carga mínima para vista
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
@@ -218,6 +226,8 @@ public class DevolucionesController extends HttpServlet {
 
         // Siempre incidencias
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
+        Versiculo versiculo = verDAO.obtenerVersiculoAleatorio();
+        request.setAttribute("versiculoDelDia", versiculo);
 
         // Si hay doc, cargamos info + comparativo
         if (docMaterial > 0) {
