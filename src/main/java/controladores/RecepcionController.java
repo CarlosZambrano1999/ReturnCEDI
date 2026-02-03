@@ -7,6 +7,7 @@ package controladores;
 import dao.DevolucionesDAO;
 import dao.IncidenciaDAO;
 import dao.RecepcionDAO;
+import dao.VersiculoDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
 import modelos.Usuario;
+import modelos.Versiculo;
 
 /**
  *
@@ -27,12 +29,15 @@ public class RecepcionController extends HttpServlet {
     private final DevolucionesDAO dao = new DevolucionesDAO();
     private final RecepcionDAO recepcionDAO = new RecepcionDAO();
     private final IncidenciaDAO incidenciaDAO = new IncidenciaDAO();
+    private final VersiculoDAO verDAO = new VersiculoDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         // Carga mínima para vista
+        Versiculo versiculo = verDAO.obtenerVersiculoAleatorio();
+        request.setAttribute("versiculoDelDia", versiculo);
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
         request.getRequestDispatcher("/guia/recepcion.jsp").forward(request, response);
     }
@@ -268,6 +273,9 @@ public class RecepcionController extends HttpServlet {
 
         // Siempre incidencias
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
+        Versiculo versiculo = verDAO.obtenerVersiculoAleatorio();
+        request.setAttribute("versiculoDelDia", versiculo);
+
 
         // Si hay doc, cargamos info + comparativo
         if (docMaterial > 0) {

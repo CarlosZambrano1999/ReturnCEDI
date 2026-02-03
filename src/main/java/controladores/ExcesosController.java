@@ -7,6 +7,7 @@ package controladores;
 import dao.DevolucionesDAO;
 import dao.ExcesosDAO;
 import dao.IncidenciaDAO;
+import dao.VersiculoDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoOperacion;
 import modelos.Usuario;
+import modelos.Versiculo;
 
 /**
  *
@@ -28,10 +30,14 @@ public class ExcesosController extends HttpServlet {
     private final DevolucionesDAO dao = new DevolucionesDAO();
     private final ExcesosDAO excesosDAO = new ExcesosDAO();
     private final IncidenciaDAO incidenciaDAO = new IncidenciaDAO();
+    private final VersiculoDAO verDAO = new VersiculoDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        Versiculo versiculo = verDAO.obtenerVersiculoAleatorio();
+        request.setAttribute("versiculoDelDia", versiculo);
         
         // Carga mínima para vista
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
@@ -41,6 +47,8 @@ public class ExcesosController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        
 
         String accion = nvl(request.getParameter("accion"), "");
         long docMaterial = parseLong(request.getParameter("docMaterial"), -1);
@@ -70,6 +78,12 @@ public class ExcesosController extends HttpServlet {
                         // Guía cerrada -> NO traer datos
                         setMsg(request, "warning", "Esta guía ya fue completada y está cerrada.");
                         // Ojo: no mandamos docMaterial, comparativo, infoDoc
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
+                    
+                    if (info.getCentro() == null ? user.getCentro() != null : !info.getCentro().equals(user.getCentro())) {
+                        setMsg(request, "warning", "Esta guía pertenece a otra farmacia distinta a su centro." + user.getCentro() + " " + info.getCentro());
                         render(request, response, -1, idUsuario);
                         return;
                     }
@@ -213,6 +227,9 @@ public class ExcesosController extends HttpServlet {
 
         // Siempre incidencias
         request.setAttribute("incidencias", incidenciaDAO.listarIncidencias());
+        Versiculo versiculo = verDAO.obtenerVersiculoAleatorio();
+        request.setAttribute("versiculoDelDia", versiculo);
+
 
         // Si hay doc, cargamos info + comparativo
         if (docMaterial > 0) {

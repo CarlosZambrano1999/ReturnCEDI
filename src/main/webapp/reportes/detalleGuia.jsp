@@ -102,37 +102,50 @@ $(function () {
     }
 
     const table = $('#tblDetalle').DataTable({
-        paging: true,
-        searching: true,
-        ordering: true,
-        lengthChange: true,
-        responsive: false,
-        language: {
-            url: '<%=request.getContextPath()%>/js/es-ES.json'
-        },
-        dom: '<"d-flex flex-wrap gap-2 align-items-center justify-content-between mb-2"Bf>rt<"d-flex flex-wrap gap-2 align-items-center justify-content-between mt-2"lip>',
-        buttons: [
-            {
-                extend: 'excelHtml5',
-                title: 'Detalle Guía ' + docMaterial,
-                text: 'Exportar a Excel',
-                className: 'btn btn-rc-success'
-            }
-        ],
-        columns: [
-            { data: 'doc_material' },
-            { data: 'usuario' },
-            { data: 'codigo_sap' },
-            { data: 'codigo' },
-            { data: 'producto' },
-            { data: 'enviado', className: 'text-center' },
-            { data: 'recibido', className: 'text-center' },
-            { data: 'farmacia' },
-            { data: 'incidencia' },
-            { data: 'observacion' },
-            { data: 'fecha_scan' }
-        ]
-    });
+    paging: true,
+    searching: true,
+    ordering: true,
+    lengthChange: true,
+    responsive: false,
+    language: {
+        url: '<%=request.getContextPath()%>/js/es-ES.json'
+    },
+    dom: '<"d-flex flex-wrap gap-2 align-items-center justify-content-between mb-2"Bf>rt<"d-flex flex-wrap gap-2 align-items-center justify-content-between mt-2"lip>',
+    buttons: [
+        {
+            extend: 'excelHtml5',
+            title: 'Detalle Guía ' + docMaterial,
+            text: 'Exportar a Excel',
+            className: 'btn btn-rc-success'
+        }
+    ],
+    columns: [
+        { data: 'doc_material' },
+        { data: 'usuario' },
+        { data: 'codigo_sap' },
+        { data: 'codigo' },
+        { data: 'producto' },
+        { data: 'enviado', className: 'text-center' },
+        { data: 'recibido', className: 'text-center' },
+        { data: 'farmacia' },
+        { data: 'incidencia' },
+        { data: 'observacion' },
+        { data: 'fecha_scan' }
+    ],
+
+    // 👇 AQUÍ LA MAGIA
+    rowCallback: function (row, data) {
+
+        const enviado  = Number(data.enviado) || 0;
+        const recibido = Number(data.recibido) || 0;
+        const incidencia = data.incidencia && data.incidencia.trim() !== '';
+
+        if (incidencia || enviado !== recibido) {
+            $(row).addClass('table-danger');
+        }
+    }
+});
+
 
     function cargar() {
         $.post(endpoint, { doc: docMaterial, tipo: tipo })

@@ -257,18 +257,18 @@
                     </div>
                 </div>
             </div>
-                            
-                            <%
+
+            <%
                 Versiculo v = (Versiculo) request.getAttribute("versiculoDelDia");
             %>
 
-            <% if (v != null) { %>
+            <% if (v != null) {%>
             </br>
-                <div class="card p-4 text-center">
-                    <div class="fst-italic mb-2"><%= v.getVersiculo() %></div>
-                    <div class="fw-bold text-muted"><%= v.getCita() %></div>
-                </div>
-            <% } %>
+            <div class="card p-4 text-center">
+                <div class="fst-italic mb-2"><%= v.getVersiculo()%></div>
+                <div class="fw-bold text-muted"><%= v.getCita()%></div>
+            </div>
+            <% }%>
 
 
         </div>

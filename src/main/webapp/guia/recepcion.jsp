@@ -4,6 +4,7 @@
     Author     : Administrador
 --%>
 
+<%@page import="modelos.Versiculo"%>
 <%@page import="modelos.InfoDocMaterial"%>
 <%@page import="modelos.Incidencia"%>
 <%@page import="java.util.ArrayList"%>
@@ -281,6 +282,18 @@
                     </div>
                 </div>
             </div>
+                            
+                            <%
+                Versiculo v = (Versiculo) request.getAttribute("versiculoDelDia");
+            %>
+
+            <% if (v != null) {%>
+            </br>
+            <div class="card p-4 text-center">
+                <div class="fst-italic mb-2"><%= v.getVersiculo()%></div>
+                <div class="fw-bold text-muted"><%= v.getCita()%></div>
+            </div>
+            <% }%>
 
         </div>
                             
@@ -305,8 +318,15 @@
     let interactuandoTabla = false;
     let dropdownAbierto = false;
     let inputCantidadActivo = null;
+    let swalAbierto = false;
+    
+    function haySweetAlertAbierto() {
+        return swalAbierto || !!document.querySelector(".swal2-container.swal2-shown");
+      }
     
     function keepFocus(force = false) {
+        if (haySweetAlertAbierto()) return;
+        
   const scanner = document.getElementById("scanner");
   if (!scanner || scanner.disabled) return;
 
@@ -355,6 +375,7 @@
 
         document.addEventListener("click", function () {
             if (dropdownAbierto) return;
+            if (haySweetAlertAbierto()) return;
             setTimeout(keepFocus, 30);
         });
         
@@ -530,7 +551,9 @@
         cancelButtonColor: '#6c757d',
         confirmButtonText: 'Sí, cerrar guía',
         cancelButtonText: 'Cancelar',
-        reverseButtons: true
+        reverseButtons: true,
+        didOpen: () => { swalAbierto = true; },
+  didClose: () => { swalAbierto = false; setTimeout(() => keepFocus(true), 80); }
     }).then((result) => {
         if (result.isConfirmed) {
 
@@ -540,8 +563,13 @@
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 didOpen: () => {
+                    swalAbierto = true;
                     Swal.showLoading();
-                }
+                },
+            didClose: () => {
+              swalAbierto = false;
+              setTimeout(() => keepFocus(true), 80);
+            }
             });
 
             formCerrar.submit(); // POST normal al servlet
@@ -675,7 +703,9 @@ function confirmarLimpiar(form){
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Sí, limpiar',
-    cancelButtonText: 'Cancelar'
+    cancelButtonText: 'Cancelar',
+    didOpen: () => { swalAbierto = true; },
+    didClose: () => { swalAbierto = false; setTimeout(() => keepFocus(true), 80); }
   }).then(r => { if(r.isConfirmed) form.submit(); });
   return false;
 }

@@ -86,6 +86,12 @@ public class DevolucionesController extends HttpServlet {
                         render(request, response, -1, idUsuario);
                         return;
                     }
+                    
+                    if (info.getCentro() == null ? user.getCentro() != null : !info.getCentro().equals(user.getCentro())) {
+                        setMsg(request, "warning", "Esta guía pertenece a otra farmacia distinta a su centro." + user.getCentro() + " " + info.getCentro());
+                        render(request, response, -1, idUsuario);
+                        return;
+                    }
 
                     // Si está abierta, sí mandamos todo
                     request.setAttribute("infoDoc", info);
