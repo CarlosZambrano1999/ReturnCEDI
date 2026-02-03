@@ -301,6 +301,30 @@
 
         <script>
             
+            let editandoFila = false;
+    let interactuandoTabla = false;
+    let dropdownAbierto = false;
+    let inputCantidadActivo = null;
+    
+    function keepFocus(force = false) {
+  const scanner = document.getElementById("scanner");
+  if (!scanner || scanner.disabled) return;
+
+  // ✅ Si hay dropdown abierto, el foco DEBE quedarse en cantidad
+  if (dropdownAbierto) {
+    if (inputCantidadActivo && !inputCantidadActivo.disabled) {
+      inputCantidadActivo.focus({ preventScroll: true });
+      inputCantidadActivo.select?.();
+    }
+    return;
+  }
+
+  if ((editandoFila || interactuandoTabla) && !force) return;
+
+  scanner.focus({ preventScroll: true });
+  scanner.select?.();
+}
+            
             const LAST_CODIGO = "<%= request.getAttribute("lastCodigo") == null ? "" : request.getAttribute("lastCodigo").toString() %>";
             $(function () {
                 $("#tabla").DataTable({
@@ -318,19 +342,7 @@
         }
     });
 
-        // Mantener foco siempre en scanner si doc existe
-        function keepFocus(force = false) {
-            const scanner = document.getElementById("scanner");
-            if (!scanner || scanner.disabled)
-                return;
-
-            if ((editandoFila || interactuandoTabla) && !force)
-                return;
-
-            scanner.focus();
-            scanner.select();
-        }
-
+        
         setTimeout(function () {
             const scanner = document.getElementById("scanner");
             const doc = document.getElementById("docMaterial");
@@ -341,8 +353,18 @@
         }, 50);
 
         document.addEventListener("click", function () {
+            if (dropdownAbierto) return;
             setTimeout(keepFocus, 30);
         });
+        
+        document.getElementById("scanner")?.addEventListener("focus", () => {
+            if (!dropdownAbierto) return;
+
+            if (inputCantidadActivo && !inputCantidadActivo.disabled) {
+              inputCantidadActivo.focus({ preventScroll: true });
+              inputCantidadActivo.select?.();
+            }
+          });
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 editandoFila = false;
@@ -369,8 +391,7 @@
         }
     }, 80);
 
-    let editandoFila = false;
-    let interactuandoTabla = false;
+    
 
     document.addEventListener("focusin", (e) => {
         if (
@@ -397,14 +418,19 @@
 
     document.addEventListener("focusout", (e) => {
         if (
-                e.target.classList.contains("cell-input") ||
-                e.target.classList.contains("cell-select") ||
-                e.target.classList.contains("cell-text")
-                ) {
-            editandoFila = false;
-            setTimeout(() => keepFocus(true), 80);
+          e.target.classList.contains("cell-input") ||
+          e.target.classList.contains("cell-select") ||
+          e.target.classList.contains("cell-text")
+        ) {
+          editandoFila = false;
+
+          // ✅ si dropdown está abierto, NO regreses al scanner
+          if (dropdownAbierto) return;
+
+          setTimeout(() => keepFocus(true), 80);
         }
-    });
+      });
+
 
     document.addEventListener("submit", function (e) {
         const form = e.target;
@@ -571,15 +597,31 @@ if (!LAST_CODIGO) return;
     });
     
         document.addEventListener("shown.bs.dropdown", function (e) {
-  const btn = e.target;
-  const tr = btn.closest("tr");
-  if (tr) tr.classList.add("no-hover");
-});
+            dropdownAbierto = true;
+
+            const btn = e.target;        // toggle
+            const tr = btn.closest("tr");
+            if (!tr) return;
+
+            inputCantidadActivo = tr.querySelector('.dropdown-menu input[name="cantidad"]');
+
+            if (inputCantidadActivo && !inputCantidadActivo.disabled) {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  inputCantidadActivo.focus({ preventScroll: true });
+                  inputCantidadActivo.select?.();
+                });
+              });
+            }
+          });
 
 document.addEventListener("hidden.bs.dropdown", function (e) {
   const btn = e.target;
   const tr = btn.closest("tr");
   if (tr) tr.classList.remove("no-hover");
+  dropdownAbierto = false;
+  inputCantidadActivo = null;
+  setTimeout(() => keepFocus(true), 30);
 });
 
 document.addEventListener("mouseover", function (e) {
