@@ -329,7 +329,7 @@
             $(function () {
                 $("#tabla").DataTable({
         ordering: true,
-        pageLength: 10,
+        pageLength: 50,
         order: [], // sin orden inicial
         scrollX: true,          // ✅ clave
         autoWidth: false,       // ✅ evita cálculos raros
@@ -338,6 +338,7 @@
             url: '<%=request.getContextPath()%>/js/es-ES.json'
         },
         drawCallback: function () {
+             forzarScrollDerecha();
             keepFocus();
         }
     });
@@ -574,6 +575,35 @@ if (!LAST_CODIGO) return;
 
     // Scroll a la fila (opcional)
     fila.scrollIntoView({ behavior: "smooth", block: "center" });
+    
+    function dtScrollBody() {
+    return document.querySelector("#tabla_wrapper .dataTables_scrollBody");
+    }
+
+    function forzarScrollDerecha() {
+    const sb = dtScrollBody();
+    if (!sb) return;
+
+    // al final (lado derecho)
+    sb.scrollLeft = sb.scrollWidth;
+    }
+
+    // ✅ 1) al cargar
+    setTimeout(forzarScrollDerecha, 0);
+    setTimeout(forzarScrollDerecha, 50);
+    setTimeout(forzarScrollDerecha, 150);
+
+    // ✅ 2) cada vez que DataTables redibuja (paginación, filtro, order, etc.)
+    $(document).on("draw.dt", "#tabla", function () {
+    // esperar un tick para que DataTables termine de ajustar anchos
+    requestAnimationFrame(() => forzarScrollDerecha());
+    });
+
+    // ✅ 3) al cambiar tamaño (móvil rota, etc.)
+    window.addEventListener("resize", () => {
+    clearTimeout(window.__dtR);
+    window.__dtR = setTimeout(forzarScrollDerecha, 120);
+    });
 
     // Si FC es distinto de 1 → abrir dropdown y enfocar cantidad
     if (!Number.isNaN(fc) && fc !== 1) {
