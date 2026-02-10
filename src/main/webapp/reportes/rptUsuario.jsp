@@ -93,7 +93,7 @@
                             <th>PRODUCTO</th>
                             <th class="text-center">ENVIADO</th>
                             <th class="text-center">RECIBIDO</th>
-                            <th>FARMACIA</th>
+                            <th>ENVIADO POR</th>
                             <th>INCIDENCIA</th>
                             <th>OBSERVACION</th>
                             <th>FECHA_SCAN</th>
