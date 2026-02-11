@@ -79,7 +79,7 @@ public class NdDAO {
             try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) {
                     ComparativoDocMaterialRow r = new ComparativoDocMaterialRow();
-                    r.setCodigoSap(rs.getString("CODIGO_SAP"));
+                    r.setCodigoSap(rs.getString("CODIGO_EAN"));
                     r.setDescripcion(rs.getString("DESCRIPCION"));
                     r.setCantidadEsperada(rs.getBigDecimal("CANTIDAD_ESPERADA"));
                     r.setCantidadEscaneada(rs.getBigDecimal("CANTIDAD_ESCANEADA"));

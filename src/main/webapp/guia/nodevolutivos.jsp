@@ -42,8 +42,8 @@
             %>
 
             <h1>No Devolutivos</h1>
-            <div class="card shadow-sm mb-3">
-                <div class="card-body p-4">
+            <div class="row shadow-sm mb-3" style="background-color: white; border-radius:15px;">
+                <div class="p-4 col-6">
 
                     <% if (msg != null && !msg.trim().isEmpty()) {%>
                     <div class="alert alert-<%= "success".equals(msgType) ? "success" : ("warning".equals(msgType) ? "warning" : "danger")%>">
@@ -80,29 +80,31 @@
                     </form>
 
                 </div>
-            </div>
 
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                    <h6 class="mb-3">Información del Documento</h6>
+                <div class="col-6 p-4">
+                    <div class="">
+                        <h6 class="mb-3">Información del Documento</h6>
 
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="text-muted small">Almacén</div>
-                            <div class="fw-bold"><%= (infoDoc == null ? "—" : infoDoc.getAlmacen())%></div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="text-muted small">Almacén</div>
+                                <div class="fw-bold"><%= (infoDoc == null ? "—" : infoDoc.getAlmacen())%></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Departamento</div>
+                                <div class="fw-bold"><%= (infoDoc == null ? "—" : infoDoc.getDepartamento())%></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted small">Farmacia</div>
+                                <div class="fw-bold"><%= (infoDoc == null ? "—" : infoDoc.getFarmacia())%></div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-muted small">Departamento</div>
-                            <div class="fw-bold"><%= (infoDoc == null ? "—" : infoDoc.getDepartamento())%></div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-muted small">Farmacia</div>
-                            <div class="fw-bold"><%= (infoDoc == null ? "—" : infoDoc.getFarmacia())%></div>
-                        </div>
+
                     </div>
-
                 </div>
             </div>
+
+
             <% if (doc != null) {%>
             <div class="d-flex justify-content-end mt-3">
                 <form id="formCerrarGuia"
@@ -128,7 +130,7 @@
                             <thead>
                                 <tr>
                                     <th>Estado</th>
-                                    <th>Código SAP</th>
+                                    <th>Código</th>
                                     <th>Descripción</th>
                                     <th>FC</th>
                                     <th>Presentación</th>
@@ -229,7 +231,7 @@
                                         </div>
 
                                         <% if (r.getIdDevolucion() == null) { %>
-                                        <div class="small text-muted mt-1">Escanee este Producto para habilitar edición</div>
+                                        <div class="small text-muted mt-1"></div>
                                         <% } %>
                                     </td>
                                     <td><% if (esAdicional && r.getIdDevolucion() != null) {%>
@@ -257,8 +259,8 @@
                     </div>
                 </div>
             </div>
-                            
-                            <%
+
+            <%
                 Versiculo v = (Versiculo) request.getAttribute("versiculoDelDia");
             %>
 
@@ -271,13 +273,13 @@
             <% }%>
 
         </div>
-                            
-                            <!-- Overlay Spinner -->
-<div id="pageSpinner" class="spinner-overlay d-none">
-    <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
-        <span class="visually-hidden">Cargando...</span>
-    </div>
-</div>
+
+        <!-- Overlay Spinner -->
+        <div id="pageSpinner" class="spinner-overlay d-none">
+            <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
 
 
         <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
@@ -288,224 +290,434 @@
 
 
         <script>
-            $(function () {
-                $("#tabla").DataTable({
+
+let editandoFila = false;
+let interactuandoTabla = false;
+let dropdownAbierto = false;
+let inputCantidadActivo = null;
+let swalAbierto = false;
+
+function haySweetAlertAbierto() {
+    return swalAbierto || !!document.querySelector(".swal2-container.swal2-shown");
+}
+
+function keepFocus(force = false) {
+    if (haySweetAlertAbierto())
+        return;
+
+    const scanner = document.getElementById("scanner");
+    if (!scanner || scanner.disabled)
+        return;
+
+    // ✅ Si hay dropdown abierto, el foco DEBE quedarse en cantidad
+    if (dropdownAbierto) {
+        if (inputCantidadActivo && !inputCantidadActivo.disabled) {
+            inputCantidadActivo.focus({preventScroll: true});
+            inputCantidadActivo.select?.();
+        }
+        return;
+    }
+
+    if ((editandoFila || interactuandoTabla) && !force)
+        return;
+
+    scanner.focus({preventScroll: true});
+    scanner.select?.();
+}
+
+const LAST_CODIGO = "<%= request.getAttribute("lastCodigo") == null ? "" : request.getAttribute("lastCodigo").toString()%>";
+$(function () {
+    $("#tabla").DataTable({
         ordering: true,
-        pageLength: 10,
+        pageLength: 50,
         order: [], // sin orden inicial
-        scrollX: true,          // ✅ clave
-        autoWidth: false,       // ✅ evita cálculos raros
-        responsive: false,      
+        scrollX: true, // ✅ clave
+        autoWidth: false, // ✅ evita cálculos raros
+        responsive: false,
         language: {
             url: '<%=request.getContextPath()%>/js/es-ES.json'
         },
         drawCallback: function () {
+            forzarScrollDerecha();
             keepFocus();
         }
     });
 
-        // Mantener foco siempre en scanner si doc existe
-        function keepFocus(force = false) {
-            const scanner = document.getElementById("scanner");
-            if (!scanner || scanner.disabled)
-                return;
-
-            // 🚫 Si está editando y no es forzado, NO mover foco
-            if ((editandoFila || interactuandoTabla) && !force)
-                return;
-
-            scanner.focus();
-            scanner.select();
-        }
-
-
-        // Al cargar, foco al scanner si hay doc, sino al docMaterial
-        setTimeout(function () {
-            const scanner = document.getElementById("scanner");
-            const doc = document.getElementById("docMaterial");
-            if (scanner && !scanner.disabled)
-                keepFocus();
-            else if (doc)
-                doc.focus();
-        }, 50);
-
-        document.addEventListener("click", function () {
-            setTimeout(keepFocus, 30);
-        });
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-                editandoFila = false;
-                keepFocus(true);
-            }
-        });
-
-        // Enter en scanner envía el formScan
-        const scanner = document.getElementById("scanner");
-        if (scanner) {
-            scanner.addEventListener("keydown", function (e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    document.getElementById("formScan").submit();
-                }
-            });
-        }
-    });
 
     setTimeout(function () {
         const scanner = document.getElementById("scanner");
-        if (scanner && !scanner.disabled) {
-            scanner.focus();
-            scanner.select();
-        }
-    }, 80);
+        const doc = document.getElementById("docMaterial");
+        if (scanner && !scanner.disabled)
+            keepFocus();
+        else if (doc)
+            doc.focus();
+    }, 50);
 
-    let editandoFila = false;
-    let interactuandoTabla = false;
-
-    document.addEventListener("focusin", (e) => {
-        if (
-                e.target.classList.contains("cell-input") ||
-                e.target.classList.contains("cell-select") ||
-                e.target.classList.contains("cell-text")
-                ) {
-            editandoFila = true;
-        }
+    document.addEventListener("click", function () {
+        if (dropdownAbierto)
+            return;
+        if (haySweetAlertAbierto())
+            return;
+        setTimeout(keepFocus, 30);
     });
 
-    document.addEventListener("mousedown", function (e) {
-        const tabla = document.getElementById("tabla");
-        const card = document.getElementById("cardPrincipal");
-        if (!tabla)
+    document.getElementById("scanner")?.addEventListener("focus", () => {
+        if (!dropdownAbierto)
             return;
 
-        if (tabla.contains(e.target) || card.contains(e.target)) {
-            interactuandoTabla = true;
-        } else {
-            interactuandoTabla = false;
+        if (inputCantidadActivo && !inputCantidadActivo.disabled) {
+            inputCantidadActivo.focus({preventScroll: true});
+            inputCantidadActivo.select?.();
         }
     });
-
-    document.addEventListener("focusout", (e) => {
-        if (
-                e.target.classList.contains("cell-input") ||
-                e.target.classList.contains("cell-select") ||
-                e.target.classList.contains("cell-text")
-                ) {
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
             editandoFila = false;
-            setTimeout(() => keepFocus(true), 80);
+            keepFocus(true);
         }
     });
 
-    document.addEventListener("submit", function (e) {
-        const form = e.target;
-        const dropdown = form.closest(".dropdown-menu");
+    const scanner = document.getElementById("scanner");
+    if (scanner) {
+        scanner.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                document.getElementById("formScan").submit();
+            }
+        });
+    }
+});
 
-        if (dropdown) {
-            const bsDropdown = bootstrap.Dropdown.getInstance(
-                    dropdown.previousElementSibling
-                    );
-            if (bsDropdown)
-                bsDropdown.hide();
-        }
+setTimeout(function () {
+    const scanner = document.getElementById("scanner");
+    if (scanner && !scanner.disabled) {
+        scanner.focus();
+        scanner.select();
+    }
+}, 80);
 
-        // Solo para forms de edición (guardar)
-        const btn = form.querySelector(".btn-guardar");
-        if (!btn)
+
+
+document.addEventListener("focusin", (e) => {
+    if (
+            e.target.classList.contains("cell-input") ||
+            e.target.classList.contains("cell-select") ||
+            e.target.classList.contains("cell-text")
+            ) {
+        editandoFila = true;
+    }
+});
+
+document.addEventListener("mousedown", function (e) {
+    const tabla = document.getElementById("tabla");
+    const card = document.getElementById("cardPrincipal");
+    if (!tabla)
+        return;
+
+    if (tabla.contains(e.target) || card.contains(e.target)) {
+        interactuandoTabla = true;
+    } else {
+        interactuandoTabla = false;
+    }
+});
+
+document.addEventListener("focusout", (e) => {
+    if (
+            e.target.classList.contains("cell-input") ||
+            e.target.classList.contains("cell-select") ||
+            e.target.classList.contains("cell-text")
+            ) {
+        editandoFila = false;
+
+        // ✅ si dropdown está abierto, NO regreses al scanner
+        if (dropdownAbierto)
             return;
 
-        const spinner = btn.querySelector(".spinner-border");
-        const text = btn.querySelector(".btn-text");
+        setTimeout(() => keepFocus(true), 80);
+    }
+});
 
-        // Activar spinner
-        if (spinner)
-            spinner.classList.remove("d-none");
-        if (text)
-            text.textContent = "Guardando...";
 
-        // Deshabilitar botón para evitar doble submit
-        btn.disabled = true;
+document.addEventListener("submit", function (e) {
+    const form = e.target;
+    const dropdown = form.closest(".dropdown-menu");
 
-        // Opcional: bloquear inputs de la fila
-        const inputs = form.querySelectorAll("input, select");
-        inputs.forEach(i => i.setAttribute("readonly", true));
-    });
+    if (dropdown) {
+        const bsDropdown = bootstrap.Dropdown.getInstance(
+                dropdown.previousElementSibling
+                );
+        if (bsDropdown)
+            bsDropdown.hide();
+    }
 
-    document.addEventListener("DOMContentLoaded", function () {
+    const btn = form.querySelector(".btn-guardar");
+    if (!btn)
+        return;
 
-        const btnCerrar = document.getElementById("btnCerrarGuia");
-        const formCerrar = document.getElementById("formCerrarGuia");
-        const form = document.querySelector("form[action$='/NoDevolutivos']");
-        const spinner = document.getElementById("pageSpinner");
+    const spinner = btn.querySelector(".spinner-border");
+    const text = btn.querySelector(".btn-text");
 
-        if (form) {
-            form.addEventListener("submit", function () {
+    if (spinner)
+        spinner.classList.remove("d-none");
+    if (text)
+        text.textContent = "Guardando...";
+
+    btn.disabled = true;
+
+    const inputs = form.querySelectorAll("input, select");
+    inputs.forEach(i => i.setAttribute("readonly", true));
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btnCerrar = document.getElementById("btnCerrarGuia");
+    const formCerrar = document.getElementById("formCerrarGuia");
+    const form = document.querySelector("form[action$='/NoDevolutivos']");
+    const spinner = document.getElementById("pageSpinner");
+
+    document.querySelectorAll("form[action$='/NoDevolutivos']").forEach(f => {
+        f.addEventListener("submit", function () {
+            const accion = (f.querySelector("input[name='accion']")?.value || "").toLowerCase();
+
+            // ✅ Solo mostrar overlay en acciones pesadas
+            const accionesConOverlay = ["cargardocumento", "cerrarguia"];
+
+            if (accionesConOverlay.includes(accion)) {
                 spinner.classList.remove("d-none");
-            });
-        }
+            }
+        });
+    });
 
-        if (!btnCerrar || !formCerrar)
-            return;
+    if (!btnCerrar || !formCerrar)
+        return;
 
-        btnCerrar.addEventListener("click", function () {
+    btnCerrar.addEventListener("click", function () {
 
-            Swal.fire({
-                title: '¿Cerrar la guía?',
-                text: 'Una vez cerrada no podrás seguir escaneando ni editando información.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, cerrar guía',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
+        // 1) Detectar si hay estados NO OK
+        const estadosNoOK = Array.from(document.querySelectorAll("#tabla tbody .state-pill"))
+                .map(el => (el.textContent || "").trim().toUpperCase())
+                .filter(txt => txt && txt !== "OK");
 
-                    Swal.fire({
-                        title: 'Cerrando guía...',
-                        text: 'Por favor espera',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        didOpen: () => {
-                            Swal.showLoading();
+        const hayNoOK = estadosNoOK.length > 0;
+
+        // 2) (Opcional) Contar por tipo para mostrarlo bonito
+        const conteo = estadosNoOK.reduce((acc, s) => {
+            acc[s] = (acc[s] || 0) + 1;
+            return acc;
+        }, {});
+
+        const detalle = Object.keys(conteo)
+                .sort()
+                .map(k => `${k}: ${conteo[k]}`)
+                                    .join(" • ");
+
+                            // 3) Configurar el mensaje según el caso
+                            const config = hayNoOK
+                                    ? {
+                                        title: '¿Cerrar la guía con incidencias?',
+                                        html:
+                                                '⚠️ Hay productos con estado <b>FALTANE o SOBRANTE</b>.<br>' +
+                                                (detalle ? `<div class="mt-2 small text-muted">${detalle}</div>` : '') +
+                                                '<div class="mt-2">Si cierras la guía, no podrás seguir escaneando ni editando información.</div>',
+                                        icon: 'warning'
+                                    }
+                            : {
+                                title: '¿Cerrar la guía?',
+                                text: 'Una vez cerrada no podrás seguir escaneando ni editando información.',
+                                icon: 'warning'
+                            };
+
+                            // 4) Mostrar la alerta (una sola, con contenido dinámico)
+                            Swal.fire({
+                                ...config,
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#6c757d',
+                                confirmButtonText: 'Sí, cerrar guía',
+                                cancelButtonText: 'Cancelar',
+                                reverseButtons: true,
+                                didOpen: () => {
+                                    swalAbierto = true;
+                                },
+                                didClose: () => {
+                                    swalAbierto = false;
+                                    setTimeout(() => keepFocus(true), 80);
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+
+                                    Swal.fire({
+                                        title: 'Cerrando guía...',
+                                        text: 'Por favor espera',
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false,
+                                        didOpen: () => {
+                                            swalAbierto = true;
+                                            Swal.showLoading();
+                                        },
+                                        didClose: () => {
+                                            swalAbierto = false;
+                                            setTimeout(() => keepFocus(true), 80);
+                                        }
+                                    });
+
+                                    formCerrar.submit(); // POST normal al servlet
+                                }
+                            });
+
+                        });
+
+                        if (!LAST_CODIGO)
+                            return;
+
+                        const tabla = document.querySelector("#tabla tbody");
+                        if (!tabla)
+                            return;
+
+                        // Buscar la fila cuyo "Código EAN" (2da columna) coincida con el escaneo
+                        const filas = Array.from(tabla.querySelectorAll("tr"));
+
+                        const fila = filas.find(tr => {
+                            const tds = tr.querySelectorAll("td");
+                            if (tds.length < 4)
+                                return false;
+
+                            const codigoTabla = (tds[1].textContent || "").trim(); // col 2: Código EAN
+                            return codigoTabla === LAST_CODIGO.trim();
+                        });
+
+                        if (!fila)
+                            return;
+
+                        // Leer FC (col 4)
+                        const tds = fila.querySelectorAll("td");
+                        const fcTxt = (tds[3].textContent || "").trim(); // col 4: FC
+                        const fc = Number(fcTxt);
+
+                        // Scroll a la fila (opcional)
+                        fila.scrollIntoView({behavior: "smooth", block: "center"});
+
+                        function dtScrollBody() {
+                            return document.querySelector("#tabla_wrapper .dataTables_scrollBody");
+                        }
+
+                        function forzarScrollDerecha() {
+                            const sb = dtScrollBody();
+                            if (!sb)
+                                return;
+
+                            // al final (lado derecho)
+                            sb.scrollLeft = sb.scrollWidth;
+                        }
+
+                        // ✅ 1) al cargar
+                        setTimeout(forzarScrollDerecha, 0);
+                        setTimeout(forzarScrollDerecha, 50);
+                        setTimeout(forzarScrollDerecha, 150);
+
+                        // ✅ 2) cada vez que DataTables redibuja (paginación, filtro, order, etc.)
+                        $(document).on("draw.dt", "#tabla", function () {
+                            // esperar un tick para que DataTables termine de ajustar anchos
+                            requestAnimationFrame(() => forzarScrollDerecha());
+                        });
+
+                        // ✅ 3) al cambiar tamaño (móvil rota, etc.)
+                        window.addEventListener("resize", () => {
+                            clearTimeout(window.__dtR);
+                            window.__dtR = setTimeout(forzarScrollDerecha, 120);
+                        });
+
+                        // Si FC es distinto de 1 → abrir dropdown y enfocar cantidad
+                        if (!Number.isNaN(fc) && fc !== 1) {
+
+                            const btnToggle = fila.querySelector(".dropdown .dropdown-toggle");
+                            if (!btnToggle || btnToggle.disabled)
+                                return;
+
+                            // Abrir dropdown Bootstrap 5
+                            const dd = bootstrap.Dropdown.getOrCreateInstance(btnToggle);
+                            dd.show();
+
+                            // Esperar a que se pinte el menú y enfocar input cantidad
+                            setTimeout(() => {
+                                const inputCantidad = fila.querySelector('.dropdown-menu input[name="cantidad"]');
+                                if (inputCantidad && !inputCantidad.disabled) {
+                                    inputCantidad.focus();
+                                    inputCantidad.select(); // opcional: selecciona el valor para escribir rápido
+                                }
+                            }, 50);
                         }
                     });
 
-                    formCerrar.submit(); // 👉 POST normal al servlet
-                }
-            });
+                    document.addEventListener("shown.bs.dropdown", function (e) {
+                        dropdownAbierto = true;
 
-        });
+                        const btn = e.target;        // toggle
+                        const tr = btn.closest("tr");
+                        if (!tr)
+                            return;
 
-    });
-    
-    document.addEventListener("shown.bs.dropdown", function (e) {
-  // e.target = botón
-  const btn = e.target;
-  const tr = btn.closest("tr");
-  if (tr) tr.classList.add("no-hover");
-});
+                        inputCantidadActivo = tr.querySelector('.dropdown-menu input[name="cantidad"]');
 
-document.addEventListener("hidden.bs.dropdown", function (e) {
-  const btn = e.target;
-  const tr = btn.closest("tr");
-  if (tr) tr.classList.remove("no-hover");
-});
+                        if (inputCantidadActivo && !inputCantidadActivo.disabled) {
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    inputCantidadActivo.focus({preventScroll: true});
+                                    inputCantidadActivo.select?.();
+                                });
+                            });
+                        }
+                    });
 
-// Si el mouse está dentro del dropdown-menu, mantenemos no-hover
-document.addEventListener("mouseover", function (e) {
-  const menu = e.target.closest(".dropdown-menu");
-  if (!menu) return;
-  const tr = menu.closest("tr");
-  if (tr) tr.classList.add("no-hover");
-});
+                    document.addEventListener("hidden.bs.dropdown", function (e) {
+                        const btn = e.target;
+                        const tr = btn.closest("tr");
+                        if (tr)
+                            tr.classList.remove("no-hover");
+                        dropdownAbierto = false;
+                        inputCantidadActivo = null;
+                        setTimeout(() => keepFocus(true), 30);
+                    });
 
-document.addEventListener("mouseleave", function (e) {
-  const menu = e.target.closest(".dropdown-menu");
-  if (!menu) return;
-  const tr = menu.closest("tr");
-  if (tr) tr.classList.remove("no-hover");
-});
+                    document.addEventListener("mouseover", function (e) {
+                        const menu = e.target.closest(".dropdown-menu");
+                        if (!menu)
+                            return;
+                        const tr = menu.closest("tr");
+                        if (tr)
+                            tr.classList.add("no-hover");
+                    });
+
+                    document.addEventListener("mouseleave", function (e) {
+                        const menu = e.target.closest(".dropdown-menu");
+                        if (!menu)
+                            return;
+                        const tr = menu.closest("tr");
+                        if (tr)
+                            tr.classList.remove("no-hover");
+                    });
+
+                    function confirmarLimpiar(form) {
+                        Swal.fire({
+                            title: '¿Limpiar a 0?',
+                            text: 'Esto dejará la cantidad escaneada en cero para este producto.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí, limpiar',
+                            cancelButtonText: 'Cancelar',
+                            didOpen: () => {
+                                swalAbierto = true;
+                            },
+                            didClose: () => {
+                                swalAbierto = false;
+                                setTimeout(() => keepFocus(true), 80);
+                            }
+                        }).then(r => {
+                            if (r.isConfirmed)
+                                form.submit();
+                        });
+                        return false;
+                    }
 
         </script>
     </body>

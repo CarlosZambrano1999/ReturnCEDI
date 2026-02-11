@@ -124,6 +124,7 @@ public class DevolucionesController extends HttpServlet {
                     } else {
                         setMsg(request, "error", r.getMessage());
                     }
+                    request.setAttribute("lastCodigo", codigo);
 
                     render(request, response, docMaterial, idUsuario);
                     return;
