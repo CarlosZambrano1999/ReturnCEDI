@@ -22,9 +22,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import modelos.DatosDocMaterial;
 import modelos.InfoDocMaterial;
 import modelos.ResultadoCargaDocMaterial;
@@ -65,142 +67,150 @@ public class CargarDocMaterialExcelController extends HttpServlet {
         request.getRequestDispatcher("/guia/cargarDocMaterialExcel.jsp").forward(request, response);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        response.setContentType("application/json;charset=UTF-8");
-        
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-        if (usuario == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+    response.setContentType("application/json;charset=UTF-8");
+    
+    HttpSession session = request.getSession(false);
+    Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+    if (usuario == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    try {
+        Part filePart = request.getPart("archivoExcel");
+        if (filePart == null || filePart.getSize() == 0) {
+            response.getWriter().write("{\"status\":\"error\",\"message\":\"No se recibió el archivo Excel.\"}");
             return;
         }
 
-        try {
-            Part filePart = request.getPart("archivoExcel");
-            if (filePart == null || filePart.getSize() == 0) {
-                response.getWriter().write("{\"status\":\"error\",\"message\":\"No se recibió el archivo Excel.\"}");
+        String fileName = getFileName(filePart);
+        if (fileName == null || (!fileName.toLowerCase().endsWith(".xlsx"))) {
+            response.getWriter().write("{\"status\":\"error\",\"message\":\"Formato inválido. Solo se permite .xlsx\"}");
+            return;
+        }
+
+        List<DatosDocMaterial> validas = new ArrayList<>();
+        List<FilaError> invalidas = new ArrayList<>();
+        Long docMaterial = null;
+
+        try (InputStream is = filePart.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet == null) {
+                response.getWriter().write("{\"status\":\"error\",\"message\":\"El Excel no tiene hojas.\"}");
                 return;
             }
 
-            String fileName = getFileName(filePart);
-            if (fileName == null || (!fileName.toLowerCase().endsWith(".xlsx"))) {
-                response.getWriter().write("{\"status\":\"error\",\"message\":\"Formato inválido. Solo se permite .xlsx\"}");
+            // 1) Detectar encabezados y mapear índices de columnas por nombre
+            Row header = sheet.getRow(sheet.getFirstRowNum());
+            if (header == null) {
+                response.getWriter().write("{\"status\":\"error\",\"message\":\"No se encontró la fila de encabezados.\"}");
                 return;
             }
 
-            List<DatosDocMaterial> validas = new ArrayList<>();
-            List<FilaError> invalidas = new ArrayList<>();
-            Long docMaterial = null;
+            Map<String, Integer> col = buildHeaderIndex(header);
 
-            try (InputStream is = filePart.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+            // Validar columnas mínimas necesarias (según tu mapeo)
+            String[] requeridas = new String[] {
+                "Material", "Texto breve de material", "Centro", "Almacén", "Clase de movimiento", "Documento material",
+                "Posición", "Referencia", "Texto cab.documento", "Hora de entrada", "Nombre del usuario", "Fe.contabilización",
+                "Fe.contabilización", "Ctd.en UM entrada", "Importe ML"
+            };
 
-                Sheet sheet = workbook.getSheetAt(0);
-                if (sheet == null) {
-                    response.getWriter().write("{\"status\":\"error\",\"message\":\"El Excel no tiene hojas.\"}");
+            for (String r : requeridas) {
+                if (!col.containsKey(normalize(r))) {
+                    response.getWriter().write("{\"status\":\"error\",\"message\":\"Falta la columna requerida: " + escape(r) + "\"}");
                     return;
                 }
+            }
 
-                // 1) Detectar encabezados y mapear índices de columnas por nombre
-                Row header = sheet.getRow(sheet.getFirstRowNum());
-                if (header == null) {
-                    response.getWriter().write("{\"status\":\"error\",\"message\":\"No se encontró la fila de encabezados.\"}");
-                    return;
+            // 2) Leer filas desde la siguiente a encabezados
+            String centroValue = null;
+            String emisorValue = null;
+            Set<String> centros = new HashSet<>();
+            Set<String> emisores = new HashSet<>();
+
+            int firstDataRow = header.getRowNum() + 1;
+            int lastRow = sheet.getLastRowNum();
+
+            for (int i = firstDataRow; i <= lastRow; i++) {
+                Row row = sheet.getRow(i);
+                if (row == null || isRowEmpty(row)) {
+                    continue;
                 }
 
-                Map<String, Integer> col = buildHeaderIndex(header);
+                try {
+                    String centro = getString(row, col, "Centro");
+                    String emisor = getString(row, col, "Nombre del usuario");
 
-                // Validar columnas mínimas necesarias (según tu mapeo)
-                String[] requeridas = new String[]{
-                    "Material",
-                    "Texto breve de material",
-                    "Centro",
-                    "Almacén",
-                    "Clase de movimiento",
-                    "Documento material",
-                    "Posición",
-                    "Referencia",
-                    "Texto cab.documento",
-                    "Hora de entrada",
-                    "Nombre del usuario",
-                    "Fe.contabilización",
-                    "Fe.contabilización",
-                    "Ctd.en UM entrada",
-                    "Importe ML"
-                };
+                    // Agregar centros y emisores a los sets
+                    centros.add(centro);
+                    emisores.add(emisor);
 
-                for (String r : requeridas) {
-                    if (!col.containsKey(normalize(r))) {
-                        response.getWriter().write("{\"status\":\"error\",\"message\":\"Falta la columna requerida: " + escape(r) + "\"}");
-                        return;
+                    DatosDocMaterial d = new DatosDocMaterial();
+                    d.setCodigoSap(getString(row, col, "Material"));
+                    d.setDescripcion(getString(row, col, "Texto breve de material"));
+                    d.setCentro(centro);
+                    d.setAlmacen(getString(row, col, "Almacén"));
+                    d.setTransito(getInteger(row, col, "Clase de movimiento"));
+
+                    Long docMatFila = getLong(row, col, "Documento material");
+                    if (docMatFila != null) {
+                        if (docMaterial == null) {
+                            docMaterial = docMatFila;
+                        }
+                        if (!docMatFila.equals(docMaterial)) {
+                            invalidas.add(new FilaError(i + 1, "Documento material distinto al detectado"));
+                            continue; // 👈 solo marca error y sigue
+                        }
                     }
-                }
+                    d.setDocMaterial(docMatFila);
 
-                // 2) Leer filas desde la siguiente a encabezados
-                int firstDataRow = header.getRowNum() + 1;
-                int lastRow = sheet.getLastRowNum();
+                    d.setPosicion(getInteger(row, col, "Posición"));
+                    d.setReferencia(getString(row, col, "Referencia"));
+                    d.setTexto(getString(row, col, "Texto cab.documento"));
+                    d.setHora(getTime(row, col, "Hora de entrada"));
+                    d.setUsuario(getString(row, col, "Nombre del usuario"));
+                    d.setFechaDocumento(getDate(row, col, "Fe.contabilización"));
+                    d.setFechaContable(getDate(row, col, "Fe.contabilización"));
 
-                for (int i = firstDataRow; i <= lastRow; i++) {
-                    Row row = sheet.getRow(i);
-                    if (row == null || isRowEmpty(row)) {
+                    d.setCantidad(getDecimal(row, col, "Ctd.en UM entrada"));
+                    d.setImporte(getDecimal(row, col, "Importe ML"));
+
+                    // ✅ validaciones mínimas
+                    if (d.getCodigoSap() == null || d.getCodigoSap().trim().isEmpty()) {
+                        invalidas.add(new FilaError(i + 1, "Material vacío"));
+                        continue;
+                    }
+                    if (d.getTransito() == null) {
+                        invalidas.add(new FilaError(i + 1, "Clase de movimiento vacía"));
+                        continue;
+                    }
+                    if (d.getCantidad() == null) {
+                        invalidas.add(new FilaError(i + 1, "Cantidad inválida"));
                         continue;
                     }
 
-                    try {
-                        DatosDocMaterial d = new DatosDocMaterial();
+                    validas.add(d);
 
-                        d.setCodigoSap(getString(row, col, "Material"));
-                        d.setDescripcion(getString(row, col, "Texto breve de material"));
-                        d.setCentro(getString(row, col, "Centro"));
-                        d.setAlmacen(getString(row, col, "Almacén"));
-                        d.setTransito(getInteger(row, col, "Clase de movimiento"));
-
-                        Long docMatFila = getLong(row, col, "Documento material");
-                        if (docMatFila != null) {
-                            if (docMaterial == null) {
-                                docMaterial = docMatFila;
-                            }
-                            if (!docMatFila.equals(docMaterial)) {
-                                invalidas.add(new FilaError(i + 1, "Documento material distinto al detectado"));
-                                continue; // 👈 solo marca error y sigue
-                            }
-                        }
-                        d.setDocMaterial(docMatFila);
-
-                        d.setPosicion(getInteger(row, col, "Posición"));
-                        d.setReferencia(getString(row, col, "Referencia"));
-                        d.setTexto(getString(row, col, "Texto cab.documento"));
-                        d.setHora(getTime(row, col, "Hora de entrada"));
-                        d.setUsuario(getString(row, col, "Nombre del usuario"));
-                        d.setFechaDocumento(getDate(row, col, "Fe.contabilización"));      // ajustá si tu columna es otra
-                        d.setFechaContable(getDate(row, col, "Fe.contabilización"));
-
-                        d.setCantidad(getDecimal(row, col, "Ctd.en UM entrada"));
-                        d.setImporte(getDecimal(row, col, "Importe ML"));
-
-                        // ✅ validaciones mínimas
-                        if (d.getCodigoSap() == null || d.getCodigoSap().trim().isEmpty()) {
-                            invalidas.add(new FilaError(i + 1, "Material vacío"));
-                            continue;
-                        }
-                        if (d.getTransito() == null) {
-                            invalidas.add(new FilaError(i + 1, "Clase de movimiento vacía"));
-                            continue;
-                        }
-                        if (d.getCantidad() == null) {
-                            invalidas.add(new FilaError(i + 1, "Cantidad inválida"));
-                            continue;
-                        }
-
-                        validas.add(d);
-
-                    } catch (Exception ex) {
-                        invalidas.add(new FilaError(i + 1, "Error leyendo fila: " + ex.getMessage()));
-                    }
+                } catch (Exception ex) {
+                    invalidas.add(new FilaError(i + 1, "Error leyendo fila: " + ex.getMessage()));
                 }
+            }
 
+            // Validar si hay más de un centro
+            if (centros.size() > 1) {
+                response.getWriter().write("{\"status\":\"error\",\"message\":\"El archivo tiene más de un centro: " + String.join(", ", centros) + ". Corregir y volver a intentar.\"}");
+                return;
+            }
+
+            // Validar si hay más de un emisor
+            if (emisores.size() > 1) {
+                response.getWriter().write("{\"status\":\"error\",\"message\":\"El archivo tiene más de un 'Nombre del usuario': " + String.join(", ", emisores) + ". Corregir y volver a intentar.\"}");
+                return;
             }
 
             if (docMaterial == null) {
@@ -213,81 +223,33 @@ public class CargarDocMaterialExcelController extends HttpServlet {
                 return;
             }
 
-
+            // Si no hubo errores, continuar con el proceso de carga
             DocMaterialDAO dao = new DocMaterialDAO();
-            InfoDocMaterial info = dao.obtenerInfoDocMaterial(docMaterial);
-
-            if (info != null) {
-                int estado = info.getEstado();
-
-                if (estado == 1) {
-                    response.getWriter().write(
-                            "{"
-                            + "\"status\":\"error\","
-                            + "\"code\":\"YA_CARGADA\","
-                            + "\"message\":\"La guía ya ha sido cargada.\","
-                            + "\"docMaterial\":" + docMaterial + ","
-                            + "\"estado\":" + estado + ","
-                            + "\"info\":{"
-                            + "\"almacen\":\"" + escape(info.getAlmacen()) + "\","
-                            + "\"departamento\":\"" + escape(info.getDepartamento()) + "\","
-                            + "\"farmacia\":\"" + escape(info.getFarmacia()) + "\""
-                            + "}"
-                            + "}"
-                    );
-                    return;
-                }
-
-                if (estado == 2) {
-                    response.getWriter().write(
-                            "{"
-                            + "\"status\":\"error\","
-                            + "\"code\":\"YA_COMPLETADA\","
-                            + "\"message\":\"La guía ya fue completada.\","
-                            + "\"docMaterial\":" + docMaterial + ","
-                            + "\"estado\":" + estado + ","
-                            + "\"info\":{"
-                            + "\"almacen\":\"" + escape(info.getAlmacen()) + "\","
-                            + "\"departamento\":\"" + escape(info.getDepartamento()) + "\","
-                            + "\"farmacia\":\"" + escape(info.getFarmacia()) + "\""
-                            + "}"
-                            + "}"
-                    );
-                    return;
-                }
-            }
-
-            // 3) Guardar en BD vía DAO + SP
             ResultadoCargaDocMaterial r = dao.cargarDocMaterialExcel(docMaterial, validas);
 
             if ("success".equalsIgnoreCase(r.getStatus())) {
                 StringBuilder sb = new StringBuilder();
-sb.append("{");
-sb.append("\"status\":\"success\",");
-sb.append("\"docMaterial\":").append(docMaterial).append(",");
-sb.append("\"filasValidas\":").append(validas.size()).append(",");
-sb.append("\"filasInvalidas\":").append(invalidas.size()).append(",");
-sb.append("\"filasInsertadas\":").append(r.getFilasInsertadas()).append(",");
+                sb.append("{");
+                sb.append("\"status\":\"success\",");
+                sb.append("\"docMaterial\":").append(docMaterial).append(",");
+                sb.append("\"filasValidas\":").append(validas.size()).append(",");
+                sb.append("\"filasInvalidas\":").append(invalidas.size()).append(",");
+                sb.append("\"filasInsertadas\":").append(r.getFilasInsertadas()).append(",");
 
-sb.append("\"invalidas\":[");
-for (int k = 0; k < invalidas.size(); k++) {
-    FilaError fe = invalidas.get(k);
-    sb.append("{\"fila\":").append(fe.getFilaExcel())
-      .append(",\"motivo\":\"").append(escape(fe.getMotivo())).append("\"}");
-    if (k < invalidas.size() - 1) sb.append(",");
-}
-sb.append("]");
+                sb.append("\"invalidas\":[");
+                for (int k = 0; k < invalidas.size(); k++) {
+                    FilaError fe = invalidas.get(k);
+                    sb.append("{\"fila\":").append(fe.getFilaExcel())
+                      .append(",\"motivo\":\"").append(escape(fe.getMotivo())).append("\"}");
+                    if (k < invalidas.size() - 1) sb.append(",");
+                }
+                sb.append("]");
 
-sb.append("}");
-response.getWriter().write(sb.toString());
+                sb.append("}");
+                response.getWriter().write(sb.toString());
             } else {
                 String msg = (r.getErrorMessage() != null) ? escape(r.getErrorMessage()) : "Error desconocido";
-                response.getWriter().write(
-                        "{"
-                        + "\"status\":\"error\","
-                        + "\"message\":\"" + msg + "\""
-                        + "}"
-                );
+                response.getWriter().write("{\"status\":\"error\",\"message\":\"" + msg + "\"}");
             }
 
         } catch (Exception e) {
@@ -295,6 +257,12 @@ response.getWriter().write(sb.toString());
             response.getWriter().write("{\"status\":\"error\",\"message\":\"" + msg + "\"}");
         }
     }
+    catch (Exception e) {
+            String msg = escape(e.getMessage());
+            response.getWriter().write("{\"status\":\"error\",\"message\":\"" + msg + "\"}");
+        }
+}
+
 
     // ------------------------
     // Utilidades de Excel

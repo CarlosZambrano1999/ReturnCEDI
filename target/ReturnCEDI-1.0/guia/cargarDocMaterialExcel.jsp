@@ -260,8 +260,8 @@
             // ========= INIT DATATABLE =========
             $(document).ready(function () {
                 dt = $("#tablaPreview").DataTable({
-                    pageLength: 10,
-                    lengthMenu: [10, 25, 50],
+                    pageLength: 25,
+                    lengthMenu: [25, 50, 100, 200],
                     language: {
                         search: "Buscar:",
                         lengthMenu: "Mostrar _MENU_",
@@ -569,34 +569,35 @@
                 };
 
                 xhr.onload = function () {
-                    btnPreview.disabled = false;
+    btnPreview.disabled = false;
 
-                    try {
-                        const resp = JSON.parse(xhr.responseText || "{}");
+    try {
+        const resp = JSON.parse(xhr.responseText || "{}");
 
-                        if (xhr.status >= 200 && xhr.status < 300 && resp.status === "success") {
-                            setProgress(100);
-                            setStatus("Carga completada.", "ok");
-                            Swal.fire({
-                                icon: "success",
-                                title: "Carga exitosa",
-                                html: "Doc.Material: <b>" + resp.docMaterial + "</b><br>Filas insertadas: <b>" + resp.filasInsertadas + "</b>"
-                            });
+        if (xhr.status >= 200 && xhr.status < 300 && resp.status === "success") {
+            setProgress(100);
+            setStatus("Carga completada.", "ok");
+            Swal.fire({
+                icon: "success",
+                title: "Carga exitosa",
+                html: "Doc.Material: <b>" + resp.docMaterial + "</b><br>Filas insertadas: <b>" + resp.filasInsertadas + "</b>"
+            });
 
-                        } else {
-                            setStatus("Error al cargar.", "err");
-                            const msg = resp.message || "Ocurrió un error al procesar el archivo.";
-                            Swal.fire("Error", msg, "error");
-                            btnCargar.disabled = false;
-                        }
+        } else {
+            setStatus("Error al cargar.", "err");
+            const msg = resp.message || "Ocurrió un error al procesar el archivo.";
+            Swal.fire("Error", msg, "error");
+            btnCargar.disabled = false;
+        }
 
-                    } catch (e) {
-                        console.error(e);
-                        setStatus("Respuesta inválida del servidor.", "err");
-                        Swal.fire("Error", "El servidor no devolvió un JSON válido.", "error");
-                        btnCargar.disabled = false;
-                    }
-                };
+    } catch (e) {
+        console.error(e);
+        setStatus("Respuesta inválida del servidor.", "err");
+        Swal.fire("Error", "El servidor no devolvió un JSON válido.", "error");
+        btnCargar.disabled = false;
+    }
+};
+
 
                 xhr.onerror = function () {
                     setStatus("Error de red o servidor.", "err");

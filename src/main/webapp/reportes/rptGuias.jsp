@@ -107,7 +107,7 @@ $(function () {
     const table = $('#tblGuias').DataTable({
         paging: true,
         searching: true,
-        ordering: true,
+        ordering: false,
         lengthChange: true,
         responsive: false,
         language: {

@@ -253,7 +253,7 @@
                                         
 
                                         <% if (r.getIdDevolucion() == null) { %>
-                                        <div class="small text-muted mt-1">Escanee este Producto para habilitar edición</div>
+                                        <div class="small text-muted mt-1"></div>
                                         <% } %>
                                    
                                     </td>
