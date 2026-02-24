@@ -12,6 +12,7 @@ modelos\ResultadoOperacion.class
 dao\RptUsuarioDAO.class
 controladores\ModulosController.class
 controladores\RptRecepcionController.class
+modelos\DocumentosPendientes.class
 modelos\Incidencia.class
 dao\ModuloDAO.class
 controladores\CargarDocMaterialExcelController.class
@@ -55,6 +56,7 @@ utilidades\PasswordUtil$Result.class
 dao\RolDAO.class
 controladores\ConsultarPoliticaController.class
 modelos\Usuario.class
+controladores\ListarPendientesController.class
 controladores\DevolucionesController.class
 modelos\ModuloAsignacion.class
 controladores\ExcesosController.class

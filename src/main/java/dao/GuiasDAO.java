@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import modelos.DocumentosPendientes;
 
 public class GuiasDAO {
 
@@ -109,4 +110,33 @@ public class GuiasDAO {
         }
     }
 
+        public List<DocumentosPendientes> listarGuiasPendientes(int idUsuario) throws SQLException {
+        List<DocumentosPendientes> lista = new ArrayList<>();
+
+        String sql = "{CALL GUIA.SP_DOC_MATERIAL_PENDIENTES(?)}";
+        
+        ConexionSQLServer conexion = new ConexionSQLServer();
+        
+
+        try (Connection cn = conexion.getConnection(); CallableStatement cs = cn.prepareCall(sql)) {
+            cs.setInt(1, idUsuario);
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    DocumentosPendientes d = new DocumentosPendientes();
+                    d.setNumero(rs.getLong("NUMERO"));
+                    d.setEstado(rs.getInt("ESTADO"));
+                    d.setFecha(rs.getTimestamp("FECHA"));
+
+                    // Pueden venir null por LEFT JOIN
+                    d.setTipo(rs.getString("TIPO"));
+                    d.setUsuario(rs.getString("USUARIO"));
+
+                    lista.add(d);
+                }
+            }
+        }
+
+        return lista;
+    }
 }

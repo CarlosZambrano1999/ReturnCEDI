@@ -52,7 +52,7 @@
   function initDataTable() {
     if (dtModulos) return;
     dtModulos = $("#tablaModulos").DataTable({
-      pageLength: 10,
+      pageLength:25,
       lengthChange: true,
       searching: true,
       ordering: true,

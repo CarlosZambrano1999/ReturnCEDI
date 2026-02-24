@@ -23,7 +23,6 @@
     <link href="<%=request.getContextPath()%>/reportes/detalles.css" rel="stylesheet"> 
     <link href="<%=request.getContextPath()%>/css/dataTables.css" rel="stylesheet"> 
     <link href="<%=request.getContextPath()%>/css/buttons.css" rel="stylesheet"> 
-    <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
     <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
     <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
     <script src="<%=request.getContextPath()%>/js/jqueryDataTables.js"></script>
@@ -32,6 +31,9 @@
     <script src="<%=request.getContextPath()%>/js/buttonsBootstrap.js"></script>
     <script src="<%=request.getContextPath()%>/js/jszip.js"></script>
     <script src="<%=request.getContextPath()%>/js/buttonshtml5.js"></script>
+    <script src="<%=request.getContextPath()%>/js/buttonsprint.js"></script>
+    <script src="<%=request.getContextPath()%>/js/bundle.js"></script>
+
 
 </head>
 
@@ -84,6 +86,7 @@
 </div>
 
 <script>
+
 $(function () {
 
     const endpoint = "<%=endpoint%>";
@@ -117,8 +120,38 @@ $(function () {
             title: 'Detalle Guía ' + docMaterial,
             text: 'Exportar a Excel',
             className: 'btn btn-rc-success'
+        },
+        {
+            extend: 'print',
+            title: 'Detalle Guía ' + docMaterial,
+            text: 'Imprimir',
+            className: 'btn btn-rc-primary ms-2',
+            exportOptions: {
+                modifier: {
+                    page: 'all'
+            }
+        },
+        customize: function (win) {
+
+            // Tamaño general
+            $(win.document.body).css('font-size', '10pt');
+
+            // Agregar encabezado personalizado
+            $(win.document.body).prepend(
+                '<div style="text-align:center; margin-bottom:15px;">' +
+                '<h3 style="margin:0;">ReturnCEDI</h3>' +
+                '<p style="margin:0;">Documento: ' + docMaterial + 
+                ' | Tipo: ' + tipo + '</p>' +
+                '</div>'
+            );
+
+            // Ajustar tabla
+            $(win.document.body).find('table')
+                .addClass('compact')
+                .css('font-size', 'inherit');
         }
-    ],
+    }
+],
     columns: [
         { data: 'doc_material' },
         { data: 'usuario' },

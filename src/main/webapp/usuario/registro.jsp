@@ -9,7 +9,7 @@
         <link href="<%=request.getContextPath()%>/css/bootstrap.css" rel="stylesheet">
 
         <!-- SweetAlert2 -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="<%=request.getContextPath()%>/js/sweetalert2.js"></script>
     </head>
     <body class="bg-light">
         <jsp:include page="/componentes/navbar.jsp" />
