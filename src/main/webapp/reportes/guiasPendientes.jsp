@@ -43,6 +43,7 @@
                             <th>FECHA</th>
                             <th>TIPO</th>
                             <th>USUARIO</th>
+                            <th>RETOMAR</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -89,24 +90,101 @@ function mostrarError(msg) {
     box.innerText = msg;
 }
 
+const rutasPorTipo = {
+  "DEVOLUCIONES": "Devoluciones",
+  "EXCESOS": "Excesos",
+  "DONACIONES": "Donaciones",
+  "ND": "NoDevolutivos",
+  "RECEPCION": "Recepcion"
+};
+
 function initTabla() {
-    tabla = new DataTable("#tablaGuias", {
-        paging: true,
-        searching: true,
-        ordering: true,
-        pageLength: 25,
-        order: [[2, "desc"]], // FECHA desc
-        language: {
-            url: '<%=request.getContextPath()%>/js/es-ES.json'
-        },
-        columns: [
-            { data: "numero" },
-            { data: "estado" },
-            { data: "fecha" },
-            { data: "tipo" },
-            { data: "usuario" }
-        ]
-    });
+  tabla = new DataTable("#tablaGuias", {
+    paging: true,
+    searching: true,
+    ordering: true,
+    pageLength: 25,
+    order: [[2, "desc"]],
+    language: { url: ctx + "/js/es-ES.json" },
+    columns: [
+      { data: "numero" },
+      { data: "estado" },
+      { data: "fecha" },
+      { data: "tipo" },
+      { data: "usuario" },
+{
+  data: null,
+  orderable: false,
+  searchable: false,
+  render: (data, type, row) => {
+    const tipo = (row.tipo || "").toString().trim().toUpperCase();
+    const ruta = rutasPorTipo[tipo];
+
+    // Si no hay tipo o no hay ruta, mostramos deshabilitado
+    if (!tipo || !ruta) {
+      return `<button class="btn btn-sm btn-secondary" disabled title="Sin tipo/ruta">Retomar</button>`;
+    }
+
+    // Importante: mandar docMaterial como string (no parseInt)
+    return `
+      <button
+        class="btn btn-sm btn-success btn-retomar"
+        data-tipo="\${tipo}"
+        data-doc="\${String(row.numero)}">
+        Retomar
+      </button>
+    `;
+  }
+}
+    ]
+  });
+
+  // Delegación de evento (porque los botones se crean dinámicamente)
+  document.querySelector("#tablaGuias tbody").addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".btn-retomar");
+    if (!btn) return;
+
+    const tipo = (btn.dataset.tipo || "").trim().toUpperCase();
+    const doc = btn.dataset.doc;
+
+    retomarGuia(tipo, doc);
+  });
+}
+
+function retomarGuia(tipo, docMaterial) {
+  const ruta = rutasPorTipo[tipo];
+
+  if (!ruta) {
+    mostrarError(`No hay ruta configurada para el tipo: ${tipo}`);
+    return;
+  }
+
+  const doc = parseInt(docMaterial, 10);
+  if (!doc || doc <= 0) {
+    mostrarError("Doc.Material inválido para retomar.");
+    return;
+  }
+
+  // POST real (navega al servlet y te carga el documento)
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = ctx + "/" + ruta;
+
+  const inpAccion = document.createElement("input");
+  inpAccion.type = "hidden";
+  inpAccion.name = "accion";
+  inpAccion.value = "cargardocumento";
+
+  const inpDoc = document.createElement("input");
+  inpDoc.type = "hidden";
+  inpDoc.name = "docMaterial";
+  inpDoc.value = String(doc);
+
+  form.appendChild(inpAccion);
+  form.appendChild(inpDoc);
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 async function cargarDatos() {
@@ -125,6 +203,7 @@ async function cargarDatos() {
         }
 
         const data = await resp.json();
+        console.log("JSON completo:", data);
 
         if (!resp.ok || data.status !== "success") {
             throw new Error(data.message || "No se pudo cargar la información.");
