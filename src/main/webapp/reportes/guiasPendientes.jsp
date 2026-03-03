@@ -58,6 +58,7 @@
 <script src="<%=request.getContextPath()%>/js/jquery.js"></script>
 <script src="<%=request.getContextPath()%>/js/dataTables.js"></script>
 <script src="<%=request.getContextPath()%>/js/dataTablesBootstrap.js"></script>
+<script src="<%=request.getContextPath()%>/js/bundle.js"></script>
 
 <script>
 const ctx = "<%=request.getContextPath()%>";
