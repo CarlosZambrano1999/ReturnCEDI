@@ -162,6 +162,7 @@ public class DevolucionesDAO {
                 while (rs.next()) {
                     ComparativoDocMaterialRow r = new ComparativoDocMaterialRow();
                     r.setCodigoSap(rs.getString("CODIGO_EAN"));
+                    r.setCodigo(rs.getString("CODIGO_SAP"));
                     r.setDescripcion(rs.getString("DESCRIPCION"));
                     r.setCantidadEsperada(rs.getBigDecimal("CANTIDAD_ESPERADA"));
                     r.setCantidadEscaneada(rs.getBigDecimal("CANTIDAD_ESCANEADA"));

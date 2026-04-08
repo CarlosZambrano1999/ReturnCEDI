@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  */
 public class ComparativoDocMaterialRow {
     private String codigoSap;
+    private String codigo;
     private String descripcion;
     private BigDecimal cantidadEsperada;
     private BigDecimal cantidadEscaneada;
@@ -27,8 +28,9 @@ public class ComparativoDocMaterialRow {
     public ComparativoDocMaterialRow() {
     }
 
-    public ComparativoDocMaterialRow(String codigoSap, String descripcion, BigDecimal cantidadEsperada, BigDecimal cantidadEscaneada, BigDecimal diferencia, int factor, String presentacion, String estado, Long idDevolucion, BigDecimal cantidadEditable, Integer incidenciaId, String observacion) {
+    public ComparativoDocMaterialRow(String codigoSap, String codigo, String descripcion, BigDecimal cantidadEsperada, BigDecimal cantidadEscaneada, BigDecimal diferencia, int factor, String presentacion, String estado, Long idDevolucion, BigDecimal cantidadEditable, Integer incidenciaId, String observacion) {
         this.codigoSap = codigoSap;
+        this.codigo = codigo;
         this.descripcion = descripcion;
         this.cantidadEsperada = cantidadEsperada;
         this.cantidadEscaneada = cantidadEscaneada;
@@ -42,7 +44,6 @@ public class ComparativoDocMaterialRow {
         this.observacion = observacion;
     }
 
-    
     public String getCodigoSap() {
         return codigoSap;
     }
@@ -51,6 +52,14 @@ public class ComparativoDocMaterialRow {
         this.codigoSap = codigoSap;
     }
 
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+    
     public String getDescripcion() {
         return descripcion;
     }

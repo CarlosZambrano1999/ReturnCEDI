@@ -127,7 +127,8 @@
                             <thead>
                                 <tr>
                                     <th>Estado</th>
-                                    <th>Código EAN</th>
+                                    <th>EAN</th>
+                                    <th>Código Sap</th>
                                     <th>Descripción</th>
                                     <th>FC</th>
                                     <th>Presentación</th>
@@ -149,6 +150,7 @@
                                 <tr class="<%=rowCls%>">
                                     <td><span class="state-pill <%=pill%>"><%=est%></span></td>
                                     <td><%= r.getCodigoSap()%></td>
+                                    <td><%= r.getCodigo()%></td>
                                     <td><%= r.getDescripcion() == null ? "" : r.getDescripcion()%></td>
                                     <td><%= r.getFactor()%></td>
                                     <td><%= r.getPresentacion()%></td>
@@ -598,7 +600,7 @@ if (!LAST_CODIGO) return;
 
     // Leer FC (col 4)
     const tds = fila.querySelectorAll("td");
-    const fcTxt = (tds[3].textContent || "").trim(); // col 4: FC
+    const fcTxt = (tds[4].textContent || "").trim(); // col 4: FC
     const fc = Number(fcTxt);
 
     // Scroll a la fila (opcional)
