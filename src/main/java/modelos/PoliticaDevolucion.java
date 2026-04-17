@@ -11,7 +11,7 @@ package modelos;
 public class PoliticaDevolucion {
     private Long idPolitica;
     private Integer tiempo;          // meses
-    private Integer fracciones;
+    private String fracciones;
     private String observaciones;
     private Integer estado;
 
@@ -34,11 +34,11 @@ public class PoliticaDevolucion {
         this.tiempo = tiempo;
     }
 
-    public Integer getFracciones() {
+    public String getFracciones() {
         return fracciones;
     }
 
-    public void setFracciones(Integer fracciones) {
+    public void setFracciones(String fracciones) {
         this.fracciones = fracciones;
     }
 

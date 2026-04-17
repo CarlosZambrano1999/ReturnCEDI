@@ -4,7 +4,7 @@
  */
 package dao;
 
-import configDB.ConexionSQLServer;
+import configDB.ConexionPoliticas;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,12 +19,13 @@ import modelos.ProveedorPolitica;
 /**
  *
  * @author Administrador
+ * Recepcion
  */
 public class ConsultarPoliticaDAO {
-    private final ConexionSQLServer conexion;
+    private final ConexionPoliticas conexion;
 
     public ConsultarPoliticaDAO() {
-        this.conexion = new ConexionSQLServer();
+        this.conexion = new ConexionPoliticas();
     }
 
    
@@ -119,7 +120,7 @@ public class ConsultarPoliticaDAO {
      * Llama wrapper en ReturnCEDIDB que ejecuta el SP real de DevolCEDIDB.
      */
     public PoliticaDevolucion consultarPolitica(String idLaboratorio, String idProveedor, int idColor) {
-        String sql = "{CALL POLITICA.SP_CONSULTAR_POLITICA_EXT(?, ?, ?)}";
+        String sql = "{CALL POLITICA.SP_CONSULTAR_POLITICA(?, ?, ?)}";
 
         try (Connection con = conexion.getConnection();
              CallableStatement cs = con.prepareCall(sql)) {
@@ -133,7 +134,7 @@ public class ConsultarPoliticaDAO {
                     PoliticaDevolucion pol = new PoliticaDevolucion();
                     pol.setIdPolitica(rs.getLong("id_politica"));
                     pol.setTiempo(rs.getInt("tiempo"));
-                    pol.setFracciones(rs.getInt("fracciones"));
+                    pol.setFracciones(rs.getString("fracciones"));
                     pol.setObservaciones(rs.getString("observaciones"));
                     pol.setEstado(rs.getInt("estado"));
                     return pol;
