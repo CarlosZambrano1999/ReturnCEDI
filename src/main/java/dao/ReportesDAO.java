@@ -8,11 +8,13 @@ import configDB.ConexionSQLServer;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import modelos.reportes.ReporteDevolucionUnificada;
 import modelos.reportes.RptFarmaciasMayorIncidencia;
 import modelos.reportes.RptGuiasMayorIncidencia;
 import modelos.reportes.RptIncidenciasMasFrecuentes;
@@ -31,53 +33,54 @@ public class ReportesDAO {
     }
 
     // 1) Productividad por día/hora/usuario (con nombre)
-public List<RptProductividadDiaHoraUsuario> rptProductividadDiaHora(
-        Date desde, Date hasta, Integer horaMin, Integer horaMax, Integer idUsuario) {
+    public List<RptProductividadDiaHoraUsuario> rptProductividadDiaHora(
+            Date desde, Date hasta, Integer horaMin, Integer horaMax, Integer idUsuario) {
 
-    List<RptProductividadDiaHoraUsuario> lista = new ArrayList<>();
-    String sql = "{CALL GUIA.SP_RPT_PRODUCTIVIDAD_DIA_HORA_USUARIO(?,?,?,?,?)}";
+        List<RptProductividadDiaHoraUsuario> lista = new ArrayList<>();
+        String sql = "{CALL GUIA.SP_RPT_PRODUCTIVIDAD_DIA_HORA_USUARIO(?,?,?,?,?)}";
 
-    try (Connection con = conexion.getConnection();
-         CallableStatement cs = con.prepareCall(sql)) {
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
 
-        cs.setDate(1, desde);
-        cs.setDate(2, hasta);
+            cs.setDate(1, desde);
+            cs.setDate(2, hasta);
 
-        cs.setInt(3, horaMin == null ? 0 : horaMin);
-        cs.setInt(4, horaMax == null ? 23 : horaMax);
+            cs.setInt(3, horaMin == null ? 0 : horaMin);
+            cs.setInt(4, horaMax == null ? 23 : horaMax);
 
-        if (idUsuario == null) cs.setNull(5, Types.INTEGER);
-        else cs.setInt(5, idUsuario);
-
-        try (ResultSet rs = cs.executeQuery()) {
-            while (rs.next()) {
-                RptProductividadDiaHoraUsuario r = new RptProductividadDiaHoraUsuario();
-                r.setFecha(rs.getDate("FECHA"));
-                r.setHora(rs.getInt("HORA"));
-                r.setIdUsuario(rs.getInt("ID_USUARIO"));
-                r.setNombre(rs.getString("NOMBRE"));
-
-                r.setTotalEscaneos(rs.getInt("TOTAL_ESCANEOS"));
-                r.setTotalCantidad(rs.getInt("TOTAL_CANTIDAD"));
-
-                r.setConIncidencia(rs.getInt("CON_INCIDENCIA"));
-                r.setSinIncidencia(rs.getInt("SIN_INCIDENCIA"));
-                lista.add(r);
+            if (idUsuario == null) {
+                cs.setNull(5, Types.INTEGER);
+            } else {
+                cs.setInt(5, idUsuario);
             }
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    RptProductividadDiaHoraUsuario r = new RptProductividadDiaHoraUsuario();
+                    r.setFecha(rs.getDate("FECHA"));
+                    r.setHora(rs.getInt("HORA"));
+                    r.setIdUsuario(rs.getInt("ID_USUARIO"));
+                    r.setNombre(rs.getString("NOMBRE"));
+
+                    r.setTotalEscaneos(rs.getInt("TOTAL_ESCANEOS"));
+                    r.setTotalCantidad(rs.getInt("TOTAL_CANTIDAD"));
+
+                    r.setConIncidencia(rs.getInt("CON_INCIDENCIA"));
+                    r.setSinIncidencia(rs.getInt("SIN_INCIDENCIA"));
+                    lista.add(r);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return lista;
     }
-    return lista;
-}
 
     // 2) Guías con mayor incidencia
     public List<RptGuiasMayorIncidencia> rptGuiasMayorIncidencia(Date desde, Date hasta, int top) {
         List<RptGuiasMayorIncidencia> lista = new ArrayList<>();
         String sql = "{CALL GUIA.SP_RPT_GUIAS_MAYOR_INCIDENCIA(?,?,?)}";
 
-        try (Connection con = conexion.getConnection();
-             CallableStatement cs = con.prepareCall(sql)) {
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
 
             cs.setDate(1, desde);
             cs.setDate(2, hasta);
@@ -106,8 +109,7 @@ public List<RptProductividadDiaHoraUsuario> rptProductividadDiaHora(
         List<RptFarmaciasMayorIncidencia> lista = new ArrayList<>();
         String sql = "{CALL GUIA.SP_RPT_FARMACIAS_MAYOR_INCIDENCIA(?,?,?)}";
 
-        try (Connection con = conexion.getConnection();
-             CallableStatement cs = con.prepareCall(sql)) {
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
 
             cs.setDate(1, desde);
             cs.setDate(2, hasta);
@@ -135,8 +137,7 @@ public List<RptProductividadDiaHoraUsuario> rptProductividadDiaHora(
         List<RptIncidenciasMasFrecuentes> lista = new ArrayList<>();
         String sql = "{CALL GUIA.SP_RPT_INCIDENCIAS_MAS_FRECUENTES(?,?,?)}";
 
-        try (Connection con = conexion.getConnection();
-             CallableStatement cs = con.prepareCall(sql)) {
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
 
             cs.setDate(1, desde);
             cs.setDate(2, hasta);
@@ -157,5 +158,105 @@ public List<RptProductividadDiaHoraUsuario> rptProductividadDiaHora(
         }
 
         return lista;
+    }
+
+    public List<ReporteDevolucionUnificada> rptDevolucionesUnificadas(
+            Date fechaInicial,
+            Date fechaFinal,
+            String farmacias,
+            String tipoEnvio,
+            String laboratorios
+    ) {
+
+        List<ReporteDevolucionUnificada> lista = new ArrayList<>();
+        String sql = "{CALL GUIA.SP_REPORTE_UNIFICADAS(?,?,?,?,?)}";
+
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+
+            if (fechaInicial == null) {
+                cs.setNull(1, Types.DATE);
+            } else {
+                cs.setDate(1, fechaInicial);
+            }
+
+            if (fechaFinal == null) {
+                cs.setNull(2, Types.DATE);
+            } else {
+                cs.setDate(2, fechaFinal);
+            }
+
+            if (farmacias == null || farmacias.trim().isEmpty()) {
+                cs.setNull(3, Types.NVARCHAR);
+            } else {
+                cs.setString(3, farmacias);
+            }
+
+            if (tipoEnvio == null || tipoEnvio.trim().isEmpty()) {
+                cs.setNull(4, Types.NVARCHAR);
+            } else {
+                cs.setString(4, tipoEnvio);
+            }
+
+            if (laboratorios == null || laboratorios.trim().isEmpty()) {
+                cs.setNull(5, Types.NVARCHAR);
+            } else {
+                cs.setString(5, laboratorios.trim());
+            }
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    ReporteDevolucionUnificada r = new ReporteDevolucionUnificada();
+
+                    r.setCodigoSap(rs.getString("CODIGO_SAP"));
+                    r.setCodigo(rs.getString("CODIGO"));
+                    r.setProducto(rs.getString("PRODUCTO"));
+                    r.setEnviado(rs.getInt("ENVIADO"));
+                    r.setRecibido(rs.getInt("RECIBIDO"));
+                    r.setFarmacia(rs.getString("FARMACIA"));
+
+                    // Recomendado: cambiar el alias en SQL a TIPO_ENVIO para evitar problemas con tildes.
+                    r.setTipoEnvio(rs.getString("TIPO ENVIO"));
+
+                    r.setDepartamento(rs.getString("DEPARTAMENTO"));
+
+                    // Si tu setter está escrito así en el modelo, mantenlo.
+                    r.setLabortaorio(rs.getString("LABORATORIO"));
+
+                    r.setFactor(rs.getInt("FACTOR"));
+                    r.setCategoria(rs.getString("CATEGORIA"));
+                    r.setSubcategoria(rs.getString("SUBCATEGORIA"));
+                    r.setSegmento(rs.getString("SEGMENTO"));
+                    r.setIncidencia(rs.getString("INCIDENCIA"));
+                    r.setObservacion(rs.getString("OBSERVACION"));
+                    r.setFechaScan(rs.getTimestamp("FECHA_SCAN"));
+
+                    lista.add(r);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public List<String> listarLaboratorios() {
+
+        List<String> laboratorios = new ArrayList<>();
+
+        String sql = " SELECT DISTINCT LABORATORIO FROM VW_LISTAR_PRODUCTOS_DZ WHERE LABORATORIO IS NOT NULL AND LTRIM(RTRIM(LABORATORIO)) <> '' ORDER BY LABORATORIO";
+
+        try (Connection con = conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                laboratorios.add(rs.getString("LABORATORIO"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return laboratorios;
     }
 }

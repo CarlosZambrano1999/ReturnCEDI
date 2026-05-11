@@ -6,6 +6,7 @@ modelos\DatosDocMaterial.class
 dao\RptUsuarioDAO.class
 controladores\RptRecepcionController.class
 modelos\Incidencia.class
+modelos\reportes\ReporteDevolucionUnificada.class
 modelos\reportes\Guias.class
 controladores\ReportExcesosController.class
 controladores\RptDonacionesController.class
@@ -52,6 +53,7 @@ modelos\ColorPolitica.class
 modelos\ResultadoOperacion.class
 controladores\ModulosController.class
 modelos\DocumentosPendientes.class
+controladores\ReporteUnificadoController.class
 dao\ModuloDAO.class
 controladores\CargarDocMaterialExcelController.class
 controladores\ReportRecepcionController.class
