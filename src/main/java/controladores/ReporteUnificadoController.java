@@ -27,7 +27,7 @@ import modelos.reportes.ReporteDevolucionUnificada;
  *
  * @author Administrador
  */
-@WebServlet(name = "ReporteUnificadoServlet", urlPatterns = {"/reportes/unificado"})
+@WebServlet(name = "ReporteUnificadoServlet", urlPatterns = {"/reportes/unificado2"})
 public class ReporteUnificadoController extends HttpServlet {
 
     private final ReportesDAO reportesDAO = new ReportesDAO();

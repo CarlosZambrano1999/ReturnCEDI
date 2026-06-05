@@ -1,0 +1,110 @@
+body {
+    background: #f4f6f9;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+}
+
+.input-multiple {
+    cursor: pointer;
+    background-color: #fff !important;
+}
+
+.dropdown-checkbox-panel {
+    display: none;
+    position: absolute;
+    z-index: 1050;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+    padding: 10px;
+}
+
+.dropdown-checkbox-panel.show {
+    display: block;
+}
+
+.checkbox-option {
+    border-radius: 5px;
+}
+
+.checkbox-option:hover {
+    background-color: #f1f3f5;
+}
+
+.table {
+    font-size: 12px;
+    width: 100% !important;
+}
+
+th, td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.table-responsive-custom {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dataTables_wrapper {
+    width: 100%;
+}
+
+.dataTables_wrapper .dt-buttons {
+    margin-bottom: 10px;
+}
+
+.dataTables_filter {
+    margin-bottom: 10px;
+}
+
+.dataTables_filter input {
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 12px;
+    }
+
+    h4 {
+        font-size: 18px;
+    }
+
+    .table {
+        font-size: 11px;
+    }
+
+    .dataTables_wrapper .dt-buttons,
+    .dataTables_filter,
+    .dataTables_length {
+        width: 100%;
+        text-align: left !important;
+        margin-bottom: 8px;
+    }
+
+    .dataTables_filter label,
+    .dataTables_length label {
+        width: 100%;
+    }
+
+    .dataTables_filter input,
+    .dataTables_length select {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-top: 4px;
+    }
+
+    .dt-buttons .btn {
+        width: 100%;
+        margin-bottom: 6px;
+    }
+}

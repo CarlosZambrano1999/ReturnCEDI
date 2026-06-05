@@ -146,9 +146,6 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
                     String centro = getString(row, col, "Centro");
                     String emisor = getString(row, col, "Nombre del usuario");
 
-                    // Agregar centros y emisores a los sets
-                    centros.add(centro);
-                    emisores.add(emisor);
 
                     DatosDocMaterial d = new DatosDocMaterial();
                     d.setCodigoSap(getString(row, col, "Material"));
@@ -193,6 +190,18 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
                         invalidas.add(new FilaError(i + 1, "Cantidad inválida"));
                         continue;
                     }
+                    
+                    if (d.getCentro() == null || d.getCentro().trim().isEmpty()) {
+                        invalidas.add(new FilaError(i + 1, "Centro vacío"));
+                        continue;
+                    }
+                    if (d.getUsuario() != null && !d.getUsuario().trim().isEmpty()) {
+                            emisores.add(d.getUsuario().trim());
+                        }
+                    
+                    
+                    centros.add(d.getCentro().trim());
+                   
 
                     validas.add(d);
 

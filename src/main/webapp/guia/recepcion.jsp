@@ -534,7 +534,7 @@
         ? {
             title: '¿Cerrar la guía con incidencias?',
             html:
-                '⚠️ Hay productos con estado <b>FALTANE o SOBRANTE</b>.<br>' +
+                '⚠️ Hay productos con estado <b>FALTANTE o SOBRANTE</b>.<br>' +
                 (detalle ? `<div class="mt-2 small text-muted">${detalle}</div>` : '') +
                 '<div class="mt-2">Si cierras la guía, no podrás seguir escaneando ni editando información.</div>',
             icon: 'warning'

@@ -15,6 +15,7 @@ controladores\ConsultarPoliticaController$PoliticaEvaluatorService.class
 modelos\Farmacia.class
 modelos\Devoluciones.class
 modelos\Rol.class
+controladores\ReporteUnificadoLiteController.class
 modelos\InfoDocMaterial.class
 modelos\Producto.class
 controladores\UsuarioController.class
