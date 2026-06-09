@@ -133,8 +133,8 @@
                                     <th>FC</th>
                                     <th>Presentación</th>
                                     <th class="text-end">Enviado</th>
-                                    <!--th class="text-end">Recibido</th>
-                                    <th class="text-end">Diferencia</th-->
+                                    <th class="text-end">Escaneado</th>
+                                    <th class="text-end">Diferencia</th>
                                     <th class="text-center">Editar</th>
                                     <th class="text-end"></th>
 
@@ -155,12 +155,12 @@
                                     <td><%= r.getFactor()%></td>
                                     <td><%= r.getPresentacion()%></td>
                                     <td class="text-end"><%= r.getCantidadEsperada().intValue()%></td>
-                                    <!--td class="text-end"><%= r.getCantidadEscaneada().intValue()%></td>
-                                    <td class="text-end"><%= r.getDiferencia().intValue()%></td-->
+                                    <td class="text-end"><%= r.getCantidadEscaneada().intValue()%></td>
+                                    <td class="text-end"><%= r.getDiferencia().intValue()%></td>
                                     <% boolean esAdicional = "ADICIONAL".equalsIgnoreCase(r.getEstado());%>
                                     <td class="text-center">
                                         <%
-                                            boolean ocultarEditar = r.getFactor() == 1;
+                                            boolean ocultarEditar = r.getFactor() == 0;
                                         %>
                                         
                                         <div class="dropdown">
