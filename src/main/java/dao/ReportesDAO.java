@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import modelos.ResultadoPaginadoDevoluciones;
 import modelos.reportes.ReporteDevolucionUnificada;
 import modelos.reportes.RptFarmaciasMayorIncidencia;
 import modelos.reportes.RptGuiasMayorIncidencia;
@@ -258,5 +259,154 @@ public class ReportesDAO {
         }
 
         return laboratorios;
+    }
+    
+    public ResultadoPaginadoDevoluciones rptDevolucionesUnificadasPaginado(
+            Date fechaInicial,
+            Date fechaFinal,
+            String farmacias,
+            String tipoEnvio,
+            String laboratorios,
+            String busqueda,
+            int pagina,
+            int pageSize,
+            String orderBy,
+            String orderDir
+    ) {
+
+        ResultadoPaginadoDevoluciones resultado = new ResultadoPaginadoDevoluciones();
+        List<ReporteDevolucionUnificada> lista = new ArrayList<>();
+
+        String sql = "{CALL GUIA.SP_REPORTE_UNIFICADAS_V2(?,?,?,?,?,?,?,?,?,?)}";
+
+        int totalRegistros = 0;
+
+        try (Connection con = conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+
+            // 1. Fecha inicial
+            if (fechaInicial == null) {
+                cs.setNull(1, Types.DATE);
+            } else {
+                cs.setDate(1, fechaInicial);
+            }
+
+            // 2. Fecha final
+            if (fechaFinal == null) {
+                cs.setNull(2, Types.DATE);
+            } else {
+                cs.setDate(2, fechaFinal);
+            }
+
+            // 3. Farmacias CSV
+            if (farmacias == null || farmacias.trim().isEmpty()) {
+                cs.setNull(3, Types.NVARCHAR);
+            } else {
+                cs.setString(3, farmacias.trim());
+            }
+
+            // 4. Tipo envío CSV
+            if (tipoEnvio == null || tipoEnvio.trim().isEmpty()) {
+                cs.setNull(4, Types.NVARCHAR);
+            } else {
+                cs.setString(4, tipoEnvio.trim());
+            }
+
+            // 5. Laboratorios CSV
+            if (laboratorios == null || laboratorios.trim().isEmpty()) {
+                cs.setNull(5, Types.NVARCHAR);
+            } else {
+                cs.setString(5, laboratorios.trim());
+            }
+
+            // 6. Búsqueda general
+            if (busqueda == null || busqueda.trim().isEmpty()) {
+                cs.setNull(6, Types.NVARCHAR);
+            } else {
+                cs.setString(6, busqueda.trim());
+            }
+
+            // 7. Página
+            if (pagina < 1) {
+                pagina = 1;
+            }
+            cs.setInt(7, pagina);
+
+            // 8. Tamaño de página
+            if (pageSize < 1) {
+                pageSize = 25;
+            }
+
+            if (pageSize > 500) {
+                pageSize = 500;
+            }
+
+            cs.setInt(8, pageSize);
+
+            // 9. Ordenar por
+            if (orderBy == null || orderBy.trim().isEmpty()) {
+                cs.setString(9, "FECHA_SCAN");
+            } else {
+                cs.setString(9, orderBy.trim());
+            }
+
+            // 10. Dirección de orden
+            if (orderDir == null || orderDir.trim().isEmpty()) {
+                cs.setString(10, "DESC");
+            } else {
+                cs.setString(10, orderDir.trim());
+            }
+
+            try (ResultSet rs = cs.executeQuery()) {
+                while (rs.next()) {
+                    ReporteDevolucionUnificada r = new ReporteDevolucionUnificada();
+
+                    r.setCodigoSap(rs.getString("CODIGO_SAP"));
+                    r.setCodigo(rs.getString("CODIGO"));
+                    r.setProducto(rs.getString("PRODUCTO"));
+
+                    r.setEnviado(rs.getInt("ENVIADO"));
+                    r.setRecibido(rs.getInt("RECIBIDO"));
+
+                    r.setFarmacia(rs.getString("FARMACIA"));
+
+                    // En el SP V2 ya dejamos el alias como TIPO_ENVIO, sin espacio.
+                    r.setTipoEnvio(rs.getString("TIPO_ENVIO"));
+
+                    r.setDepartamento(rs.getString("DEPARTAMENTO"));
+
+                    // Mantengo tu setter actual, aunque está escrito como Labortaorio.
+                    r.setLabortaorio(rs.getString("LABORATORIO"));
+
+                    r.setFactor(rs.getInt("FACTOR"));
+                    r.setCategoria(rs.getString("CATEGORIA"));
+                    r.setSubcategoria(rs.getString("SUBCATEGORIA"));
+                    r.setSegmento(rs.getString("SEGMENTO"));
+                    r.setIncidencia(rs.getString("INCIDENCIA"));
+                    r.setObservacion(rs.getString("OBSERVACION"));
+                    r.setFechaScan(rs.getTimestamp("FECHA_SCAN"));
+
+                    totalRegistros = rs.getInt("TOTAL_REGISTROS");
+
+                    lista.add(r);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        int totalPaginas = 1;
+
+        if (totalRegistros > 0) {
+            totalPaginas = (int) Math.ceil((double) totalRegistros / pageSize);
+        }
+
+        resultado.setRegistros(lista);
+        resultado.setTotalRegistros(totalRegistros);
+        resultado.setPaginaActual(pagina);
+        resultado.setPageSize(pageSize);
+        resultado.setTotalPaginas(totalPaginas);
+
+        return resultado;
     }
 }

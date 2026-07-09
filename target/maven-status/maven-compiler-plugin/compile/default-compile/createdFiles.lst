@@ -26,6 +26,7 @@ com\farmafacil\returncedi\JakartaRestConfiguration.class
 controladores\ReportDonacionesController.class
 utilidades\PasswordUtil$Result.class
 controladores\ListarPendientesController.class
+modelos\ResultadoPaginadoDevoluciones.class
 modelos\ModuloAsignacion.class
 modelos\reportes\DetalleGuia.class
 controladores\LogoutController.class
@@ -54,7 +55,6 @@ modelos\ColorPolitica.class
 modelos\ResultadoOperacion.class
 controladores\ModulosController.class
 modelos\DocumentosPendientes.class
-controladores\ReporteUnificadoController.class
 dao\ModuloDAO.class
 controladores\CargarDocMaterialExcelController.class
 controladores\ReportRecepcionController.class
@@ -88,6 +88,7 @@ controladores\AuthModuloFilter.class
 dao\DocMaterialDAO.class
 modelos\Versiculo.class
 dao\UsuarioDAO.class
+controladores\ReporteUnificadoV2Controller.class
 configDB\ConexionPoliticas.class
 dao\FarmaciaDAO.class
 dao\ModuloDAO$ResultadoSP.class
