@@ -220,22 +220,16 @@
             const MAX_PREVIEW_ROWS = 50;
 
             // Columnas requeridas (deben existir en el Excel)
-            const REQUIRED_HEADERS = [
-                "Material",
-                "Texto breve de material",
-                "Centro",
-                "Almacén",
-                "Clase de movimiento",
-                "Documento material",
-                "Posición",
-                "Referencia",
-                "Texto cab.documento",
-                "Hora de entrada",
-                "Nombre del usuario",
-                "Fe.contabilización",
-                "Fe.contabilización",
-                "Ctd.en UM entrada",
-                "Importe ML"
+            const REQUIRED_HEADER_GROUPS = [
+                ["Material"],
+                ["Texto breve de material", "Texto breve"],
+                ["Centro"],
+                ["Documento material", "Documento compras"],
+                ["Posición"],
+                ["Nombre del usuario", "Creado por"],
+                ["Fe.contabilización", "Fecha documento"],
+                ["Ctd.en UM entrada", "Cantidad de pedido"],
+                ["Importe ML", "Valor neto de pedido"]
             ];
 
             // ========= STATE =========
@@ -292,10 +286,27 @@
             function normalize(s) {
                 return (s || "").toString().trim().toLowerCase();
             }
+            function getValue(row, aliases) {
+                for (const a of aliases) {
+                    if (row[a] !== undefined && row[a] !== null && row[a].toString().trim() !== "") {
+                        return row[a];
+                    }
+                }
+                return "";
+            }
 
             function validateHeaders(headers) {
                 const set = new Set(headers.map(h => normalize(h)));
-                const missing = REQUIRED_HEADERS.filter(r => !set.has(normalize(r)));
+
+                const missing = [];
+
+                REQUIRED_HEADER_GROUPS.forEach(group => {
+                    const exists = group.some(h => set.has(normalize(h)));
+                    if (!exists) {
+                        missing.push(group.join(" / "));
+                    }
+                });
+
                 return missing;
             }
             const filasValidasEl = document.getElementById("filasValidas");
@@ -327,11 +338,10 @@
                 let sumImporte = 0;
 
                 rows.forEach((r, idx) => {
-                    const material = (r["Material"] ?? "").toString().trim();
-                    const doc = (r["Documento material"] ?? "").toString().trim();
-                    const pos = (r["Posición"] ?? "").toString().trim();
-                    const fdoc = (r["Fe.contabilización"] ?? "").toString().trim();
-                    const fcon = (r["Fe.contabilización"] ?? "").toString().trim();
+                    const material = getValue(r, ["Material"]).toString().trim();
+                    const doc = getValue(r, ["Documento material", "Documento compras"]).toString().trim();
+                    const pos = getValue(r, ["Posición"]).toString().trim();
+                    const fecha = getValue(r, ["Fe.contabilización", "Fecha documento"]).toString().trim();
 
                     // Reglas mínimas (ajustables)
                     const errores = [];
@@ -343,13 +353,13 @@
                         errores.push("Documento material distinto");
                     if (isEmpty(pos))
                         errores.push("Posición vacío");
-                    if (isEmpty(fdoc))
+                    if (isEmpty(fecha))
                         errores.push("Fe.contabilización vacía");
-                    if (isEmpty(fcon))
+                    if (isEmpty(fecha))
                         errores.push("Fe.contab. vacía");
 
-                    const cantidad = toNumber(r["Ctd.en UM entrada"]);
-                    const importe = toNumber(r["Importe ML"]);
+                    const cantidad = toNumber(getValue(r, ["Ctd.en UM entrada", "Cantidad de pedido"]));
+                    const importe = toNumber(getValue(r, ["Importe ML", "Valor neto de pedido"]));
                     sumCantidad += cantidad;
                     sumImporte += importe;
 
@@ -361,21 +371,21 @@
 
                     // Agrega fila
                     const rowNode = dt.row.add([
-                        r["Material"] ?? "",
-                        r["Texto breve de material"] ?? "",
-                        r["Centro"] ?? "",
-                        r["Almacén"] ?? "",
-                        r["Clase de movimiento"] ?? "",
-                        r["Documento material"] ?? "",
-                        r["Posición"] ?? "",
-                        r["Referencia"] ?? "",
-                        r["Texto cab.documento"] ?? "",
-                        r["Hora de entrada"] ?? "",
-                        r["Nombre del usuario"] ?? "",
-                        r["Fe.contabilización"] ?? "",
-                        r["Fe.contabilización"] ?? "",
-                        r["Ctd.en UM entrada"] ?? "",
-                        r["Importe ML"] ?? ""
+                        getValue(r, ["Material"]),
+                        getValue(r, ["Texto breve de material", "Texto breve"]),
+                        getValue(r, ["Centro"]),
+                        getValue(r, ["Almacén"]),
+                        getValue(r, ["Clase de movimiento"]),
+                        getValue(r, ["Documento material", "Documento compras"]),
+                        getValue(r, ["Posición"]),
+                        getValue(r, ["Referencia"]),
+                        getValue(r, ["Texto cab.documento", "Centro"]),
+                        getValue(r, ["Hora de entrada"]),
+                        getValue(r, ["Nombre del usuario", "Creado por"]),
+                        getValue(r, ["Fe.contabilización", "Fecha documento"]),
+                        getValue(r, ["Fe.contabilización", "Fecha documento"]),
+                        getValue(r, ["Ctd.en UM entrada", "Cantidad de pedido"]),
+                        getValue(r, ["Importe ML", "Valor neto de pedido"])
                     ]).draw(false).node();
 
                     // Colorear + tooltip con errores
@@ -412,22 +422,29 @@
             }
 
             function detectDocMaterial(rows) {
-                // toma el primer Documento material no vacío y valida que todos (si vienen) sean iguales
                 let dm = null;
                 for (const r of rows) {
-                    const v = (r["Documento material"] ?? "").toString().trim();
+                    const v = getValue(r, ["Documento material", "Documento compras"]).toString().trim();
                     if (v) {
                         dm = v;
                         break;
                     }
                 }
-                if (!dm)
-                    return {ok: false, value: null, error: "No se detectó Documento material en el preview."};
-
+                if (!dm) {
+                    return {
+                        ok: false,
+                        value: null,
+                        error: "No se detectó Documento material / Documento compras en el preview."
+                    };
+                }
                 for (const r of rows) {
-                    const v = (r["Documento material"] ?? "").toString().trim();
+                    const v = getValue(r, ["Documento material", "Documento compras"]).toString().trim();
                     if (v && v !== dm) {
-                        return {ok: false, value: null, error: "El archivo tiene más de un Documento material distinto."};
+                        return {
+                            ok: false,
+                            value: null,
+                            error: "El archivo tiene más de un Documento material / Documento compras distinto."
+                        };
                     }
                 }
                 return {ok: true, value: dm, error: null};

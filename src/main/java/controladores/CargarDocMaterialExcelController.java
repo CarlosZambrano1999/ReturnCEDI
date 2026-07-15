@@ -114,18 +114,27 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
             Map<String, Integer> col = buildHeaderIndex(header);
 
             // Validar columnas mínimas necesarias (según tu mapeo)
-            String[] requeridas = new String[] {
-                "Material", "Texto breve de material", "Centro", "Almacén", "Clase de movimiento", "Documento material",
-                "Posición", "Referencia", "Texto cab.documento", "Hora de entrada", "Nombre del usuario", "Fe.contabilización",
-                "Fe.contabilización", "Ctd.en UM entrada", "Importe ML"
-            };
+            String[][] requeridas = new String[][] {
+    {"Material"},
+    {"Texto breve de material", "Texto breve"},
+    {"Centro"},
+    {"Documento material", "Documento compras"},
+    {"Posición"},
+    {"Nombre del usuario", "Creado por"},
+    {"Fe.contabilización", "Fecha documento"},
+    {"Ctd.en UM entrada", "Cantidad de pedido"},
+    {"Importe ML", "Valor neto de pedido"}
+};
 
-            for (String r : requeridas) {
-                if (!col.containsKey(normalize(r))) {
-                    response.getWriter().write("{\"status\":\"error\",\"message\":\"Falta la columna requerida: " + escape(r) + "\"}");
-                    return;
-                }
-            }
+for (String[] grupo : requeridas) {
+    if (!hasAnyHeader(col, grupo)) {
+        response.getWriter().write(
+            "{\"status\":\"error\",\"message\":\"Falta una columna requerida. Se esperaba una de estas: "
+            + escape(String.join(" / ", grupo)) + "\"}"
+        );
+        return;
+    }
+}
 
             // 2) Leer filas desde la siguiente a encabezados
             String centroValue = null;
@@ -144,57 +153,102 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
 
                 try {
                     String centro = getString(row, col, "Centro");
-                    String emisor = getString(row, col, "Nombre del usuario");
+                    String emisor = getStringAny(row, col, "Nombre del usuario", "Creado por");
 
 
                     DatosDocMaterial d = new DatosDocMaterial();
-                    d.setCodigoSap(getString(row, col, "Material"));
-                    d.setDescripcion(getString(row, col, "Texto breve de material"));
-                    d.setCentro(centro);
-                    d.setAlmacen(getString(row, col, "Almacén"));
-                    d.setTransito(getInteger(row, col, "Clase de movimiento"));
 
-                    Long docMatFila = getLong(row, col, "Documento material");
+                    d.setCodigoSap(getStringAny(row, col, "Material"));
+
+                    d.setDescripcion(getStringAny(row, col,
+                            "Texto breve de material",
+                            "Texto breve"
+                    ));
+
+                    d.setCentro(centro);
+
+                    // Opcional: si no viene en el Excel nuevo, queda null
+                    d.setAlmacen(getStringAny(row, col, "Almacén"));
+
+                    // Opcional: si no viene en el Excel nuevo, queda null
+                    d.setTransito(getIntegerAny(row, col, "Clase de movimiento"));
+
+                    Long docMatFila = getLongAny(row, col,
+                            "Documento material",
+                            "Documento compras"
+                    );
+
                     if (docMatFila != null) {
                         if (docMaterial == null) {
                             docMaterial = docMatFila;
                         }
                         if (!docMatFila.equals(docMaterial)) {
-                            invalidas.add(new FilaError(i + 1, "Documento material distinto al detectado"));
-                            continue; // 👈 solo marca error y sigue
+                            invalidas.add(new FilaError(i + 1, "Documento material / Documento compras distinto al detectado"));
+                            continue;
                         }
                     }
+
                     d.setDocMaterial(docMatFila);
 
-                    d.setPosicion(getInteger(row, col, "Posición"));
-                    d.setReferencia(getString(row, col, "Referencia"));
-                    d.setTexto(getString(row, col, "Texto cab.documento"));
-                    d.setHora(getTime(row, col, "Hora de entrada"));
-                    d.setUsuario(getString(row, col, "Nombre del usuario"));
-                    d.setFechaDocumento(getDate(row, col, "Fe.contabilización"));
-                    d.setFechaContable(getDate(row, col, "Fe.contabilización"));
+                    d.setPosicion(getIntegerAny(row, col, "Posición"));
 
-                    d.setCantidad(getDecimal(row, col, "Ctd.en UM entrada"));
-                    d.setImporte(getDecimal(row, col, "Importe ML"));
+                    d.setReferencia(getStringAny(row, col, "Referencia"));
+
+                    // En el nuevo Excel no existe Texto cab.documento.
+                    // Si quieres guardar algo ahí, puedes usar Centro como fallback.
+                    d.setTexto(getStringAny(row, col,
+                            "Texto cab.documento",
+                            "Centro"
+                    ));
+
+                    // En el nuevo Excel no viene hora.
+                    d.setHora(getTime(row, col, "Hora de entrada"));
+
+                    d.setUsuario(getStringAny(row, col,
+                            "Nombre del usuario",
+                            "Creado por"
+                    ));
+
+                    d.setFechaDocumento(getDateAny(row, col,
+                            "Fe.contabilización",
+                            "Fecha documento"
+                    ));
+
+                    d.setFechaContable(getDateAny(row, col,
+                            "Fe.contabilización",
+                            "Fecha documento"
+                    ));
+
+                    d.setCantidad(getDecimalAny(row, col,
+                            "Ctd.en UM entrada",
+                            "Cantidad de pedido"
+                    ));
+
+                    d.setImporte(getDecimalAny(row, col,
+                            "Importe ML",
+                            "Valor neto de pedido"
+                    ));
 
                     // ✅ validaciones mínimas
                     if (d.getCodigoSap() == null || d.getCodigoSap().trim().isEmpty()) {
                         invalidas.add(new FilaError(i + 1, "Material vacío"));
                         continue;
                     }
-                    if (d.getTransito() == null) {
-                        invalidas.add(new FilaError(i + 1, "Clase de movimiento vacía"));
+
+                    if (d.getDocMaterial() == null) {
+                        invalidas.add(new FilaError(i + 1, "Documento material / Documento compras vacío"));
                         continue;
                     }
+
                     if (d.getCantidad() == null) {
                         invalidas.add(new FilaError(i + 1, "Cantidad inválida"));
                         continue;
                     }
-                    
+
                     if (d.getCentro() == null || d.getCentro().trim().isEmpty()) {
                         invalidas.add(new FilaError(i + 1, "Centro vacío"));
                         continue;
-                    }
+}
                     if (d.getUsuario() != null && !d.getUsuario().trim().isEmpty()) {
                             emisores.add(d.getUsuario().trim());
                         }
@@ -479,5 +533,120 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
             return motivo;
         }
     }
+    
+    private Integer findCol(Map<String, Integer> col, String... headerNames) {
+    for (String h : headerNames) {
+        Integer idx = col.get(normalize(h));
+        if (idx != null) {
+            return idx;
+        }
+    }
+    return null;
+}
+
+private boolean hasAnyHeader(Map<String, Integer> col, String... headerNames) {
+    return findCol(col, headerNames) != null;
+}
+
+private String getStringAny(Row row, Map<String, Integer> col, String... headerNames) {
+    Integer idx = findCol(col, headerNames);
+    if (idx == null) {
+        return null;
+    }
+
+    Cell c = row.getCell(idx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+    if (c == null) {
+        return null;
+    }
+
+    DataFormatter fmt = new DataFormatter();
+    String val = fmt.formatCellValue(c);
+    return (val != null && !val.trim().isEmpty()) ? val.trim() : null;
+}
+
+private Integer getIntegerAny(Row row, Map<String, Integer> col, String... headerNames) {
+    String s = getStringAny(row, col, headerNames);
+    if (s == null) {
+        return null;
+    }
+    try {
+        s = s.replace(",", "").trim();
+        if (s.contains(".")) {
+            s = s.substring(0, s.indexOf('.'));
+        }
+        return Integer.parseInt(s);
+    } catch (Exception ex) {
+        return null;
+    }
+}
+
+private Long getLongAny(Row row, Map<String, Integer> col, String... headerNames) {
+    String s = getStringAny(row, col, headerNames);
+    if (s == null) {
+        return null;
+    }
+    try {
+        s = s.replace(",", "").trim();
+        if (s.contains(".")) {
+            s = s.substring(0, s.indexOf('.'));
+        }
+        return Long.parseLong(s);
+    } catch (Exception ex) {
+        return null;
+    }
+}
+
+private BigDecimal getDecimalAny(Row row, Map<String, Integer> col, String... headerNames) {
+    String s = getStringAny(row, col, headerNames);
+    if (s == null) {
+        return null;
+    }
+
+    s = s.replace(",", "").trim();
+
+    try {
+        return new BigDecimal(s);
+    } catch (Exception ex) {
+        return null;
+    }
+}
+
+private Date getDateAny(Row row, Map<String, Integer> col, String... headerNames) {
+    Integer idx = findCol(col, headerNames);
+    if (idx == null) {
+        return null;
+    }
+
+    Cell c = row.getCell(idx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+    if (c == null) {
+        return null;
+    }
+
+    try {
+        if (c.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(c)) {
+            java.util.Date d = c.getDateCellValue();
+            return new Date(d.getTime());
+        }
+
+        String s = new DataFormatter().formatCellValue(c).trim();
+        if (s.isEmpty()) {
+            return null;
+        }
+
+        String[] p = s.split("/");
+        if (p.length == 3) {
+            int dd = Integer.parseInt(p[0]);
+            int mm = Integer.parseInt(p[1]);
+            int yy = Integer.parseInt(p[2]);
+            LocalDate ld = LocalDate.of(yy, mm, dd);
+            return Date.valueOf(ld);
+        }
+
+    } catch (Exception ex) {
+        // ignorar y retornar null
+    }
+
+    return null;
+}
 
 }

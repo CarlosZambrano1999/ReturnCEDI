@@ -381,6 +381,10 @@
                     <input type="hidden" name="pagina" value="1">
                     <input type="hidden" name="orderBy" value="<%= textoSeguro(orderBy) %>">
                     <input type="hidden" name="orderDir" value="<%= textoSeguro(orderDir) %>">
+                    <input type="hidden"
+       id="tokenDescargaExcel"
+       name="tokenDescargaExcel"
+       value="">
 
                     <div class="row g-3 align-items-end">
 
@@ -897,6 +901,142 @@
             });
         }
     });
+    
+    let intervaloDescargaExcel = null;
+let tiempoMaximoDescargaExcel = null;
+
+function mostrarOverlayCarga(titulo, detalle) {
+    const overlay = document.getElementById('overlayCarga');
+    const overlayTitulo = document.getElementById('overlayTitulo');
+    const overlayDetalle = document.getElementById('overlayDetalle');
+
+    if (overlayTitulo) {
+        overlayTitulo.textContent = titulo;
+    }
+
+    if (overlayDetalle) {
+        overlayDetalle.textContent = detalle;
+    }
+
+    if (overlay) {
+        overlay.classList.remove('d-none');
+    }
+}
+
+function ocultarOverlayCarga() {
+    const overlay = document.getElementById('overlayCarga');
+
+    if (overlay) {
+        overlay.classList.add('d-none');
+    }
+}
+
+function obtenerCookie(nombre) {
+    const prefijo = nombre + "=";
+
+    const cookies = document.cookie
+        .split(";")
+        .map(function (cookie) {
+            return cookie.trim();
+        });
+
+    for (const cookie of cookies) {
+        if (cookie.startsWith(prefijo)) {
+            return decodeURIComponent(cookie.substring(prefijo.length));
+        }
+    }
+
+    return null;
+}
+
+function eliminarCookie(nombre) {
+    const contextPath = '<%= request.getContextPath() %>';
+    const cookiePath = contextPath || '/';
+
+    document.cookie =
+        nombre +
+        "=; Max-Age=0; path=" +
+        cookiePath +
+        "; SameSite=Lax";
+}
+
+function generarTokenDescargaExcel() {
+    return Date.now().toString(36)
+            + "_"
+            + Math.random().toString(36).substring(2, 15);
+}
+
+function iniciarControlDescargaExcel() {
+    const tokenInput = document.getElementById('tokenDescargaExcel');
+
+    if (!tokenInput) {
+        return;
+    }
+
+    const token = generarTokenDescargaExcel();
+
+    tokenInput.value = token;
+
+    eliminarCookie('estadoDescargaExcel');
+
+    mostrarOverlayCarga(
+        'Generando archivo Excel...',
+        'El reporte puede tardar dependiendo de la cantidad de registros.'
+    );
+
+    if (intervaloDescargaExcel) {
+        clearInterval(intervaloDescargaExcel);
+    }
+
+    if (tiempoMaximoDescargaExcel) {
+        clearTimeout(tiempoMaximoDescargaExcel);
+    }
+
+    intervaloDescargaExcel = setInterval(function () {
+        const estado = obtenerCookie('estadoDescargaExcel');
+
+        if (!estado) {
+            return;
+        }
+
+        if (estado === token + "_OK") {
+            clearInterval(intervaloDescargaExcel);
+            clearTimeout(tiempoMaximoDescargaExcel);
+
+            eliminarCookie('estadoDescargaExcel');
+            ocultarOverlayCarga();
+
+            tokenInput.value = "";
+        }
+
+        if (estado === token + "_ERROR") {
+            clearInterval(intervaloDescargaExcel);
+            clearTimeout(tiempoMaximoDescargaExcel);
+
+            eliminarCookie('estadoDescargaExcel');
+            ocultarOverlayCarga();
+
+            tokenInput.value = "";
+
+            alert("No se pudo generar el archivo Excel.");
+        }
+    }, 500);
+
+    /*
+     * Protección para que el overlay no quede abierto indefinidamente
+     * ante una desconexión o error no controlado.
+     */
+    tiempoMaximoDescargaExcel = setTimeout(function () {
+        if (intervaloDescargaExcel) {
+            clearInterval(intervaloDescargaExcel);
+        }
+
+        eliminarCookie('estadoDescargaExcel');
+        ocultarOverlayCarga();
+
+        tokenInput.value = "";
+    }, 30 * 60 * 1000);
+}
 
     document.addEventListener("DOMContentLoaded", function () {
         actualizarInputSeleccionado('panelFarmacias', 'inputFarmacias');
@@ -912,11 +1052,17 @@
                 const accion = accionForm ? accionForm.value : 'listar';
 
                 if (accion === 'listar') {
-                    overlayCarga.classList.remove('d-none');
+                    mostrarOverlayCarga(
+                        'Procesando reporte...',
+                        'Espere un momento, por favor.'
+                    );
+                }
+
+                if (accion === 'excel') {
+                    iniciarControlDescargaExcel();
                 }
             });
         }
-
         document.querySelectorAll('.form-paginacion').forEach(function (form) {
             form.addEventListener('submit', function () {
                 if (overlayCarga) {

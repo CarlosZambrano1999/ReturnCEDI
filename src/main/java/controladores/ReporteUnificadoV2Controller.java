@@ -9,6 +9,7 @@ import dao.FarmaciaDAO;
 import dao.ReportesDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -117,8 +118,8 @@ public class ReporteUnificadoV2Controller extends HttpServlet {
 
             cargarCatalogos(request);
 
-            ResultadoPaginadoDevoluciones resultado =
-                    reportesDAO.rptDevolucionesUnificadasPaginado(
+            ResultadoPaginadoDevoluciones resultado
+                    = reportesDAO.rptDevolucionesUnificadasPaginado(
                             fechaInicial,
                             fechaFinal,
                             farmacias,
@@ -192,37 +193,29 @@ public class ReporteUnificadoV2Controller extends HttpServlet {
         String laboratorios = unirValores(request.getParameterValues("laboratorios"));
         String busqueda = texto(request.getParameter("busqueda"));
 
-        /*
-            OJO:
-            Este Excel usa el SP paginado y por ahora exporta hasta 500 registros,
-            porque el SP V2 limita @PageSize a 500.
-            Luego podemos hacer un SP_EXPORTAR sin paginación para sacar todo.
-        */
-        ResultadoPaginadoDevoluciones resultado =
-                reportesDAO.rptDevolucionesUnificadasPaginado(
-                        fechaInicial,
-                        fechaFinal,
-                        farmacias,
-                        tipoEnvio,
-                        laboratorios,
-                        busqueda,
-                        1,
-                        500,
-                        "FECHA_SCAN",
-                        "DESC"
-                );
+        final int TAMANO_PAGINA_EXPORTACION = 500;
 
-        List<ReporteDevolucionUnificada> listaReporte = resultado.getRegistros();
+        response.setContentType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
 
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=\"Reporte_Unificado_V2.xlsx\"");
+        response.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"Reporte_Unificado_V2.xlsx\""
+        );
 
         try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
+
+            // Comprime los archivos temporales generados por SXSSFWorkbook.
+            workbook.setCompressTempFiles(true);
 
             Sheet sheet = workbook.createSheet("Reporte Unificado");
 
             int rowNum = 0;
 
+            /*
+         * Encabezados
+             */
             Row header = sheet.createRow(rowNum++);
 
             String[] columnas = {
@@ -248,31 +241,174 @@ public class ReporteUnificadoV2Controller extends HttpServlet {
                 header.createCell(i).setCellValue(columnas[i]);
             }
 
-            if (listaReporte != null) {
-                for (ReporteDevolucionUnificada r : listaReporte) {
-                    Row row = sheet.createRow(rowNum++);
+            /*
+         * Primera consulta:
+         * obtiene los primeros 500 registros y el total de páginas.
+             */
+            ResultadoPaginadoDevoluciones primeraPagina
+                    = reportesDAO.rptDevolucionesUnificadasPaginado(
+                            fechaInicial,
+                            fechaFinal,
+                            farmacias,
+                            tipoEnvio,
+                            laboratorios,
+                            busqueda,
+                            1,
+                            TAMANO_PAGINA_EXPORTACION,
+                            "FECHA_SCAN",
+                            "DESC"
+                    );
 
-                    row.createCell(0).setCellValue(valor(r.getCodigoSap()));
-                    row.createCell(1).setCellValue(valor(r.getCodigo()));
-                    row.createCell(2).setCellValue(valor(r.getProducto()));
-                    row.createCell(3).setCellValue(valor(r.getEnviado()));
-                    row.createCell(4).setCellValue(valor(r.getRecibido()));
-                    row.createCell(5).setCellValue(valor(r.getFarmacia()));
-                    row.createCell(6).setCellValue(valor(r.getTipoEnvio()));
-                    row.createCell(7).setCellValue(valor(r.getDepartamento()));
-                    row.createCell(8).setCellValue(valor(r.getLabortaorio()));
-                    row.createCell(9).setCellValue(valor(r.getFactor()));
-                    row.createCell(10).setCellValue(valor(r.getCategoria()));
-                    row.createCell(11).setCellValue(valor(r.getSubcategoria()));
-                    row.createCell(12).setCellValue(valor(r.getSegmento()));
-                    row.createCell(13).setCellValue(valor(r.getIncidencia()));
-                    row.createCell(14).setCellValue(valor(r.getObservacion()));
-                    row.createCell(15).setCellValue(valor(r.getFechaScan()));
-                }
+            int totalPaginas = primeraPagina.getTotalPaginas();
+
+            /*
+         * Escribimos la primera página.
+             */
+            rowNum = escribirRegistrosExcel(
+                    sheet,
+                    primeraPagina.getRegistros(),
+                    rowNum
+            );
+
+            /*
+         * Consultamos y escribimos las demás páginas.
+             */
+            for (int pagina = 2; pagina <= totalPaginas; pagina++) {
+
+                ResultadoPaginadoDevoluciones resultadoPagina
+                        = reportesDAO.rptDevolucionesUnificadasPaginado(
+                                fechaInicial,
+                                fechaFinal,
+                                farmacias,
+                                tipoEnvio,
+                                laboratorios,
+                                busqueda,
+                                pagina,
+                                TAMANO_PAGINA_EXPORTACION,
+                                "FECHA_SCAN",
+                                "DESC"
+                        );
+
+                rowNum = escribirRegistrosExcel(
+                        sheet,
+                        resultadoPagina.getRegistros(),
+                        rowNum
+                );
             }
 
+            /*
+         * Anchos razonables.
+         * No se usa autoSizeColumn porque puede ser costoso con muchos registros.
+             */
+            sheet.setColumnWidth(0, 16 * 256);
+            sheet.setColumnWidth(1, 18 * 256);
+            sheet.setColumnWidth(2, 45 * 256);
+            sheet.setColumnWidth(3, 12 * 256);
+            sheet.setColumnWidth(4, 12 * 256);
+            sheet.setColumnWidth(5, 28 * 256);
+            sheet.setColumnWidth(6, 24 * 256);
+            sheet.setColumnWidth(7, 25 * 256);
+            sheet.setColumnWidth(8, 30 * 256);
+            sheet.setColumnWidth(9, 12 * 256);
+            sheet.setColumnWidth(10, 24 * 256);
+            sheet.setColumnWidth(11, 24 * 256);
+            sheet.setColumnWidth(12, 24 * 256);
+            sheet.setColumnWidth(13, 30 * 256);
+            sheet.setColumnWidth(14, 45 * 256);
+            sheet.setColumnWidth(15, 22 * 256);
+
+            marcarEstadoDescargaExcel(
+                    request,
+                    response,
+                    "OK"
+            );
+
             workbook.write(response.getOutputStream());
-            workbook.dispose();
+            response.getOutputStream().flush();
+
+        } catch (Exception e) {
+
+            Logger.getLogger(
+                    ReporteUnificadoV2Controller.class.getName()
+            ).log(
+                    Level.SEVERE,
+                    "Error al exportar reporte a Excel",
+                    e
+            );
+
+            if (!response.isCommitted()) {
+                response.reset();
+
+                marcarEstadoDescargaExcel(
+                        request,
+                        response,
+                        "ERROR"
+                );
+
+                response.sendError(
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "No se pudo generar el archivo Excel."
+                );
+            }
+        }
+    }
+
+    private int escribirRegistrosExcel(
+            Sheet sheet,
+            List<ReporteDevolucionUnificada> registros,
+            int rowNum) {
+
+        if (registros == null || registros.isEmpty()) {
+            return rowNum;
+        }
+
+        for (ReporteDevolucionUnificada r : registros) {
+
+            Row row = sheet.createRow(rowNum++);
+
+            row.createCell(0).setCellValue(valor(r.getCodigoSap()));
+            row.createCell(1).setCellValue(valor(r.getCodigo()));
+            row.createCell(2).setCellValue(valor(r.getProducto()));
+
+            crearCeldaNumerica(row, 3, r.getEnviado());
+            crearCeldaNumerica(row, 4, r.getRecibido());
+
+            row.createCell(5).setCellValue(valor(r.getFarmacia()));
+            row.createCell(6).setCellValue(valor(r.getTipoEnvio()));
+            row.createCell(7).setCellValue(valor(r.getDepartamento()));
+            row.createCell(8).setCellValue(valor(r.getLabortaorio()));
+
+            crearCeldaNumerica(row, 9, r.getFactor());
+
+            row.createCell(10).setCellValue(valor(r.getCategoria()));
+            row.createCell(11).setCellValue(valor(r.getSubcategoria()));
+            row.createCell(12).setCellValue(valor(r.getSegmento()));
+            row.createCell(13).setCellValue(valor(r.getIncidencia()));
+            row.createCell(14).setCellValue(valor(r.getObservacion()));
+            row.createCell(15).setCellValue(valor(r.getFechaScan()));
+        }
+
+        return rowNum;
+    }
+
+    private void crearCeldaNumerica(Row row, int columna, Object valor) {
+
+        if (valor == null) {
+            row.createCell(columna).setCellValue(0);
+            return;
+        }
+
+        if (valor instanceof Number) {
+            Number numero = (Number) valor;
+            row.createCell(columna).setCellValue(numero.doubleValue());
+            return;
+        }
+
+        try {
+            double numero = Double.parseDouble(valor.toString());
+            row.createCell(columna).setCellValue(numero);
+        } catch (NumberFormatException e) {
+            row.createCell(columna).setCellValue(valor.toString());
         }
     }
 
@@ -289,6 +425,48 @@ public class ReporteUnificadoV2Controller extends HttpServlet {
         request.setAttribute("listaFarmacias", listaFarmacias);
         request.setAttribute("listaLaboratorios", listaLaboratorios);
         request.setAttribute("listaTipoEnvio", listaTipoEnvio);
+    }
+
+    private void marcarEstadoDescargaExcel(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String estado) {
+
+        String token = texto(
+                request.getParameter("tokenDescargaExcel")
+        );
+
+        if (token == null || token.isEmpty()) {
+            return;
+        }
+
+        /*
+     * Seguridad básica porque el token proviene del request.
+         */
+        if (!token.matches("[a-zA-Z0-9_-]{5,100}")) {
+            return;
+        }
+
+        String valorCookie = token + "_" + estado;
+
+        Cookie cookie = new Cookie(
+                "estadoDescargaExcel",
+                valorCookie
+        );
+
+        String contextPath = request.getContextPath();
+
+        cookie.setPath(
+                contextPath == null || contextPath.isEmpty()
+                ? "/"
+                : contextPath
+        );
+
+        cookie.setMaxAge(30 * 60);
+        cookie.setHttpOnly(false);
+        cookie.setSecure(request.isSecure());
+
+        response.addCookie(cookie);
     }
 
     private void mantenerFiltros(HttpServletRequest request) {
@@ -355,4 +533,3 @@ public class ReporteUnificadoV2Controller extends HttpServlet {
         return valor == null ? "" : valor.toString();
     }
 }
-
