@@ -64,12 +64,6 @@ public class DetalleGuiaController extends HttpServlet {
         doc = doc.trim();
         tipo = tipo.trim().toUpperCase();
 
-        if (!("DEVOLUCIONES".equals(tipo) || "DONACIONES".equals(tipo) || "EXCESOS".equals(tipo) || "ND".equals(tipo) || "RECEPCION".equals(tipo))) {
-            res.put("status", "error");
-            res.put("message", "Tipo inválido. Use DEVOLUCIONES, DONACIONES o EXCESOS.");
-            escribirJson(response, res);
-            return;
-        }
 
         try {
             List<DetalleGuia> lista = dao.listarDetallePorDocTipo(doc, tipo);

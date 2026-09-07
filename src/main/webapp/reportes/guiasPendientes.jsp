@@ -96,7 +96,8 @@ const rutasPorTipo = {
   "EXCESOS": "Excesos",
   "DONACIONES": "Donaciones",
   "ND": "NoDevolutivos",
-  "RECEPCION": "Recepcion"
+  "RECEPCION": "Recepcion",
+  "CONTROLADOS": "Controlados",
 };
 
 function initTabla() {

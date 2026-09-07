@@ -15,6 +15,7 @@ controladores\ConsultarPoliticaController$PoliticaEvaluatorService.class
 modelos\Farmacia.class
 modelos\Devoluciones.class
 modelos\Rol.class
+dao\ControladosDAO.class
 controladores\ReporteUnificadoLiteController.class
 modelos\InfoDocMaterial.class
 modelos\Producto.class
@@ -42,6 +43,7 @@ controladores\ReportDevolucionesController.class
 dao\AccesoDAO.class
 controladores\NDController.class
 com\farmafacil\returncedi\resources\JakartaEE10Resource.class
+controladores\ReportControladosController.class
 modelos\Modulo.class
 modelos\ProveedorPolitica.class
 dao\GuiasDAO.class
@@ -49,12 +51,14 @@ dao\DetalleGuiaDAO.class
 modelos\reportes\RptProductividadDiaHoraUsuario.class
 controladores\AccesosController.class
 dao\DevolucionesDAO.class
+dao\RptControladosDAO.class
 modelos\reportes\RptUsuario.class
 dao\DonacionesDAO.class
 modelos\ColorPolitica.class
 modelos\ResultadoOperacion.class
 controladores\ModulosController.class
 modelos\DocumentosPendientes.class
+controladores\ControladosController.class
 dao\ModuloDAO.class
 controladores\CargarDocMaterialExcelController.class
 controladores\ReportRecepcionController.class
@@ -71,6 +75,7 @@ controladores\RolesController.class
 controladores\GuiasController.class
 controladores\CargarDocMaterialExcelController$FilaError.class
 dao\IncidenciaDAO.class
+controladores\RptControladoresController.class
 modelos\ResultadoCargaDocMaterial.class
 controladores\ImportarUsuariosExcelController.class
 dao\RptRecepcionDAO.class
